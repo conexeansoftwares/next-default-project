@@ -1,83 +1,54 @@
 'use client';
 
-import { Login } from '@/components/login';
-import { useForm } from '@/hooks/useForm';
-import { loginValidation } from './_validations/loginValidation';
-import { Input } from '@/components/input';
-import { Form } from '@/components/form';
+import Image from 'next/image';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function Page() {
-  const { formData, errors, isSubmitting, handleChange, validateForm } =
-    useForm({
-      email: {
-        initialValue: '',
-        validations: loginValidation.email,
-      },
-      password: {
-        initialValue: '',
-        validations: loginValidation.password,
-      },
-    });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      try {
-        console.log('Form submitted:', formData);
-        // Adicione a lógica de envio de dados aqui
-      } catch (error) {
-        console.error('Error submitting form:', error);
-      }
-    }
-  };
-
   return (
-    <Login.Root>
-      <Login.Title title="Projeto padrão" />
-      <Login.Paragraph paragraph="Bem vindo de volta" />
-      <Login.Form>
-        <Form.Root>
-          <Form.Component onSubmit={handleSubmit}>
-            <Form.Content className='grid-cols-2'>
-              <Input.Root>
-                <Input.Label
-                  htmlFor="email"
-                  text="E-mail"
-                  error={!!errors.email}
-                />
-                <Input.Default
-                  name="email"
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  error={!!errors.email}
-                  onChange={handleChange}
-                />
-                <Input.Error error={errors.email} />
-              </Input.Root>
+    <div className="w-full lg:grid h-screen lg:grid-cols-2">
+      <div className="hidden bg-muted lg:block">
+        <Image
+          src="/placeholder.svg"
+          alt="Image"
+          width="1920"
+          height="1080"
+          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        />
+      </div>
 
-              <Input.Root>
-                <Input.Label
-                  htmlFor="password"
-                  text="Senha"
-                  error={!!errors.password}
-                />
-                <Input.Default
-                  name="password"
-                  id="password"
-                  value={formData.password}
-                  error={!!errors.password}
-                  onChange={handleChange}
-                />
-                <Input.Error error={errors.password} />
-              </Input.Root>    
-
-              <Form.Submit isSubmitting={isSubmitting} text="Fazer login" className='mt-4 justify-start' />  
-            </Form.Content>
-          </Form.Component>
-        </Form.Root>
-      </Login.Form>
-    </Login.Root>
+      <div className="flex items-center justify-center py-12">
+        <div className="mx-auto grid w-[350px] gap-6">
+          <div className="grid gap-2 text-center">
+            <h1 className="text-3xl font-bold">Login</h1>
+            <p className="text-balance text-muted-foreground">
+            Digite seu e-mail e senha abaixo
+            </p>
+          </div>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="usuario@exemplo.com"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Senha</Label>
+              </div>
+              <Input id="password" type="password" required />
+            </div>
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-

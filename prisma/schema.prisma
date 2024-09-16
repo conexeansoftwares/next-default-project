@@ -15,10 +15,22 @@ datasource db {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
+  name          String
   lastname      String?
   email         String    @unique
   password      String
+  active        Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  deactivatedAt DateTime?
+}
+
+model Company {
+  id            String    @id @default(cuid())
+  name          String
+  cnpj          String    @unique @db.Char(14)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deactivatedAt DateTime?
 }
