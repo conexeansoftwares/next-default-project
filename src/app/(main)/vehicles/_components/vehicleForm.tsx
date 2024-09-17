@@ -74,7 +74,7 @@ export const VehicleForm = forwardRef<{ reset: () => void }, VehicleFormProps>(
       };
 
       fetchCompanies();
-    }, []);
+    }, [toast]);
 
     return (
       <>

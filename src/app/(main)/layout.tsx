@@ -4,11 +4,8 @@ import { Navbar } from '@/components/ui/navbar/navbar';
 import { Sidebar } from '@/components/ui/sidebar';
 import { isActiveRoute } from '@/utils/isActiveRoute';
 import {
-  Home,
   ShieldCheck,
-  UsersRound,
   Building2,
-  Users,
   Car,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';

@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import * as z from 'zod';
 
 export const userFormSchema = z

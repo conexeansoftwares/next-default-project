@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type ValidationRule = (value: any) => string | null;
 
 export type ValidationField = ValidationRule[];
@@ -6,19 +7,36 @@ export type Validations = {
   [key: string]: ValidationField;
 };
 
-export const required = (fieldName: string): ValidationRule => 
-  (value: any) => value !== undefined && value !== null && value !== '' ? null : `${fieldName} é obrigatório`;
+export const required =
+  (fieldName: string): ValidationRule =>
+  (value: any) =>
+    value !== undefined && value !== null && value !== ''
+      ? null
+      : `${fieldName} é obrigatório`;
 
-export const minLength = (min: number, fieldName: string): ValidationRule => 
-  (value: string) => value.length >= min ? null : `${fieldName} deve ter pelo menos ${min} caracteres`;
+export const minLength =
+  (min: number, fieldName: string): ValidationRule =>
+  (value: string) =>
+    value.length >= min
+      ? null
+      : `${fieldName} deve ter pelo menos ${min} caracteres`;
 
-export const maxLength = (max: number, fieldName: string): ValidationRule => 
-  (value: string) => value.length <= max ? null : `${fieldName} deve ter no máximo ${max} caracteres`;
+export const maxLength =
+  (max: number, fieldName: string): ValidationRule =>
+  (value: string) =>
+    value.length <= max
+      ? null
+      : `${fieldName} deve ter no máximo ${max} caracteres`;
 
-export const pattern = (regex: RegExp, message: string): ValidationRule => 
-  (value: string) => regex.test(value) ? null : message;
+export const pattern =
+  (regex: RegExp, message: string): ValidationRule =>
+  (value: string) =>
+    regex.test(value) ? null : message;
 
-export const validateField = (value: any, validations: ValidationField): string | null => {
+export const validateField = (
+  value: any,
+  validations: ValidationField,
+): string | null => {
   for (const validation of validations) {
     const result = validation(value);
     if (result !== null) {
@@ -30,7 +48,7 @@ export const validateField = (value: any, validations: ValidationField): string 
 
 export const validateFields = (
   schemaValidation: Validations,
-  formData: FormData
+  formData: FormData,
 ): { field: string; message: string }[] => {
   const errors: { field: string; message: string }[] = [];
 
