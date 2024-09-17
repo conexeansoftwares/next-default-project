@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { ICompaniesReturnProps, ICompany } from '../../app/(main)/companies/types';
 import { prisma } from '../../lib/prisma';
 
@@ -13,6 +14,8 @@ export async function getAllActiveCompanies(): Promise<ICompaniesReturnProps> {
       },
       where: { active: true },
     });
+
+    revalidatePath('/companies');
 
     return { success: true, data: companies };
   } catch (error) {
