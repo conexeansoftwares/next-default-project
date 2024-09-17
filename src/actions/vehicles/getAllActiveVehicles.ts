@@ -32,6 +32,7 @@ export async function getAllActiveVehicles(): Promise<IVehiclesReturnProps> {
 
     return { success: true, data: vehicles };
   } catch (error) {
+    console.log(error);
     console.error('Erro ao listar veículos:', error);
     return {
       success: false,

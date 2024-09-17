@@ -37,6 +37,7 @@ export async function desactivateVehicleAction(vehicleId: string) {
 
     return result;
   } catch (error) {
+    console.log(error);
     console.error('Erro ao desativar veículo:', error);
     if (error instanceof z.ZodError) {
       return { success: false, message: 'ID do veículo inválido' };

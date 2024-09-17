@@ -39,6 +39,7 @@ export async function getActiveVechileByIdAction(
 
     return { success: true, data: vehicle };
   } catch (error) {
+    console.log(error);
     console.error('Erro ao buscar veículo:', error);
     return {
       success: false,

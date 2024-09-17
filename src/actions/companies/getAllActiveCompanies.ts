@@ -16,6 +16,7 @@ export async function getAllActiveCompanies(): Promise<ICompaniesReturnProps> {
 
     return { success: true, data: companies };
   } catch (error) {
+    console.log(error);
     console.error('Erro ao listar empresas:', error);
     return { success: false, data: [], message: 'Ocorreu um erro ao listar as empresas' };
   }

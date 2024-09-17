@@ -27,6 +27,7 @@ export async function editVehicleAction(
 
     return { success: true, message: 'Empresa atualizada com sucesso' };
   } catch (error) {
+    console.log(error);
     return {
       success: false,
       message: 'Ocorreu um erro ao atualizar a empresa',
