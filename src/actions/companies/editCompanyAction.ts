@@ -21,7 +21,7 @@ export async function editCompanyAction(companyId: string, data: CompanyFormData
       },
     });
 
-    revalidatePath(`/companies/update/${companyId}`);
+    revalidatePath('/companies');
 
     return { success: true, message: 'Empresa atualizada com sucesso' };
   } catch (error) {

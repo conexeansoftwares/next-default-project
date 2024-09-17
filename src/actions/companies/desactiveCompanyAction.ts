@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 
 const deactivateCompanySchema = z.string().cuid();
 
-export async function deactivateCompanyAction(companyId: string) {
+export async function desactivateCompanyAction(companyId: string) {
   try {
     const validatedId = deactivateCompanySchema.parse(companyId);
 

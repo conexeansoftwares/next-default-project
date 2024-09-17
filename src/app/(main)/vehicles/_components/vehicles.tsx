@@ -7,13 +7,13 @@ import { PageComponent } from '@/components/ui/page';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/dataTable';
 import { useToast } from '@/hooks/use-toast';
-import { desactivateCompanyAction } from '@/actions/companies/desactiveCompanyAction';
-import { ICompaniesReturnProps, ICompany } from '../types';
 import { getColumns } from '../columns';
+import { desactivateVehicleAction } from '@/actions/vehicles/desactiveVehicleAction';
+import { IVehicle, IVehiclesReturnProps } from '../types';
 
-export function Companies({ success, data, message }: ICompaniesReturnProps) {
+export function Vehicles({ success, data, message }: IVehiclesReturnProps) {
   const { toast } = useToast();
-  const [companies, setCompanies] = useState<ICompany[]>(data ?? []);
+  const [vehicles, setVehicles] = useState<IVehicle[]>(data ?? []);
 
   if (!success) {
     toast({
@@ -23,28 +23,28 @@ export function Companies({ success, data, message }: ICompaniesReturnProps) {
     });
   }
 
-  const handleDelete = useCallback(async (companyId: string) => {
+  const handleDelete = useCallback(async (vehicleId: string) => {
     try {
-      const result = await desactivateCompanyAction(companyId);
+      const result = await desactivateVehicleAction(vehicleId);
       if (result.success) {
         toast({
           variant: 'success',
-          description: 'Empresa desativada com sucesso!',
+          description: 'Veículo desativado com sucesso!',
         });
-        setCompanies(prevCompanies => prevCompanies.filter(company => company.id !== companyId));
+        setVehicles(prevVehicles => prevVehicles.filter(vehicle => vehicle.id !== vehicleId));
       } else {
         toast({
           variant: 'destructive',
           title: 'Erro',
-          description: result.message || 'Não foi possível desativar a empresa.',
+          description: result.message || 'Não foi possível desativar o veículo.',
         });
       }
     } catch (error) {
-      console.error('Erro ao desativar empresa:', error);
+      console.error('Erro ao desativar veículo:', error);
       toast({
         variant: 'destructive',
         title: 'Erro',
-        description: 'Ocorreu um erro inesperado ao desativar a empresa.',
+        description: 'Ocorreu um erro inesperado ao desativar o veículo.',
       });
     }
   }, [toast]);
@@ -55,22 +55,22 @@ export function Companies({ success, data, message }: ICompaniesReturnProps) {
     <PageComponent.Root>
       <PageComponent.Header>
         <div className="flex flex-col">
-          <PageComponent.Title text="Empresas" />
+          <PageComponent.Title text="Veículos" />
         </div>
       </PageComponent.Header>
       <PageComponent.Content className="flex-col">
         <div className="flex w-full justify-end">
-          <Link href={'/companies/create'}>
+          <Link href={'/vehicles/create'}>
             <Button className="mb-2">
               <CirclePlus className="w-4 h-4 me-2" />
-              Cadastar empresa
+              Cadastar veículo
             </Button>
           </Link>
         </div>
-        <DataTable.Root columns={columns} data={companies}>
+        <DataTable.Root columns={columns} data={vehicles}>
           <DataTable.Tools
-            searchKey="name"
-            searchPlaceholder="Filtrar por nome..."
+            searchKey="licensePlate"
+            searchPlaceholder="Filtrar por placa..."
           />
           <DataTable.Content columns={columns} />
           <DataTable.Pagination />

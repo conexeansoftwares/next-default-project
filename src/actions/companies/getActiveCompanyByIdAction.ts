@@ -1,3 +1,5 @@
+'use server';
+
 import { ICompanyReturnProps, ICompany } from '@/app/(main)/companies/types';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';

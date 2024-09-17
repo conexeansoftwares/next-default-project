@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,9 +9,9 @@ datasource db {
 
 model User {
   id            String    @id @default(cuid())
-  name          String
-  lastname      String?
-  email         String    @unique
+  name          String    @db.VarChar(15)
+  lastname      String?   @db.VarChar(15)
+  email         String    @unique @db.VarChar(150)
   password      String
   active        Boolean   @default(true)
   createdAt     DateTime  @default(now())
@@ -27,10 +21,24 @@ model User {
 
 model Company {
   id            String    @id @default(cuid())
-  name          String
-  cnpj          String    @unique @db.Char(14)
+  name          String    @db.VarChar(150)
+  cnpj          String    @unique @db.VarChar(14)
   active        Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deactivatedAt DateTime?
+  vehicles      Vehicle[] 
+}
+
+model Vehicle {
+  id            String    @id @default(cuid())
+  licensePlate  String    @unique @db.VarChar(7)
+  year          String    @db.VarChar(4)
+  carModel      String    @db.VarChar(50)
+  companyId     String    
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deactivatedAt DateTime? 
+  company       Company   @relation(fields: [companyId], references: [id])
 }

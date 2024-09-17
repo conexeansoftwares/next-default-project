@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils';
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   mask?: string;
   onChange?: (value: string) => void;
+  uppercase?: boolean;
+  alphanumeric?: boolean; // New property for alphanumeric input
 }
 
 const applyMask = (value: string, mask: string) => {
@@ -28,11 +30,20 @@ const applyMask = (value: string, mask: string) => {
 };
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, mask, onChange, ...props }, ref) => {
+  ({ className, type, mask, onChange, uppercase = false, alphanumeric = false, ...props }, ref) => {
     const [inputValue, setInputValue] = React.useState('');
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const { value } = event.target;
+      let { value } = event.target;
+      
+      if (alphanumeric) {
+        value = value.replace(/[^a-zA-Z0-9]/g, '');
+      }
+
+      if (uppercase) {
+        value = value.toUpperCase();
+      }
+
       let newValue = value;
 
       if (mask) {

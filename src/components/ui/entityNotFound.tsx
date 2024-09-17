@@ -11,9 +11,6 @@ interface IEntityNotFound {
 export function EntityNotFound({ title, href }: IEntityNotFound) {
   return (
     <PageComponent.Root>
-      <PageComponent.Header>
-        <PageComponent.Title text="Editar empresa" />
-      </PageComponent.Header>
       <PageComponent.Content className="items-center justify-center">
         <div className="flex flex-col items-center gap-1 text-center">
           <h3 className="text-2xl font-bold tracking-tight">

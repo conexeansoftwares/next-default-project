@@ -1,15 +1,14 @@
 'use server';
 
-import { ICompaniesReturnProps, ICompany } from '@/app/(main)/companies/types';
+import { ICompaniesReturnToSelectProps, ICompanyToSelect } from '@/app/(main)/companies/types';
 import { prisma } from '@/lib/prisma';
 
-export async function getAllActiveCompanies(): Promise<ICompaniesReturnProps> {
+export async function getAllActiveCompaniesToSelect(): Promise<ICompaniesReturnToSelectProps> {
   try {
-    const companies: ICompany[] = await prisma.company.findMany({
+    const companies: ICompanyToSelect[] = await prisma.company.findMany({
       select: {
         id: true,
         name: true,
-        cnpj: true,
       },
       where: { active: true },
     });

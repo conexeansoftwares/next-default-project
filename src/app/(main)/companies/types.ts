@@ -9,9 +9,20 @@ export interface ICompany {
   cnpj: string;
 };
 
+export interface ICompanyToSelect {
+  id: string;
+  name: string;
+};
+
 export interface ICompaniesReturnProps {
   success: boolean;
   data: ICompany[];
+  message?: string;
+}
+
+export interface ICompaniesReturnToSelectProps {
+  success: boolean;
+  data: ICompanyToSelect[];
   message?: string;
 }
 
