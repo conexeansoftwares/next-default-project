@@ -1,7 +1,7 @@
 'use server';
 
-import { ICompaniesReturnToSelectProps, ICompanyToSelect } from '@/app/(main)/companies/types';
-import { prisma } from '@/lib/prisma';
+import { ICompaniesReturnToSelectProps, ICompanyToSelect } from '../../app/(main)/companies/types';
+import { prisma } from '../../lib/prisma';
 
 export async function getAllActiveCompaniesToSelect(): Promise<ICompaniesReturnToSelectProps> {
   try {

@@ -7,16 +7,16 @@ import {
   DoubleArrowRightIcon,
 } from '@radix-ui/react-icons';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '../../../components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '../../../components/ui/select';
 
-import { useDataTable } from '@/context/dataTableContext';
+import { useDataTable } from '../../../context/dataTableContext';
 
 
 export function DataTablePagination() {

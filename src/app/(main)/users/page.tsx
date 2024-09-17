@@ -1,8 +1,8 @@
-import { PageComponent } from '@/components/ui/page';
+import { PageComponent } from '../../../components/ui/page';
 import { columns } from './columns';
 import { DataTable } from './dataTable';
 import { User } from './types';
-import { Button } from '@/components/ui/button';
+import { Button } from '../../../components/ui/button';
 import { UserRoundPlus } from 'lucide-react';
 import Link from 'next/link';
 

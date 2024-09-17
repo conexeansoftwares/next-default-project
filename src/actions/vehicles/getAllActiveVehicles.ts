@@ -1,7 +1,7 @@
 'use server';
 
-import { IVehicle, IVehiclesReturnProps } from '@/app/(main)/vehicles/types';
-import { prisma } from '@/lib/prisma';
+import { IVehicle, IVehiclesReturnProps } from '../../app/(main)/vehicles/types';
+import { prisma } from '../../lib/prisma';
 
 export async function getAllActiveVehicles(): Promise<IVehiclesReturnProps> {
   try {

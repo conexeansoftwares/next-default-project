@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
+import { Button } from '../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,21 +10,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '../../../../components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+} from '../../../../components/ui/select';
+import { Input } from '../../../../components/ui/input';
 import Link from 'next/link';
 import { CircleArrowLeft } from 'lucide-react';
-import { VehicleFormData, vehicleFormSchema } from '@/schemas/vehicleSchema';
-import { ICompaniesReturnToSelectProps, ICompanyToSelect } from '@/app/(main)/companies/types';
-import { getAllActiveCompaniesToSelect } from '@/actions/companies/getAllActiveCompaniesToSelect'; 
-import { useToast } from '@/hooks/use-toast';
+import { VehicleFormData, vehicleFormSchema } from '../../../../schemas/vehicleSchema';
+import { ICompaniesReturnToSelectProps, ICompanyToSelect } from '../../../../app/(main)/companies/types';
+import { getAllActiveCompaniesToSelect } from '../../../../actions/companies/getAllActiveCompaniesToSelect'; 
+import { useToast } from '../../../../hooks/use-toast';
 
 interface VehicleFormProps {
   initialData?: VehicleFormData;

@@ -1,4 +1,4 @@
-import { getAllActiveCompanies } from '@/actions/companies/getAllActiveCompanies';
+import { getAllActiveCompanies } from '../../../actions/companies/getAllActiveCompanies';
 import { Companies } from './_components/companies';
 
 export default async function Page() {

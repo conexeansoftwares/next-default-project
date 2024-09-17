@@ -1,6 +1,6 @@
-import { getActiveCompanyByIdAction } from '@/actions/companies/getActiveCompanyByIdAction';
+import { getActiveCompanyByIdAction } from '../../../../../actions/companies/getActiveCompanyByIdAction';
 import EditCompany from './_components/editCompany';
-import { EntityNotFound } from '@/components/ui/entityNotFound';
+import { EntityNotFound } from '../../../../../components/ui/entityNotFound';
 
 export default async function Page({
   params,

@@ -3,11 +3,11 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { CirclePlus } from 'lucide-react';
-import { PageComponent } from '@/components/ui/page';
-import { Button } from '@/components/ui/button';
-import { DataTable } from '@/components/ui/dataTable';
-import { useToast } from '@/hooks/use-toast';
-import { desactivateCompanyAction } from '@/actions/companies/desactiveCompanyAction';
+import { PageComponent } from '../../../../components/ui/page';
+import { Button } from '../../../../components/ui/button';
+import { DataTable } from '../../../../components/ui/dataTable';
+import { useToast } from '../../../../hooks/use-toast';
+import { desactivateCompanyAction } from '../../../../actions/companies/desactiveCompanyAction';
 import { ICompaniesReturnProps, ICompany } from '../types';
 import { getColumns } from '../columns';
 

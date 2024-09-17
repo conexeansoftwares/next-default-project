@@ -1,8 +1,8 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
-import { CompanyFormData, companyFormSchema } from '@/schemas/companySchema';
-import { removeCnpjMask } from '@/utils/cnpjUtils';
+import { prisma } from '../../lib/prisma';
+import { CompanyFormData, companyFormSchema } from '../../schemas/companySchema';
+import { removeCnpjMask } from '../../utils/cnpjUtils';
 import { revalidatePath } from 'next/cache';
 
 export async function editCompanyAction(companyId: string, data: CompanyFormData) {

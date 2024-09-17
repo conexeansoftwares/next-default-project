@@ -1,13 +1,13 @@
 'use client';
 
-import { CompanyFormData } from '@/schemas/companySchema';
-import { PageComponent } from '@/components/ui/page';
-import { useToast } from '@/hooks/use-toast';
+import { CompanyFormData } from '../../../../../../schemas/companySchema';
+import { PageComponent } from '../../../../../../components/ui/page';
+import { useToast } from '../../../../../../hooks/use-toast';
 
 import { ICompany } from '../../../types';
-import { editCompanyAction } from '@/actions/companies/editCompanyAction';
+import { editCompanyAction } from '../../../../../../actions/companies/editCompanyAction';
 import { CompanyForm } from '../../../_components/companyForm';
-import { formatCNPJ } from '@/utils/cnpjUtils';
+import { formatCNPJ } from '../../../../../../utils/cnpjUtils';
 
 export default function EditCompany(company: ICompany) {
   const { toast } = useToast();

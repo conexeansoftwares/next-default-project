@@ -5,13 +5,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '../../../components/ui/dropdown-menu';
 import {
   Sheet,
   SheetContent,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
+} from '../../../components/ui/sheet';
 import { Button } from '../button';
 import { CircleUser, Menu, Package2 } from 'lucide-react';
 import Link from 'next/link';

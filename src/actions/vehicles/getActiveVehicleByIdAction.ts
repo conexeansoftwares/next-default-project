@@ -3,8 +3,8 @@
 import {
   IVehicleReturnProps,
   IVehicleToEdit,
-} from '@/app/(main)/vehicles/types';
-import { prisma } from '@/lib/prisma';
+} from '../../app/(main)/vehicles/types';
+import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 
 const getVehicleSchema = z.string().cuid();

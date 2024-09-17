@@ -3,12 +3,12 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { CirclePlus } from 'lucide-react';
-import { PageComponent } from '@/components/ui/page';
-import { Button } from '@/components/ui/button';
-import { DataTable } from '@/components/ui/dataTable';
-import { useToast } from '@/hooks/use-toast';
+import { PageComponent } from '../../../../components/ui/page';
+import { Button } from '../../../../components/ui/button';
+import { DataTable } from '../../../../components/ui/dataTable';
+import { useToast } from '../../../../hooks/use-toast';
 import { getColumns } from '../columns';
-import { desactivateVehicleAction } from '@/actions/vehicles/desactiveVehicleAction';
+import { desactivateVehicleAction } from '../../../../actions/vehicles/desactiveVehicleAction';
 import { IVehicle, IVehiclesReturnProps } from '../types';
 
 export function Vehicles({ success, data, message }: IVehiclesReturnProps) {

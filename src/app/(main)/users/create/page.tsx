@@ -2,10 +2,10 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UserFormData, userFormSchema } from '@/schemas/userSchema';
-import { createUserAction } from '@/actions/users/createUserAction';
+import { UserFormData, userFormSchema } from '../../../../schemas/userSchema';
+import { createUserAction } from '../../../../actions/users/createUserAction';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -14,9 +14,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { PageComponent } from '@/components/ui/page';
+} from '../../../../components/ui/form';
+import { Input } from '../../../../components/ui/input';
+import { PageComponent } from '../../../../components/ui/page';
 import Link from 'next/link';
 
 import { CircleArrowLeft } from 'lucide-react';

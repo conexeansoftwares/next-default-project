@@ -6,14 +6,14 @@ import {
   UserRoundPen,
   UserRoundX,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '../../../components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '../../../components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,10 +24,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { formatCNPJ } from '@/utils/cnpjUtils';
+} from '../../../components/ui/alert-dialog';
+import { formatCNPJ } from '../../../utils/cnpjUtils';
 import Link from 'next/link';
-import { DataTable } from '@/components/ui/dataTable';
+import { DataTable } from '../../../components/ui/dataTable';
 
 export interface ICompany {
   id: string;

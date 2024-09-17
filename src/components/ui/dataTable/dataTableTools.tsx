@@ -3,7 +3,7 @@
 import React from 'react';
 import { Input } from '../input';
 import { Button } from '../button';
-import { useDataTable } from '@/context/dataTableContext';
+import { useDataTable } from '../../../context/dataTableContext';
 import { MixerHorizontalIcon } from '@radix-ui/react-icons';
 import {
   DropdownMenu,

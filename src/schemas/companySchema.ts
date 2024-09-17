@@ -1,4 +1,4 @@
-import { removeCnpjMask } from '@/utils/cnpjUtils';
+import { removeCnpjMask } from '../utils/cnpjUtils';
 import * as z from 'zod';
 
 function validateCNPJ(cnpj: string): boolean {

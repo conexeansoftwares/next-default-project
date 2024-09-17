@@ -1,9 +1,9 @@
 'use client';
 
-import { CompanyFormData } from '@/schemas/companySchema';
-import { PageComponent } from '@/components/ui/page';
-import { useToast } from '@/hooks/use-toast';
-import { createCompanyAction } from '@/actions/companies/createCompanyAction';
+import { CompanyFormData } from '../../../../schemas/companySchema';
+import { PageComponent } from '../../../../components/ui/page';
+import { useToast } from '../../../../hooks/use-toast';
+import { createCompanyAction } from '../../../../actions/companies/createCompanyAction';
 import { CompanyForm } from '../_components/companyForm';
 import { useRef } from 'react';
 

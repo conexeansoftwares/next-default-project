@@ -1,5 +1,5 @@
-import { getActiveVechileByIdAction } from '@/actions/vehicles/getActiveVehicleByIdAction';
-import { EntityNotFound } from '@/components/ui/entityNotFound';
+import { getActiveVechileByIdAction } from '../../../../../actions/vehicles/getActiveVehicleByIdAction';
+import { EntityNotFound } from '../../../../../components/ui/entityNotFound';
 import EditVehicle from './_components/editVehicle';
 
 export default async function Page({

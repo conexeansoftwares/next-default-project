@@ -1,9 +1,9 @@
 'use client';
 
-import { createVehicleAction } from '@/actions/vehicles/createVehicleAction';
-import { PageComponent } from '@/components/ui/page';
-import { useToast } from '@/hooks/use-toast';
-import { VehicleFormData } from '@/schemas/vehicleSchema';
+import { createVehicleAction } from '../../../../actions/vehicles/createVehicleAction';
+import { PageComponent } from '../../../../components/ui/page';
+import { useToast } from '../../../../hooks/use-toast';
+import { VehicleFormData } from '../../../../schemas/vehicleSchema';
 import { useRef } from 'react';
 import { VehicleForm } from '../_components/vehicleForm';
 

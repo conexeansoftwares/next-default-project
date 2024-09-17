@@ -4,8 +4,8 @@
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CompanyFormData, companyFormSchema } from '@/schemas/companySchema';
-import { Button } from '@/components/ui/button';
+import { CompanyFormData, companyFormSchema } from '../../../../schemas/companySchema';
+import { Button } from '../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,8 +13,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from '../../../../components/ui/form';
+import { Input } from '../../../../components/ui/input';
 import Link from 'next/link';
 import { CircleArrowLeft } from 'lucide-react';
 

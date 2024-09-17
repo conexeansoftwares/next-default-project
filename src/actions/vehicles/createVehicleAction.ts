@@ -1,7 +1,7 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
-import { VehicleFormData, vehicleFormSchema } from '@/schemas/vehicleSchema';
+import { prisma } from '../../lib/prisma';
+import { VehicleFormData, vehicleFormSchema } from '../../schemas/vehicleSchema';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 

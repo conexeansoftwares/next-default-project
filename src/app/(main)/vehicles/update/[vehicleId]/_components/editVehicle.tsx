@@ -1,11 +1,11 @@
 'use client';
 
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '../../../../../../hooks/use-toast';
 import { IVehicleToEdit } from '../../../types';
-import { VehicleFormData } from '@/schemas/vehicleSchema';
-import { PageComponent } from '@/components/ui/page';
+import { VehicleFormData } from '../../../../../../schemas/vehicleSchema';
+import { PageComponent } from '../../../../../../components/ui/page';
 import { VehicleForm } from '../../../_components/vehicleForm';
-import { editVehicleAction } from '@/actions/vehicles/editVehicleAction';
+import { editVehicleAction } from '../../../../../../actions/vehicles/editVehicleAction';
 
 export default function EditVehicle(vehicle: IVehicleToEdit) {
   const { toast } = useToast();

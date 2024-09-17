@@ -1,7 +1,7 @@
 'use server';
 
-import { ICompaniesReturnProps, ICompany } from '@/app/(main)/companies/types';
-import { prisma } from '@/lib/prisma';
+import { ICompaniesReturnProps, ICompany } from '../../app/(main)/companies/types';
+import { prisma } from '../../lib/prisma';
 
 export async function getAllActiveCompanies(): Promise<ICompaniesReturnProps> {
   try {

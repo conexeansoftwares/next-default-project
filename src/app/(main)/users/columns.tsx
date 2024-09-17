@@ -8,15 +8,15 @@ import {
 } from 'lucide-react';
 import { User } from './types';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '../../../components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { DataTableColumnHeader } from '@/components/ui/dataTable/dataTableColumnHeader';
+} from '../../../components/ui/dropdown-menu';
+import { DataTableColumnHeader } from '../../../components/ui/dataTable/dataTableColumnHeader';
 
 export const columns: ColumnDef<User>[] = [
   {

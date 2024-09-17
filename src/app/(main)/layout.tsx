@@ -1,8 +1,8 @@
 'use client';
 
-import { Navbar } from '@/components/ui/navbar/navbar';
-import { Sidebar } from '@/components/ui/sidebar';
-import { isActiveRoute } from '@/utils/isActiveRoute';
+import { Navbar } from '../../components/ui/navbar/navbar';
+import { Sidebar } from '../../components/ui/sidebar';
+import { isActiveRoute } from '../../utils/isActiveRoute';
 import {
   ShieldCheck,
   Building2,

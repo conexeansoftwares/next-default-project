@@ -8,11 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '../../../components/ui/table';
 
 import { flexRender } from '@tanstack/react-table';
 
-import { useDataTable } from '@/context/dataTableContext';
+import { useDataTable } from '../../../context/dataTableContext';
 
 interface IDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

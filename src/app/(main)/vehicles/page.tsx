@@ -1,4 +1,4 @@
-import { getAllActiveVehicles } from '@/actions/vehicles/getAllActiveVehicles';
+import { getAllActiveVehicles } from '../../../actions/vehicles/getAllActiveVehicles';
 import { Vehicles } from './_components/vehicles';
 
 export default async function Page() {
