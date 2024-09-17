@@ -34,8 +34,6 @@ export async function getActiveCompanyByIdAction(
 
     return { success: true, data: company };
   } catch (error) {
-    console.log(error);
-    console.error('Erro ao buscar empresa:', error);
     return {
       success: false,
       data: null,

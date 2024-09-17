@@ -37,8 +37,6 @@ export async function desactivateCompanyAction(companyId: string) {
 
     return result;
   } catch (error) {
-    console.log(error);
-    console.error('Erro ao desativar empresa:', error);
     if (error instanceof z.ZodError) {
       return { success: false, message: 'ID de empresa inválido' };
     }

@@ -1,7 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { ICompaniesReturnProps, ICompany } from '../../app/(main)/companies/types';
+import {
+  ICompaniesReturnProps,
+  ICompany,
+} from '../../app/(main)/companies/types';
 import { prisma } from '../../lib/prisma';
 
 export async function getAllActiveCompanies(): Promise<ICompaniesReturnProps> {
@@ -18,9 +21,11 @@ export async function getAllActiveCompanies(): Promise<ICompaniesReturnProps> {
     revalidatePath('/companies');
 
     return { success: true, data: companies };
-  } catch (error: any) {
-    console.log(error);
-    console.error('Erro ao listar empresas:', error);
-    return { success: false, data: [], message: error.message };
+  } catch (error) {
+    return {
+      success: false,
+      data: [],
+      message: 'Ocorreu um erro ao listar empresas.',
+    };
   }
 }

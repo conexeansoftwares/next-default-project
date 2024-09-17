@@ -17,9 +17,7 @@ export async function getAllActiveCompaniesToSelect(): Promise<ICompaniesReturnT
     revalidatePath('/companies');
 
     return { success: true, data: companies };
-  } catch (error: any) {
-    console.log(error);
-    console.error('Erro ao listar empresas:', error);
-    return { success: false, data: [], message: error.message };
+  } catch (error) {
+    return { success: false, data: [], message: 'Ocorreu um erro ao listar empresas.' };
   }
 }

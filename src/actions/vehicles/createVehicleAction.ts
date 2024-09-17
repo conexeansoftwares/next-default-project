@@ -24,7 +24,6 @@ export async function createVehicleAction(data: VehicleFormData) {
 
     return { success: true, message: 'Veículo criado com sucesso' };
   } catch (error) {
-    console.log(error);
     if (error instanceof z.ZodError) {
       return { success: false, errors: error.errors };
     }

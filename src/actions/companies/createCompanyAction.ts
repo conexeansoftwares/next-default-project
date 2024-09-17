@@ -25,7 +25,6 @@ export async function createCompanyAction(data: CompanyFormData) {
 
     return { success: true, message: 'Empresa criada com sucesso' };
   } catch (error) {
-    console.log(error);
     if (error instanceof z.ZodError) {
       return { success: false, errors: error.errors };
     }
