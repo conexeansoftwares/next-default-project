@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getActiveVechileByLicensePlateAction } from '@/actions/vehicles/getActiveVehicleByLicensePlateAction';
-import { IVehicle, IVehicleToEdit } from '../../vehicles/types';
+import { IVehicleToMovement } from '../../vehicles/types';
 import { useToast } from '../../../../hooks/use-toast';
 import { VehicleFormData, vehicleFormSchema } from '@/schemas/vehicleSchema';
 
@@ -29,6 +29,7 @@ type SearchVehicleFormData = z.infer<typeof searchVehicleSchema>;
 
 const movementVehicleSchema = vehicleFormSchema.extend({
   id: z.string().cuid({ message: 'ID do veículo inválido' }),
+  companyName: z.string().optional(),
   acao: z.enum(['entrada', 'saida']),
 });
 
@@ -40,7 +41,7 @@ export function VehicleMovementForm() {
   const [licensePlateFound, setLicensePlateFoud] = useState<boolean>(false);
   const [searchingLicensePlate, setSearchingLicensePlate] =
     useState<boolean>(false);
-  const [vehicle, setVehicle] = useState<IVehicleToEdit | null>(null);
+  const [vehicle, setVehicle] = useState<IVehicleToMovement | null>(null);
 
   const searchVehicleForm = useForm<SearchVehicleFormData>({
     resolver: zodResolver(searchVehicleSchema),
@@ -173,7 +174,7 @@ export function VehicleMovementForm() {
                         {...field}
                         readOnly
                         disabled
-                        value={vehicle?.licensePlate}
+                        value={vehicle?.carModel}
                       />
                     </FormControl>
                     <FormMessage />
@@ -192,7 +193,7 @@ export function VehicleMovementForm() {
                         {...field}
                         readOnly
                         disabled
-                        value={vehicle?.licensePlate}
+                        value={vehicle?.owner}
                       />
                     </FormControl>
                     <FormMessage />
@@ -202,7 +203,7 @@ export function VehicleMovementForm() {
 
               <FormField
                 control={movementVehicleForm.control}
-                name="owner"
+                name="companyName"
                 render={({ field }) => (
                   <FormItem className='col-span-1 md:col-span-full'>
                     <FormLabel>Empresa</FormLabel>
@@ -211,7 +212,7 @@ export function VehicleMovementForm() {
                         {...field}
                         readOnly
                         disabled
-                        value={vehicle?.licensePlate}
+                        value={vehicle?.companyName}
                       />
                     </FormControl>
                     <FormMessage />
