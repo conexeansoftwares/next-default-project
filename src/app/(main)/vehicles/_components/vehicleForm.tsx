@@ -1,4 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useEffect, useState } from 'react';
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  useState,
+} from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../../../../components/ui/button';
@@ -21,9 +26,15 @@ import {
 import { Input } from '../../../../components/ui/input';
 import Link from 'next/link';
 import { CircleArrowLeft } from 'lucide-react';
-import { VehicleFormData, vehicleFormSchema } from '../../../../schemas/vehicleSchema';
-import { ICompaniesReturnToSelectProps, ICompanyToSelect } from '../../../../app/(main)/companies/types';
-import { getAllActiveCompaniesToSelect } from '../../../../actions/companies/getAllActiveCompaniesToSelect'; 
+import {
+  VehicleFormData,
+  vehicleFormSchema,
+} from '../../../../schemas/vehicleSchema';
+import {
+  ICompaniesReturnToSelectProps,
+  ICompanyToSelect,
+} from '../../../../app/(main)/companies/types';
+import { getAllActiveCompaniesToSelect } from '../../../../actions/companies/getAllActiveCompaniesToSelect';
 import { useToast } from '../../../../hooks/use-toast';
 
 interface VehicleFormProps {
@@ -42,7 +53,7 @@ export const VehicleForm = forwardRef<{ reset: () => void }, VehicleFormProps>(
       defaultValues: initialData || {
         licensePlate: '',
         carModel: '',
-        year: '',
+        owner: '',
         companyId: '',
       },
     });
@@ -52,7 +63,7 @@ export const VehicleForm = forwardRef<{ reset: () => void }, VehicleFormProps>(
     useImperativeHandle(ref, () => ({
       reset: () => {
         form.reset();
-        setSelectKey(prev => prev + 1);
+        setSelectKey((prev) => prev + 1);
       },
     }));
 
@@ -60,7 +71,8 @@ export const VehicleForm = forwardRef<{ reset: () => void }, VehicleFormProps>(
 
     useEffect(() => {
       const fetchCompanies = async () => {
-        const result: ICompaniesReturnToSelectProps = await getAllActiveCompaniesToSelect();
+        const result: ICompaniesReturnToSelectProps =
+          await getAllActiveCompaniesToSelect();
         if (result.success) {
           setCompanies(result.data);
         } else {
@@ -130,17 +142,12 @@ export const VehicleForm = forwardRef<{ reset: () => void }, VehicleFormProps>(
 
               <FormField
                 control={form.control}
-                name="year"
+                name="owner"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Ano *</FormLabel>
+                    <FormLabel>Dono</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Informe o ano"
-                        mask="####"
-                        type="number"
-                        {...field}
-                      />
+                      <Input placeholder="Informe o dono" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -183,7 +190,7 @@ export const VehicleForm = forwardRef<{ reset: () => void }, VehicleFormProps>(
         </Form>
       </>
     );
-  }
+  },
 );
 
 VehicleForm.displayName = 'VehicleForm';

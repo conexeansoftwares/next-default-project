@@ -11,14 +11,14 @@ export async function editVehicleAction(
   try {
     const validatedData = vehicleFormSchema.parse(data);
 
-    const { licensePlate, carModel, year, companyId } = validatedData;
+    const { licensePlate, carModel, owner, companyId } = validatedData;
 
     await prisma.vehicle.update({
       where: { id: vehicleId },
       data: {
         licensePlate,
         carModel,
-        year,
+        owner,
         companyId,
       },
     });

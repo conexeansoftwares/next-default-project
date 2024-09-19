@@ -51,6 +51,16 @@ export default function MainLayout({
             </Sidebar.Navigation>
           </Sidebar.Content>
 
+          <Sidebar.Content>
+            <Sidebar.ContentTitle text="Portaria" />
+            <Sidebar.Navigation>
+              <Sidebar.Item href='/movement' active={isActiveRoute(pathname, '/movement')}>
+                <ShieldCheck className="w-4 h-4" />
+                Movimentação
+              </Sidebar.Item>
+            </Sidebar.Navigation>
+          </Sidebar.Content>
+
           {/* <Sidebar.Footer>
             <Sidebar.Navigation>
               <Sidebar.Item href='/configurations'>

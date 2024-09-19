@@ -49,9 +49,9 @@ export const getColumns = ({
     ),
   },
   {
-    accessorKey: 'year',
+    accessorKey: 'owner',
     header: ({ column }) => (
-      <DataTable.ColumnHeader column={column} title="Ano" />
+      <DataTable.ColumnHeader column={column} title="Dono" />
     ),
   },
   {

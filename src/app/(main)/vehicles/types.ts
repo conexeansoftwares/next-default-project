@@ -1,6 +1,6 @@
 export interface IVehicleData {
   licensePlate: string;
-  year: string;
+  owner: string;
   carModel: string;
   companyId: string;
 };
@@ -8,7 +8,7 @@ export interface IVehicleData {
 export interface IVehicle {
   id: string;
   licensePlate: string;
-  year: string;
+  owner: string;
   carModel: string;
   companyId: string;
   companyName: string;
@@ -17,7 +17,7 @@ export interface IVehicle {
 export interface IVehicleToEdit {
   id: string;
   licensePlate: string;
-  year: string;
+  owner: string;
   carModel: string;
   companyId: string;
 };

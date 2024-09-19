@@ -7,13 +7,15 @@ import {
 import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 
-const getVehicleSchema = z.string().cuid();
+const getVehicleSchema = z
+  .string()
+  .length(7, { message: 'Placa deve conter 7 caracteres' });
 
-export async function getActiveVechileByIdAction(
-  vehicleId: string,
+export async function getActiveVechileByLicensePlateAction(
+  licensePlate: string,
 ): Promise<IVehicleReturnProps> {
   try {
-    const validatedId = getVehicleSchema.parse(vehicleId);
+    const validatedLisencePlate = getVehicleSchema.parse(licensePlate);
 
     const vehicle: IVehicleToEdit | null = await prisma.vehicle.findUnique({
       select: {
@@ -24,7 +26,7 @@ export async function getActiveVechileByIdAction(
         companyId: true,
       },
       where: {
-        id: validatedId,
+        licensePlate: validatedLisencePlate,
         active: true,
       },
     });

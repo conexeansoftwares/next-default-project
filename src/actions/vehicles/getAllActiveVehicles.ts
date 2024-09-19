@@ -9,7 +9,7 @@ export async function getAllActiveVehicles(): Promise<IVehiclesReturnProps> {
       select: {
         id: true,
         licensePlate: true,
-        year: true,
+        owner: true,
         carModel: true,
         companyId: true,
         company: {
@@ -24,7 +24,7 @@ export async function getAllActiveVehicles(): Promise<IVehiclesReturnProps> {
     const vehicles: IVehicle[] = vehiclesData.map((vehicle) => ({
       id: vehicle.id,
       licensePlate: vehicle.licensePlate,
-      year: vehicle.year,
+      owner: vehicle.owner,
       carModel: vehicle.carModel,
       companyId: vehicle.companyId,
       companyName: vehicle.company.name,

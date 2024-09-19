@@ -35,7 +35,7 @@ model Company {
 model Vehicle {
   id            String    @id @default(cuid())
   licensePlate  String    @unique @db.VarChar(7)
-  year          String    @db.VarChar(4)
+  owner         String    @db.VarChar(50)
   carModel      String    @db.VarChar(50)
   companyId     String
   active        Boolean   @default(true)
