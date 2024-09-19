@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Building2,
   Car,
+  Users,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -33,10 +34,10 @@ export default function MainLayout({
                 Empresas
               </Sidebar.Item>
 
-              {/* <Sidebar.Item href='/contributors'>
+              <Sidebar.Item href='/contributors' active={isActiveRoute(pathname, '/contributors')}>
                 <Users className="w-4 h-4" />
                 Colaboradores
-              </Sidebar.Item> */}
+              </Sidebar.Item>
 
               <Sidebar.Item href='/vehicles' active={isActiveRoute(pathname, '/vehicles')}>
                 <Car className="w-4 h-4" />

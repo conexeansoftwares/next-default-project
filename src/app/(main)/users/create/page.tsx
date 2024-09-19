@@ -34,9 +34,7 @@ export default function Page() {
   });
 
   async function onSubmit(values: UserFormData) {
-    console.log(`OnSubmit: ${JSON.stringify(values)}`);
     await createUserAction(values);
-    console.log('Chamada deu certo');
   }
 
   return (

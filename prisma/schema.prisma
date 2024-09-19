@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://dbmasteruser:correaab290499@ls-28804669717f9299d2dfbd36661c615cb8f465b8.cracgygkad7j.us-east-1.rds.amazonaws.com:5432/mydb?schema=supervisao_staging"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -28,7 +28,8 @@ model Company {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deactivatedAt DateTime?
-  vehicles      Vehicle[] 
+  vehicles      Vehicle[]
+  contributors  CompanyContributor[]
 }
 
 model Vehicle {
@@ -36,10 +37,35 @@ model Vehicle {
   licensePlate  String    @unique @db.VarChar(7)
   year          String    @db.VarChar(4)
   carModel      String    @db.VarChar(50)
-  companyId     String    
+  companyId     String
   active        Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  deactivatedAt DateTime? 
+  deactivatedAt DateTime?
   company       Company   @relation(fields: [companyId], references: [id])
+}
+
+model Contributor {
+  id               String    @id @default(cuid())
+  name             String    @db.VarChar(20)
+  lastName         String?   @db.VarChar(20)
+  registration     String    @unique @db.VarChar(20)
+  internalPassword String?   @db.VarChar(50)
+  telephone        String?   @db.VarChar(11)
+  observation      String?   @db.VarChar(200)
+  photoURL         String?   @db.VarChar(200)
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deactivatedAt    DateTime?
+  companies        CompanyContributor[]
+}
+
+model CompanyContributor {
+  companyId      String
+  contributorId  String
+  company        Company     @relation(fields: [companyId], references: [id])
+  contributor    Contributor @relation(fields: [contributorId], references: [id])
+
+  @@id([companyId, contributorId])
 }
