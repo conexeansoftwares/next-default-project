@@ -3,12 +3,7 @@
 import { Navbar } from '../../components/ui/navbar/navbar';
 import { Sidebar } from '../../components/ui/sidebar';
 import { isActiveRoute } from '../../utils/isActiveRoute';
-import {
-  ShieldCheck,
-  Building2,
-  Car,
-  Users,
-} from 'lucide-react';
+import { ShieldCheck, Building2, Car, Users, SquareStack } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export default function MainLayout({
@@ -24,22 +19,31 @@ export default function MainLayout({
         <Sidebar.Root>
           <Sidebar.Header>
             <ShieldCheck className="h-6 w-6" />
-            <span className="">Supervisão Portaria</span>
+            <span>Supervisão Portaria</span>
           </Sidebar.Header>
           <Sidebar.Content>
             <Sidebar.ContentTitle text="Cadastros" />
             <Sidebar.Navigation>
-              <Sidebar.Item href='/companies' active={isActiveRoute(pathname, '/companies')}>
+              <Sidebar.Item
+                href="/companies"
+                active={isActiveRoute(pathname, '/companies')}
+              >
                 <Building2 className="w-4 h-4" />
                 Empresas
               </Sidebar.Item>
 
-              <Sidebar.Item href='/contributors' active={isActiveRoute(pathname, '/contributors')}>
+              <Sidebar.Item
+                href="/contributors"
+                active={isActiveRoute(pathname, '/contributors')}
+              >
                 <Users className="w-4 h-4" />
                 Colaboradores
               </Sidebar.Item>
 
-              <Sidebar.Item href='/vehicles' active={isActiveRoute(pathname, '/vehicles')}>
+              <Sidebar.Item
+                href="/vehicles"
+                active={isActiveRoute(pathname, '/vehicles')}
+              >
                 <Car className="w-4 h-4" />
                 Veículos
               </Sidebar.Item>
@@ -54,9 +58,20 @@ export default function MainLayout({
           <Sidebar.Content>
             <Sidebar.ContentTitle text="Portaria" />
             <Sidebar.Navigation>
-              <Sidebar.Item href='/movement' active={isActiveRoute(pathname, '/movement')}>
+              <Sidebar.Item
+                href="/movement"
+                active={isActiveRoute(pathname, '/movement')}
+              >
                 <ShieldCheck className="w-4 h-4" />
                 Movimentação
+              </Sidebar.Item>
+
+              <Sidebar.Item
+                href="/historical"
+                active={isActiveRoute(pathname, '/historical')}
+              >
+                <SquareStack className="w-4 h-4" />
+                Histórico
               </Sidebar.Item>
             </Sidebar.Navigation>
           </Sidebar.Content>

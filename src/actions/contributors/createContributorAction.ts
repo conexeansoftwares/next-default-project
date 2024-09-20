@@ -1,5 +1,6 @@
 'use server';
 
+import { removeTelephoneMask } from '@/utils/telephoneUtils';
 import { prisma } from '../../lib/prisma';
 import {
   ContributorFormData,
@@ -11,18 +12,17 @@ import { z } from 'zod';
 export async function createContributorAction(data: ContributorFormData) {
   console.log(data);
   try {
-    const validatedData = contributorFormSchema.parse(data);
-
     const {
       name,
       lastName,
       registration,
       internalPassword,
       telephone,
+      cellPhone,
       observation,
       photoURL,
       companyIds,
-    } = validatedData;
+    } = contributorFormSchema.parse(data);
 
     const contributor = await prisma.contributor.create({
       data: {
@@ -30,7 +30,8 @@ export async function createContributorAction(data: ContributorFormData) {
         lastName,
         registration,
         internalPassword,
-        telephone,
+        telephone: removeTelephoneMask(telephone as string),
+        cellPhone: removeTelephoneMask(cellPhone as string),
         observation,
         photoURL,
         companies: {
@@ -49,6 +50,7 @@ export async function createContributorAction(data: ContributorFormData) {
       contributorId: contributor.id,
     };
   } catch (error) {
+    console.log(error);
     if (error instanceof z.ZodError) {
       return { success: false, errors: error.errors };
     }

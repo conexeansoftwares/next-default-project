@@ -90,17 +90,15 @@ export const getColumns = ({
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>
-                    Tem certeza que deseja excluir?
+                    Tem certeza que deseja inativar?
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta ação não pode ser desfeita. Isso irá desativar
-                    permanentemente a empresa e remover os dados associados.
+                    Esta irá desativar a empresa e remover os dados associados.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
-                    className="bg-destructive"
                     onClick={() => onDelete(company.id)}
                   >
                     Continuar

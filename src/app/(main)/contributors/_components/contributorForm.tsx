@@ -45,14 +45,19 @@ const localContributorFormSchema = contributorFormSchema.extend({
       (file) => {
         if (file) {
           // Verificar se é um objeto e tem a propriedade 'type'
-          return typeof file === 'object' && 'type' in file && 
-            ['image/jpeg', 'image/png', 'image/gif'].includes(file.type as string);
+          return (
+            typeof file === 'object' &&
+            'type' in file &&
+            ['image/jpeg', 'image/png', 'image/gif'].includes(
+              file.type as string,
+            )
+          );
         }
         return true;
       },
       {
         message: 'O arquivo deve ser uma imagem (JPEG, PNG ou GIF).',
-      }
+      },
     ),
 });
 
@@ -81,6 +86,7 @@ export const ContributorForm = forwardRef<
       lastName: '',
       registration: '',
       telephone: '',
+      cellPhone: '',
       observation: '',
       internalPassword: '',
       photoURL: '',
@@ -127,19 +133,8 @@ export const ContributorForm = forwardRef<
         values.photoURL = uploadedUrl;
       }
 
-      // Remove photoFile from values before submitting
       const { photoFile, ...submissionData } = values;
       await onSubmit(submissionData);
-
-      // Reset the photo field after successful submission
-      // fileUploadRef.current?.reset();
-      // form.setValue('photoFile', undefined);
-      // form.setValue('photoURL', '');
-
-      toast({
-        title: 'Sucesso',
-        description: 'Colaborador salvo com sucesso.',
-      });
     } catch (error) {
       console.error(error);
       toast({
@@ -233,6 +228,25 @@ export const ContributorForm = forwardRef<
 
             <FormField
               control={form.control}
+              name="cellPhone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Celular</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Informe o celular"
+                      mask="(##) #####-####"
+                      maxLength={16}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="telephone"
               render={({ field }) => (
                 <FormItem>
@@ -240,7 +254,8 @@ export const ContributorForm = forwardRef<
                   <FormControl>
                     <Input
                       placeholder="Informe o telefone"
-                      mask="(##) #####-####"
+                      mask="(##) ####-####"
+                      maxLength={15}
                       {...field}
                     />
                   </FormControl>
@@ -317,7 +332,7 @@ export const ContributorForm = forwardRef<
                         return (
                           <FormItem
                             key={company.id}
-                            className="flex flex-row items-start space-x-3 space-y-0"
+                            className="flex flex-row items-start space-x-3 space-y-0 mb-3"
                           >
                             <FormControl>
                               <Checkbox

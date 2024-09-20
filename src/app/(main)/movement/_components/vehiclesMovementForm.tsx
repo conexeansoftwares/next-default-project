@@ -1,77 +1,45 @@
+'use client';
+
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { boolean, z } from 'zod';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 import { getActiveVechileByLicensePlateAction } from '@/actions/vehicles/getActiveVehicleByLicensePlateAction';
-import { IVehicleToMovement } from '../../vehicles/types';
-import { useToast } from '../../../../hooks/use-toast';
-import { VehicleFormData, vehicleFormSchema } from '@/schemas/vehicleSchema';
+import { createVehicleMovementAction } from '@/actions/movements/vehicles/createVehicleMovementAction';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-const searchVehicleSchema = z.object({
-  licensePlate: z
-    .string()
-    .length(7, { message: 'Placa deve conter 7 caracteres' }),
-});
-
-type SearchVehicleFormData = z.infer<typeof searchVehicleSchema>;
-
-const movementVehicleSchema = vehicleFormSchema.extend({
-  id: z.string().cuid({ message: 'ID do veículo inválido' }),
-  companyName: z.string().optional(),
-  acao: z.enum(['entrada', 'saida']),
-});
-
-type MovementVehicleFormData = z.infer<typeof movementVehicleSchema>;
+interface IVehicleToMovement {
+  id: string;
+  licensePlate: string;
+  carModel: string;
+  owner: string;
+  companyName?: string;
+}
 
 export function VehicleMovementForm() {
   const { toast } = useToast();
-
-  const [licensePlateFound, setLicensePlateFoud] = useState<boolean>(false);
-  const [searchingLicensePlate, setSearchingLicensePlate] =
-    useState<boolean>(false);
+  const [requesting, setRequesting] = useState<boolean>(false);
   const [vehicle, setVehicle] = useState<IVehicleToMovement | null>(null);
+  const [licensePlate, setLicensePlate] = useState('');
+  const [action, setAction] = useState<'E' | 'S'>('E');
 
-  const searchVehicleForm = useForm<SearchVehicleFormData>({
-    resolver: zodResolver(searchVehicleSchema),
-    defaultValues: {
-      licensePlate: '',
-    },
-  });
+  const searchVehicle = async () => {
+    if (licensePlate.length !== 7) {
+      toast({
+        variant: 'destructive',
+        title: 'Placa inválida',
+        description: 'A placa deve conter 7 caracteres.',
+      });
+      return;
+    }
 
-  const movementVehicleForm = useForm<MovementVehicleFormData>({
-    resolver: zodResolver(movementVehicleSchema),
-    defaultValues: {
-      id: '',
-      licensePlate: '',
-      carModel: '',
-      companyId: '',
-      owner: '',
-    },
-  });
-
-  const onSubmitSearchVehicleForm = async (data: SearchVehicleFormData) => {
     try {
-      setSearchingLicensePlate(true);
-      const response = await getActiveVechileByLicensePlateAction(
-        data.licensePlate,
-      );
+      setRequesting(true);
+      const response = await getActiveVechileByLicensePlateAction(licensePlate);
 
       if (response.success) {
         setVehicle(response.data);
-        setLicensePlateFoud(true);
-        searchVehicleForm.reset();
+        setLicensePlate('');
       } else {
         toast({
           variant: 'destructive',
@@ -85,188 +53,151 @@ export function VehicleMovementForm() {
         variant: 'destructive',
         title: 'Ah não. Algo deu errado.',
         description:
-          'Não foi possível encontrar o veículo. Entre com contado com a administração.',
+          'Não foi possível encontrar o veículo. Entre em contato com a administração.',
       });
     } finally {
-      setSearchingLicensePlate(false);
+      setRequesting(false);
     }
   };
 
-  const onSubmitMovementVehicleForm = async (data: MovementVehicleFormData) => {
-    console.log(data);
+  const registerMovement = async () => {
+    if (!vehicle || !vehicle.id) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao registrar movimentação',
+        description:
+          'ID do veículo não encontrado. Por favor, tente novamente.',
+      });
+      return;
+    }
+
+    try {
+      setRequesting(true);
+      const response = await createVehicleMovementAction(vehicle.id, action);
+
+      if (response.success) {
+        toast({
+          variant: 'success',
+          title: 'Movimentação registrada com sucesso',
+          description: `${
+            action === 'E' ? 'Entrada' : 'Saída'
+          } registrada para o veículo ${vehicle.licensePlate}`,
+        });
+        setVehicle(null);
+        setAction('E');
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Ocorreu um erro ao cadastrar a movimentação.',
+          description: 'Entre em contato com a administração.',
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Ocorreu um erro ao cadastrar a movimentação.',
+        description: 'Entre em contato com a administração.',
+      });
+    } finally {
+      setRequesting(false);
+    }
+  };
+
+  const cancelRequest = () => {
+    setVehicle(null);
+    setLicensePlate('');
+    setAction('E');
   };
 
   return (
-    <div className="space-y-6">
-      {!licensePlateFound ? (
-        <Form {...searchVehicleForm}>
-          <form
-            onSubmit={searchVehicleForm.handleSubmit(onSubmitSearchVehicleForm)}
-            className="space-y-6"
+    <div className="w-full">
+      {!vehicle ? (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="licensePlate">Placa do veículo</Label>
+            <Input
+              id="licensePlate"
+              value={licensePlate}
+              onChange={(e) => setLicensePlate(e.toUpperCase())}
+              maxLength={7}
+              placeholder="Informe a placa do veículo"
+            />
+            <p className="text-sm text-muted-foreground">
+              Informe somente números e letras da placa do veículo. Ex: AAA1111.
+            </p>
+          </div>
+          <Button
+            onClick={searchVehicle}
+            disabled={requesting}
+            className="w-full"
           >
+            {requesting ? 'Buscando...' : 'Buscar veículo'}
+          </Button>
+        </div>
+      ) : (
+        <div className="bg-secondary/90 rounded-lg p-4 w-full">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-primary">Informações do veículo</h3>
+            <p className="text-sm text-muted-foreground">
+              Verifique as informações e registre a movimentação
+            </p>
+          </div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-background rounded-lg p-2">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Placa</h4>
+                <p className="text-base font-medium">{vehicle.licensePlate}</p>
+              </div>
+              <div className="bg-background rounded-lg p-2">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Modelo</h4>
+                <p className="text-base font-medium">{vehicle.carModel}</p>
+              </div>
+              <div className="bg-background rounded-lg p-2">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Dono</h4>
+                <p className="text-base font-medium">{vehicle.owner}</p>
+              </div>
+              <div className="bg-background rounded-lg p-2">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Empresa</h4>
+                <p className="text-base font-medium">{vehicle.companyName || 'N/A'}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-muted-foreground">Selecione a ação da movimentação</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  type="button"
+                  variant={action === 'E' ? 'success' : 'outline'}
+                  onClick={() => setAction('E')}
+                >
+                  Entrada
+                </Button>
+                <Button
+                  type="button"
+                  variant={action === 'S' ? 'destructive' : 'outline'}
+                  onClick={() => setAction('S')}
+                >
+                  Saída
+                </Button>
+              </div>
+            </div>
             <div className="grid grid-cols-1 gap-4">
-              <FormField
-                control={searchVehicleForm.control}
-                name="licensePlate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Placa</FormLabel>
-                    <FormControl>
-                      <Input
-                        maxLength={7}
-                        uppercase
-                        alphanumeric
-                        placeholder="Informe a placa do veículo"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Informe somente números e letras da placa do veículo. Ex:
-                      AAA1111.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit" disabled={searchingLicensePlate}>
-                {searchingLicensePlate ? 'Buscando...' : 'Buscar veículo'}
+              <Button
+                onClick={registerMovement}
+                disabled={requesting}
+                className="w-full"
+              >
+                {requesting ? 'Registrando...' : 'Registrar movimentação'}
+              </Button>
+              <Button
+                onClick={cancelRequest}
+                variant="warning"
+                className="w-full"
+              >
+                Cancelar
               </Button>
             </div>
-          </form>
-        </Form>
-      ) : (
-        <Form {...movementVehicleForm}>
-          <form
-            onSubmit={movementVehicleForm.handleSubmit(
-              onSubmitMovementVehicleForm,
-            )}
-            className="space-y-6"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              <FormField
-                control={movementVehicleForm.control}
-                name="licensePlate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Placa</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        readOnly
-                        disabled
-                        value={vehicle?.licensePlate}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={movementVehicleForm.control}
-                name="carModel"
-                render={({ field }) => (
-                  <FormItem className='col-span-1 md:col-span-3 lg:col-span-4 xl:col-span-2'>
-                    <FormLabel>Modelo</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        readOnly
-                        disabled
-                        value={vehicle?.carModel}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={movementVehicleForm.control}
-                name="owner"
-                render={({ field }) => (
-                  <FormItem className='col-span-1 md:col-span-full xl:col-span-3'>
-                    <FormLabel>Dono</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        readOnly
-                        disabled
-                        value={vehicle?.owner}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={movementVehicleForm.control}
-                name="companyName"
-                render={({ field }) => (
-                  <FormItem className='col-span-1 md:col-span-full'>
-                    <FormLabel>Empresa</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        readOnly
-                        disabled
-                        value={vehicle?.companyName}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="col-span-full">
-                <FormField
-                  control={movementVehicleForm.control}
-                  name="acao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ação</FormLabel>
-                      <div className="grid grid-cols-2 gap-4">
-                        <Button
-                          type="button"
-                          variant={
-                            field.value === 'entrada' ? 'default' : 'outline'
-                          }
-                          onClick={() => field.onChange('entrada')}
-                          className={
-                            field.value === 'entrada'
-                              ? 'bg-green-500 hover:bg-green-600'
-                              : ''
-                          }
-                        >
-                          Entrada
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={
-                            field.value === 'saida' ? 'default' : 'outline'
-                          }
-                          onClick={() => field.onChange('saida')}
-                          className={
-                            field.value === 'saida'
-                              ? 'bg-red-500 hover:bg-red-600'
-                              : ''
-                          }
-                        >
-                          Saída
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button type="submit" className='col-span-full'>Registrar Movimentação</Button>
-            </div>
-          </form>
-        </Form>
+          </div>
+        </div>
       )}
     </div>
   );

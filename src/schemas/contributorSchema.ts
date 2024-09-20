@@ -18,7 +18,11 @@ export const contributorFormSchema = z.object({
     .optional(),
   telephone: z
     .string()
-    .max(15, { message: 'Telefone deve conter 11 caracteres' })
+    .max(15, { message: 'Telefone deve conter 10 caracteres' })
+    .optional(),
+  cellPhone: z
+    .string()
+    .max(15, { message: 'Celular deve conter 11 caracteres' })
     .optional(),
   observation: z
     .string()

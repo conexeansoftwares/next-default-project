@@ -5,6 +5,7 @@ export interface IContributorData {
   registration: string;
   internalPassword?: string;
   telephone?: string;
+  cellPhone?: string;
   observation?: string;
   photoURL?: string;
 }
@@ -16,6 +17,7 @@ export interface IContributor {
   registration: string;
   internalPassword: string | null;
   telephone: string | null;
+  cellPhone: string | null;
   observation: string | null;
   photoURL: string | null;
 }
@@ -31,6 +33,7 @@ export interface IContributorToEdit {
   registration: string;
   internalPassword: string | null;
   telephone: string | null;
+  cellPhone: string | null;
   observation: string | null;
   photoURL: string | null;
   companyIds: string[];

@@ -10,26 +10,33 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Car, User, UserPlus } from 'lucide-react';
-import { VehicleMovementForm } from './_components/vehiclesMovementForm';
-import { ContributorMovementForm } from './_components/contributorsMovementForm';
-import { VisitorsMovementForm } from './_components/visitorsMovementForm';
+import { VehicleHistorical } from './_components/vehicles/vehiclesHistorical';
+import { ContributorHistorical } from './_components/contributors/contributorHistorical';
+import { VisitorHistorical } from './_components/visitors/visitorHistorical';
 
-type TipoMovimentacao = 'veiculo' | 'colaborador' | 'visitante';
+type HistoricaType = 'veiculo' | 'colaborador' | 'visitante';
 
 export default function Page() {
-  const [tipoMovimentacao, setTipoMovimentacao] = useState<TipoMovimentacao>('veiculo');
+  const [tipoMovimentacao, setTipoMovimentacao] =
+    useState<HistoricaType>('veiculo');
 
   return (
     <PageComponent.Root>
       <PageComponent.Header>
-        <PageComponent.Title text="Movimentação de portaria" />
+        <PageComponent.Title text="Histórico de movimentação" />
       </PageComponent.Header>
       <PageComponent.Content className="flex-col space-y-6">
         <div>
-          <label htmlFor="tipoMovimentacao" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="tipoMovimentacao"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Tipo de Movimentação
           </label>
-          <Select value={tipoMovimentacao} onValueChange={(value: TipoMovimentacao) => setTipoMovimentacao(value)}>
+          <Select
+            value={tipoMovimentacao}
+            onValueChange={(value: HistoricaType) => setTipoMovimentacao(value)}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione o tipo" />
             </SelectTrigger>
@@ -55,10 +62,9 @@ export default function Page() {
             </SelectContent>
           </Select>
         </div>
-
-        {tipoMovimentacao === 'veiculo' && <VehicleMovementForm />}
-        {tipoMovimentacao === 'colaborador' && <ContributorMovementForm />}
-        {tipoMovimentacao === 'visitante' && <VisitorsMovementForm />}
+        {tipoMovimentacao === 'veiculo' && <VehicleHistorical />}
+        {tipoMovimentacao === 'colaborador' && <ContributorHistorical />}
+        {tipoMovimentacao === 'visitante' && <VisitorHistorical />}
       </PageComponent.Content>
     </PageComponent.Root>
   );

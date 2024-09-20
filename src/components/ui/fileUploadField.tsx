@@ -75,7 +75,7 @@ const FileUploadField = forwardRef<FileUploadFieldRef, FileUploadFieldProps>(
                     {previewUrl ? (
                       <Image
                         src={previewUrl}
-                        alt="File preview"
+                        alt="Preview da foto de perfil"
                         fill
                         style={{ objectFit: 'cover' }}
                       />

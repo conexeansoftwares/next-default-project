@@ -7,24 +7,24 @@ import {
   contributorFormSchema,
 } from '../../schemas/contributorSchema';
 import { z } from 'zod';
+import { removeTelephoneMask } from '@/utils/telephoneUtils';
 
 export async function editContributorAction(
   contributorId: string,
   data: ContributorFormData,
 ) {
   try {
-    const validatedData = contributorFormSchema.parse(data);
-
     const {
       name,
       lastName,
       registration,
       internalPassword,
       telephone,
+      cellPhone,
       observation,
       photoURL,
       companyIds,
-    } = validatedData;
+    } = contributorFormSchema.parse(data);
 
     await prisma.contributor.update({
       where: { id: contributorId },
@@ -33,7 +33,8 @@ export async function editContributorAction(
         lastName,
         registration,
         internalPassword,
-        telephone,
+        telephone: removeTelephoneMask(telephone as string),
+        cellPhone: removeTelephoneMask(cellPhone as string),
         observation,
         photoURL,
         companies: {
