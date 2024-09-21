@@ -1,3 +1,5 @@
-export default function Home() {
-  return <h1>Página inicial</h1>;
+import { redirect } from 'next/navigation';
+
+export default function Page() {
+  redirect('/shortcuts');
 }

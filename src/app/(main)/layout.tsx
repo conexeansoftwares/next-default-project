@@ -1,9 +1,18 @@
 'use client';
 
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Navbar } from '../../components/ui/navbar/navbar';
 import { Sidebar } from '../../components/ui/sidebar';
 import { isActiveRoute } from '../../utils/isActiveRoute';
-import { ShieldCheck, Building2, Car, Users, SquareStack } from 'lucide-react';
+import {
+  ShieldCheck,
+  Building2,
+  Car,
+  Users,
+  SquareStack,
+  Footprints,
+  Link,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export default function MainLayout({
@@ -21,6 +30,24 @@ export default function MainLayout({
             <ShieldCheck className="h-6 w-6" />
             <span>Supervisão Portaria</span>
           </Sidebar.Header>
+          <Sidebar.Content>
+            <Sidebar.Navigation>
+              <Sidebar.Item
+                href="/shortcuts"
+                active={isActiveRoute(pathname, '/shortcuts')}
+              >
+                <Link className="w-4 h-4" />
+                Atalhos
+              </Sidebar.Item>
+              <Sidebar.Item
+                href="/steps"
+                active={isActiveRoute(pathname, '/steps')}
+              >
+                <Footprints className="w-4 h-4" />
+                Passo a passo
+              </Sidebar.Item>
+            </Sidebar.Navigation>
+          </Sidebar.Content>
           <Sidebar.Content>
             <Sidebar.ContentTitle text="Cadastros" />
             <Sidebar.Navigation>
@@ -87,8 +114,10 @@ export default function MainLayout({
         </Sidebar.Root>
       </div>
       <div className="flex flex-col">
-        <Navbar />
-        {children}
+        <ScrollArea className='h-screen'>
+          <Navbar />
+          {children}
+        </ScrollArea>
       </div>
     </div>
   );

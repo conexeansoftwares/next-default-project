@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '../../../lib/prisma';
 import { z } from 'zod';
 
-const getVehicleMovementSchema = z.object({
+const getContributorMovementSchema = z.object({
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
     message: 'Data inicial inválida',
   }),
@@ -13,13 +13,13 @@ const getVehicleMovementSchema = z.object({
   }),
 });
 
-export async function getVehicleMovementByDateAction(
+export async function getContributorMovementByDateAction(
   startDate: string,
   endDate: string,
 ) {
   try {
 
-    const validatedData = getVehicleMovementSchema.parse({
+    const validatedData = getContributorMovementSchema.parse({
       startDate,
       endDate,
     });
@@ -29,7 +29,7 @@ export async function getVehicleMovementByDateAction(
 
     endDateTime.setHours(23, 59, 59, 999);
 
-    const movements = await prisma.vehicleMovement.findMany({
+    const movements = await prisma.contributorMovement.findMany({
       where: {
         createdAt: {
           gte: startDateTime,
@@ -39,15 +39,11 @@ export async function getVehicleMovementByDateAction(
       select: {
         action: true,
         createdAt: true,
-        vehicle: {
+        contributor: {
           select: {
-            licensePlate: true,
-            carModel: true,
-            company: {
-              select: {
-                name: true,
-              },
-            },
+            name: true,
+            lastName: true,
+            registration: true,
           },
         },
       },
@@ -57,9 +53,9 @@ export async function getVehicleMovementByDateAction(
     });
 
     const formattedMovements = movements.map((movement) => ({
-      licensePlate: movement.vehicle.licensePlate,
-      carModel: movement.vehicle.carModel,
-      companyName: movement.vehicle.company.name,
+      name: movement.contributor.name,
+      lastName: movement.contributor.lastName,
+      registration: movement.contributor.registration,
       action: movement.action,
       date: movement.createdAt.toISOString(),
     }));

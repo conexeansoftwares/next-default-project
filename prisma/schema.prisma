@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://dbmasteruser:correaab290499@ls-28804669717f9299d2dfbd36661c615cb8f465b8.cracgygkad7j.us-east-1.rds.amazonaws.com:5432/mydb?schema=supervisao_staging"
+  url      = env("DATABASE_URL")
 }
 
 enum Action {
@@ -118,4 +118,13 @@ model VisitorMovementCompany {
   company           Company         @relation(fields: [companyId], references: [id])
 
   @@id([visitorMovementId, companyId])
+}
+
+model Shortcut {
+  id        String    @id @default(cuid())
+  url       String    @db.VarChar(200)
+  label     String    @db.VarChar(50)
+  color     String    @db.VarChar(50)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
