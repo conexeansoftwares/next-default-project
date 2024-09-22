@@ -29,8 +29,7 @@ export default function EditContributor(contributor: IContributorToEdit) {
 
   // Prepare initialData to match ContributorFormData type
   const initialData: Partial<ContributorFormData> = {
-    name: contributor.name,
-    lastName: contributor.lastName || undefined,
+    fullName: contributor.fullName,
     registration: contributor.registration,
     companyIds: contributor.companyIds,
     internalPassword: contributor.internalPassword || undefined,

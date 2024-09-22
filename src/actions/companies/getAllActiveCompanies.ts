@@ -1,31 +1,36 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import {
-  ICompaniesReturnProps,
-  ICompany,
-} from '../../app/(main)/companies/types';
 import { prisma } from '../../lib/prisma';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { GetAllActiveCompanyActionResult } from '@/app/(main)/companies/types';
 
-export async function getAllActiveCompanies(): Promise<ICompaniesReturnProps> {
+export async function getAllActiveCompanies(
+  forSelect = false,
+): Promise<GetAllActiveCompanyActionResult> {
   try {
-    const companies: ICompany[] = await prisma.company.findMany({
-      select: {
-        id: true,
-        name: true,
-        cnpj: true,
-      },
-      where: { active: true },
+    const result = await prisma.$transaction(async (tx) => {
+      const companies = await tx.company.findMany({
+        select: forSelect
+          ? { id: true, name: true }
+          : { id: true, name: true, cnpj: true },
+        where: { active: true },
+      });
+
+      if (companies.length === 0) {
+        throw new AppError(MESSAGE.COMPANY.ALL_NOT_FOUND, 404);
+      }
+
+      return companies;
     });
 
     revalidatePath('/companies');
 
-    return { success: true, data: companies };
+    return { success: true, data: result };
   } catch (error) {
-    return {
-      success: false,
-      data: [],
-      message: 'Ocorreu um erro ao listar empresas.',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

@@ -12,6 +12,7 @@ import {
   SquareStack,
   Footprints,
   Link,
+  UsersRound,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -75,10 +76,10 @@ export default function MainLayout({
                 Veículos
               </Sidebar.Item>
 
-              {/* <Sidebar.Item href='/users'>
+              <Sidebar.Item href='/users' active={isActiveRoute(pathname, '/users')}>
                 <UsersRound className="w-4 h-4" />
                 Usuários
-              </Sidebar.Item> */}
+              </Sidebar.Item>
             </Sidebar.Navigation>
           </Sidebar.Content>
 

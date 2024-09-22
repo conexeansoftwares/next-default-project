@@ -13,16 +13,36 @@ enum Action {
   S
 }
 
+enum Permission {
+  READ
+  WRITE
+  DELETE
+  ADMIN
+}
+
 model User {
   id            String    @id @default(cuid())
-  name          String    @db.VarChar(15)
-  lastname      String?   @db.VarChar(15)
   email         String    @unique @db.VarChar(150)
   password      String
   active        Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deactivatedAt DateTime?
+
+  contributorId String    @unique
+  contributor   Contributor @relation(fields: [contributorId], references: [id])
+
+  userPermissions UserPermission[]
+}
+
+model UserPermission {
+  id         String     @id @default(cuid())
+  userId     String
+  permission Permission
+  module     String     @db.VarChar(50)
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@unique([userId, module, permission])
 }
 
 model Company {
@@ -55,8 +75,7 @@ model Vehicle {
 
 model Contributor {
   id                   String    @id @default(cuid())
-  name                 String    @db.VarChar(20)
-  lastName             String?   @db.VarChar(20)
+  fullName             String    @db.VarChar(100)
   registration         String    @unique @db.VarChar(20)
   internalPassword     String?   @db.VarChar(50)
   telephone            String?   @db.VarChar(10)
@@ -69,6 +88,7 @@ model Contributor {
   deactivatedAt        DateTime?
   companies            CompanyContributor[]
   contributorMovements ContributorMovement[]
+  user                 User?
 }
 
 model CompanyContributor {

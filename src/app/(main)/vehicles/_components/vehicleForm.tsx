@@ -76,7 +76,6 @@ export const VehicleForm = forwardRef<{ reset: () => void }, VehicleFormProps>(
         if (result.success) {
           setCompanies(result.data);
         } else {
-          console.log(result);
           toast({
             variant: 'destructive',
             title: 'Ah não. Algo deu errado.',

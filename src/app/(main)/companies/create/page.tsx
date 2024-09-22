@@ -6,6 +6,7 @@ import { useToast } from '../../../../hooks/use-toast';
 import { createCompanyAction } from '../../../../actions/companies/createCompanyAction';
 import { CompanyForm } from '../_components/companyForm';
 import { useRef } from 'react';
+import { MESSAGE } from '@/utils/message';
 
 export default function CreateCompanyPage() {
   const { toast } = useToast();
@@ -17,7 +18,7 @@ export default function CreateCompanyPage() {
     if (response.success) {
       toast({
         variant: 'success',
-        description: 'Empresa cadastrada com sucesso!',
+        description: response.message,
       });
 
       if (formRef.current) {
@@ -26,8 +27,8 @@ export default function CreateCompanyPage() {
     } else {
       toast({
         variant: 'destructive',
-        title: 'Ah não. Algo deu errado.',
-        description: 'Não foi possível cadastrar empresa.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
     }
   }

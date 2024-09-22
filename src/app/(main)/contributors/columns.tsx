@@ -37,15 +37,9 @@ export const getColumns = ({
   onDelete,
 }: ContributorColumnProps): ColumnDef<IContributor>[] => [
   {
-    accessorKey: 'name',
+    accessorKey: 'fullName',
     header: ({ column }) => (
       <DataTable.ColumnHeader column={column} title="Nome" />
-    ),
-  },
-  {
-    accessorKey: 'lastName',
-    header: ({ column }) => (
-      <DataTable.ColumnHeader column={column} title="Sobrenome" />
     ),
   },
   {

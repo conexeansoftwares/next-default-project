@@ -3,11 +3,11 @@
 import { CompanyFormData } from '../../../../../../schemas/companySchema';
 import { PageComponent } from '../../../../../../components/ui/page';
 import { useToast } from '../../../../../../hooks/use-toast';
-
 import { ICompany } from '../../../types';
 import { editCompanyAction } from '../../../../../../actions/companies/editCompanyAction';
 import { CompanyForm } from '../../../_components/companyForm';
 import { formatCNPJ } from '../../../../../../utils/cnpjUtils';
+import { MESSAGE } from '@/utils/message';
 
 export default function EditCompany(company: ICompany) {
   const { toast } = useToast();
@@ -23,13 +23,13 @@ export default function EditCompany(company: ICompany) {
     if (response.success) {
       toast({
         variant: 'success',
-        description: 'Empresa editada com sucesso!',
+        description: response.message,
       });
     } else {
       toast({
         variant: 'destructive',
-        title: 'Ah não. Algo deu errado.',
-        description: 'Não foi possível editar empresa.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
     }
   }

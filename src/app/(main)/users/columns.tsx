@@ -6,8 +6,6 @@ import {
   UserRoundPen,
   UserRoundX,
 } from 'lucide-react';
-import { User } from './types';
-
 import { Button } from '../../../components/ui/button';
 import {
   DropdownMenu,
@@ -16,31 +14,39 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu';
-import { DataTableColumnHeader } from '../../../components/ui/dataTable/dataTableColumnHeader';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../../../components/ui/alert-dialog';
+import Link from 'next/link';
+import { DataTable } from '../../../components/ui/dataTable';
+import { IUser } from './types';
 
-export const columns: ColumnDef<User>[] = [
-  {
-    accessorKey: 'name',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Nome" />
-    ),
-  },
-  {
-    accessorKey: 'lastname',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Sobrenome" />
-    ),
-  },
+type userColumnProps = {
+  onDelete: (id: string) => void;
+};
+
+export const getColumns = ({
+  onDelete,
+}: userColumnProps): ColumnDef<IUser>[] => [
   {
     accessorKey: 'email',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Email" />
+      <DataTable.ColumnHeader column={column} title="E-mail" />
     ),
   },
   {
     id: 'actions',
     cell: ({ row }) => {
-      console.log(row);
+      const user = row.original;
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -50,12 +56,41 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuItem className="justify-between">
-              Editar <UserRoundPen className="w-4 h-4" />
-            </DropdownMenuItem>
-            <DropdownMenuItem className="justify-between">
-              Ecluir <UserRoundX className="w-4 h-4" />
-            </DropdownMenuItem>
+            <Link href={`/users/update/${user.id}`}>
+              <DropdownMenuItem className="justify-between">
+                Editar <UserRoundPen className="w-4 h-4" />
+              </DropdownMenuItem>
+            </Link>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  className="justify-between"
+                >
+                  Excluir <UserRoundX className="w-4 h-4" />
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Tem certeza que deseja excluir?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação não pode ser desfeita. Isso irá desativar
+                    permanentemente o colaborador e remover os dados associados.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive"
+                    onClick={() => onDelete(user.id)}
+                  >
+                    Continuar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </DropdownMenuContent>
         </DropdownMenu>
       );

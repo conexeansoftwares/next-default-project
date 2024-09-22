@@ -42,11 +42,11 @@ export async function getActiveContributorByIdAction(
 
     const formattedContributor: IContributorToEdit = {
       id: contributorWithCompanies.id,
-      name: contributorWithCompanies.name,
-      lastName: contributorWithCompanies.lastName,
+      fullName: contributorWithCompanies.fullName,
       registration: contributorWithCompanies.registration,
       internalPassword: contributorWithCompanies.internalPassword,
       telephone: contributorWithCompanies.telephone,
+      cellPhone: contributorWithCompanies.cellPhone,
       observation: contributorWithCompanies.observation,
       photoURL: contributorWithCompanies.photoURL,
       companyIds: contributorWithCompanies.companies.map((company) => company.companyId),

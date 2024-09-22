@@ -107,7 +107,7 @@ export function ContributorMovementForm() {
           title: 'Movimentação registrada com sucesso',
           description: `${
             action === 'E' ? 'Entrada' : 'Saída'
-          } registrada para o veículo ${collaborator.name}`,
+          } registrada para o veículo ${collaborator.fullName}`,
         });
         setCollaborator(null);
         setAction('E');
@@ -153,7 +153,7 @@ export function ContributorMovementForm() {
                 >
                   {selectedCollaboratorId
                     ? collaborators.find((c) => c.id === selectedCollaboratorId)
-                        ?.name
+                        ?.fullName
                     : 'Selecione um colaborador'}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -170,13 +170,13 @@ export function ContributorMovementForm() {
                       {collaborators.map((collaborator) => (
                         <CommandItem
                           key={collaborator.id}
-                          value={collaborator.name}
+                          value={collaborator.fullName}
                           onSelect={() => {
                             setSelectedCollaboratorId(collaborator.id);
                             setOpen(false);
                           }}
                         >
-                          {collaborator.name}
+                          {collaborator.fullName}
                           <CheckIcon
                             className={cn(
                               'ml-auto h-4 w-4',
@@ -222,7 +222,7 @@ export function ContributorMovementForm() {
                   {collaborator.photoURL ? (
                     <Image
                       src={collaborator.photoURL}
-                      alt={`Foto de ${collaborator.name}`}
+                      alt={`Foto de ${collaborator.fullName}`}
                       layout="fill"
                       objectFit="cover"
                       className="rounded-lg"
@@ -236,19 +236,11 @@ export function ContributorMovementForm() {
               </div>
               <div className="col-span-1 xl:col-span-9">
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  <div className="bg-background rounded-lg p-2">
+                  <div className="bg-background rounded-lg xl:col-span-2 p-2">
                     <h4 className="text-sm font-medium text-muted-foreground mb-1">
                       Nome
                     </h4>
-                    <p className="text-base font-medium">{collaborator.name}</p>
-                  </div>
-                  <div className="bg-background rounded-lg p-3">
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">
-                      Sobrenome
-                    </h4>
-                    <p className="text-base font-medium">
-                      {collaborator.lastName}
-                    </p>
+                    <p className="text-base font-medium">{collaborator.fullName}</p>
                   </div>
                   <div className="bg-background rounded-lg p-3">
                     <h4 className="text-sm font-medium text-muted-foreground mb-1">

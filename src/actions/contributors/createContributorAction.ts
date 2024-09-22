@@ -13,8 +13,7 @@ export async function createContributorAction(data: ContributorFormData) {
   console.log(data);
   try {
     const {
-      name,
-      lastName,
+      fullName,
       registration,
       internalPassword,
       telephone,
@@ -26,8 +25,7 @@ export async function createContributorAction(data: ContributorFormData) {
 
     const contributor = await prisma.contributor.create({
       data: {
-        name,
-        lastName,
+        fullName,
         registration,
         internalPassword,
         telephone: removeTelephoneMask(telephone as string),

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.654.0",
     "@aws-sdk/client-s3": "^3.651.1",
     "@hookform/resolvers": "^3.9.0",
     "@next-auth/prisma-adapter": "^1.0.7",
@@ -31,6 +32,7 @@
     "aws": "^0.0.3-2",
     "aws-sdk": "^2.1691.0",
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -56,6 +58,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.16.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",

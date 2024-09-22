@@ -7,36 +7,42 @@ import { PageComponent } from '../../../../components/ui/page';
 import { Button } from '../../../../components/ui/button';
 import { DataTable } from '../../../../components/ui/dataTable';
 import { useToast } from '../../../../hooks/use-toast';
-import { desactivateCompanyAction } from '../../../../actions/companies/desactiveCompanyAction';
-import { ICompaniesReturnProps, ICompany } from '../types';
+import { GetAllActiveCompanyActionResult, ICompany } from '../types';
 import { getColumns } from '../columns';
+import { deactivateCompanyAction } from '@/actions/companies/deactivateCompanyAction';
 
-export function Companies({ success, data, message }: ICompaniesReturnProps) {
+interface CompaniesProps {
+  result: GetAllActiveCompanyActionResult;
+}
+
+export function Companies({ result }: CompaniesProps) {
   const { toast } = useToast();
-  const [companies, setCompanies] = useState<ICompany[]>(data ?? []);
+  const [companies, setCompanies] = useState<ICompany[]>(
+    result.success ? (result.data as ICompany[]) : []
+  );
 
-  if (!success) {
+  if (!result.success) {
     toast({
       variant: 'destructive',
       title: 'Ah não. Algo deu errado.',
-      description: message,
+      description: result.error,
     });
   }
 
   const handleDelete = useCallback(async (companyId: string) => {
     try {
-      const result = await desactivateCompanyAction(companyId);
-      if (result.success) {
+      const deleteResult = await deactivateCompanyAction(companyId);
+      if (deleteResult.success) {
         toast({
           variant: 'success',
-          description: 'Empresa desativada com sucesso!',
+          description: deleteResult.message,
         });
         setCompanies(prevCompanies => prevCompanies.filter(company => company.id !== companyId));
       } else {
         toast({
           variant: 'destructive',
-          title: 'Erro',
-          description: result.message || 'Não foi possível desativar a empresa.',
+          title: 'Ah não. Algo deu errado.',
+          description: deleteResult.error || 'Não foi possível desativar a empresa.',
         });
       }
     } catch (error) {
@@ -63,18 +69,20 @@ export function Companies({ success, data, message }: ICompaniesReturnProps) {
           <Link href={'/companies/create'}>
             <Button className="mb-2">
               <CirclePlus className="w-4 h-4 me-2" />
-              Cadastar empresa
+              Cadastrar empresa
             </Button>
           </Link>
         </div>
-        <DataTable.Root columns={columns} data={companies}>
-          <DataTable.Tools
-            searchKey="name"
-            searchPlaceholder="Filtrar por nome..."
-          />
-          <DataTable.Content columns={columns} />
-          <DataTable.Pagination />
-        </DataTable.Root>
+        {result.success && (
+          <DataTable.Root columns={columns} data={companies}>
+            <DataTable.Tools
+              searchKey="name"
+              searchPlaceholder="Filtrar por nome..."
+            />
+            <DataTable.Content columns={columns} />
+            <DataTable.Pagination />
+          </DataTable.Root>
+        )}
       </PageComponent.Content>
     </PageComponent.Root>
   );

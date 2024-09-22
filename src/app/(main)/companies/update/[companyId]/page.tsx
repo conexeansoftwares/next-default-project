@@ -9,11 +9,14 @@ export default async function Page({
 }) {
   const response = await getActiveCompanyByIdAction(params.companyId);
 
-  if (response.success && response.data) {
+  if (response.success) {
     return <EditCompany {...response.data} />;
   }
 
   return (
-    <EntityNotFound title='Empresa não encontrada ou inativa.' href='/companies' />
+    <EntityNotFound 
+      title='Empresa não encontrada ou inativa.' 
+      href='/companies' 
+    />
   );
 }

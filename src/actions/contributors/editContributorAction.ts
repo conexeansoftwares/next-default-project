@@ -15,8 +15,7 @@ export async function editContributorAction(
 ) {
   try {
     const {
-      name,
-      lastName,
+      fullName,
       registration,
       internalPassword,
       telephone,
@@ -29,8 +28,7 @@ export async function editContributorAction(
     await prisma.contributor.update({
       where: { id: contributorId },
       data: {
-        name,
-        lastName,
+        fullName,
         registration,
         internalPassword,
         telephone: removeTelephoneMask(telephone as string),

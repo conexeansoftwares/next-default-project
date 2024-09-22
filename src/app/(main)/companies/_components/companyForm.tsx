@@ -1,4 +1,3 @@
-// components/CompanyForm.tsx
 'use client';
 
 import React, { forwardRef, useImperativeHandle } from 'react';

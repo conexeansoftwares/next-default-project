@@ -1,13 +1,10 @@
 import * as z from 'zod';
 
 export const contributorFormSchema = z.object({
-  name: z
+  fullName: z
     .string()
     .min(2, { message: 'Nome deve conter pelo menos 2 caracteres' })
-    .max(20, { message: 'Nome não pode exceder 20 caracteres' }),
-  lastName: z
-    .string()
-    .max(20, { message: 'Sobrenome não pode exceder 20 caracteres' }),
+    .max(100, { message: 'Nome não pode exceder 100 caracteres' }),
   registration: z
     .string()
     .min(2, { message: 'Matrícula deve conter pelo menos 2 caracteres' })

@@ -1,7 +1,6 @@
 export interface IContributorData {
   id: string;
-  name: string;
-  lastname?: string;
+  fullName: string;
   registration: string;
   internalPassword?: string;
   telephone?: string;
@@ -12,8 +11,7 @@ export interface IContributorData {
 
 export interface IContributor {
   id: string;
-  name: string;
-  lastName: string | null;
+  fullName: string;
   registration: string;
   internalPassword: string | null;
   telephone: string | null;
@@ -28,8 +26,7 @@ export interface IContributorWithCompanies extends IContributor {
 
 export interface IContributorToEdit {
   id: string;
-  name: string;
-  lastName: string | null;
+  fullName: string;
   registration: string;
   internalPassword: string | null;
   telephone: string | null;
@@ -37,6 +34,17 @@ export interface IContributorToEdit {
   observation: string | null;
   photoURL: string | null;
   companyIds: string[];
+}
+
+export interface IContributorToSelect {
+  id: string;
+  fullName: string;
+};
+
+export interface IContributorsReturnToSelectProps {
+  success: boolean;
+  data: IContributorToSelect[];
+  message?: string;
 }
 
 export interface IContributorsReturnProps {

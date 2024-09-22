@@ -8,11 +8,11 @@ export async function getAllActiveContributors(): Promise<IContributorsReturnPro
     const contributors: IContributor[] = await prisma.contributor.findMany({
       select: {
         id: true,
-        name: true,
-        lastName: true,
+        fullName: true,
         registration: true,
         internalPassword: true,
         telephone: true,
+        cellPhone: true,
         observation: true,
         photoURL: true,
       },
