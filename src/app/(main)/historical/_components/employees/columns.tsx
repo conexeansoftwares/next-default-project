@@ -2,8 +2,6 @@ import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '../../../../../components/ui/dataTable';
 import { format } from 'date-fns';
-import { formatCPF } from '@/utils/cpfUtils';
-import { formatCellphone } from '@/utils/telephoneUtils';
 
 export interface IContributorMovement {
   name: string;

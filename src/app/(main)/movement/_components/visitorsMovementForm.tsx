@@ -23,14 +23,19 @@ import {
   visitorMovementFormSchema,
 } from '@/schemas/visitorMovementSchema';
 import { Skeleton } from '@/components/ui/skeleton';
-import { GetAllActiveCompanyActionResult, ICompanySelect } from '../../companies/types';
+import {
+  GetAllActiveCompanyActionResult,
+  ICompanySelect,
+} from '../../companies/types';
 import { getAllActiveCompanies } from '@/actions/companies/getAllActiveCompanies';
+import { MESSAGE } from '@/utils/message';
 
 export function VisitorsMovementForm() {
   const [companies, setCompanies] = useState<ICompanySelect[]>([]);
   const [action, setAction] = useState<'E' | 'S'>('E');
   const [requesting, setRequesting] = useState<boolean>(false);
-  const [requestingCompanies, setRequestingCompanies] = useState<boolean>(false);
+  const [requestingCompanies, setRequestingCompanies] =
+    useState<boolean>(false);
   const { toast } = useToast();
 
   const form = useForm<VisitorMovementFormData>({
@@ -46,36 +51,24 @@ export function VisitorsMovementForm() {
   });
 
   const onSubmit = async (data: VisitorMovementFormData) => {
-    try {
-      setRequesting(true);
-      const response = await createVisitorMovementAction(data);
+    setRequesting(true);
+    const response = await createVisitorMovementAction(data);
 
-      if (response.success) {
-        toast({
-          variant: 'success',
-          title: 'Movimentação registrada com sucesso',
-          description: `${
-            action === 'E' ? 'Entrada' : 'Saída'
-          } registrada para o visitante`,
-        });
-        form.reset();
-        setAction('E');
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Ah não. Algo deu errado.',
-          description: 'Não foi possível cadastrar colaborador.',
-        });
-      }
-      setRequesting(false);
-    } catch (error) {
-      setRequesting(false);
+    if (response.success) {
+      toast({
+        variant: 'success',
+        description: response.message,
+      });
+      form.reset();
+      setAction('E');
+    } else {
       toast({
         variant: 'destructive',
-        title: 'Erro ao registrar movimentação',
-        description: 'Ocorreu um erro ao processar sua solicitação.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
     }
+    setRequesting(false);
   };
 
   useEffect(() => {
@@ -86,11 +79,10 @@ export function VisitorsMovementForm() {
       if (result.success) {
         setCompanies(result.data);
       } else {
-        console.log(result);
         toast({
           variant: 'destructive',
-          title: 'Ah não. Algo deu errado.',
-          description: 'Não foi possível listar as empresas.',
+          title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+          description: result.error,
         });
       }
       setRequestingCompanies(false);

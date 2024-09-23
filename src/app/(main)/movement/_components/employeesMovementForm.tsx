@@ -70,9 +70,9 @@ export function EmployeesMovementForm() {
   const searchEmployee = async () => {
     if (!selectedEmployeeId) {
       toast({
-        variant: 'destructive',
-        title: 'Erro ao buscar colaborador',
-        description: 'Por favor, selecione um colaborador.',
+        variant: 'warning',
+        title: MESSAGE.MOVEMENT.REQUIRED_INFORMATIONS_TITLE,
+        description: MESSAGE.MOVEMENT.EMPLOYEE_REQUIRED,
       });
       return;
     }
@@ -85,8 +85,8 @@ export function EmployeesMovementForm() {
     if (!found) {
       toast({
         variant: 'destructive',
-        title: 'Colaborador não encontrado',
-        description: 'Não foi possível encontrar o colaborador selecionado.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: MESSAGE.EMPLOYEE.NOT_FOUND,
       });
     }
   };
@@ -95,8 +95,8 @@ export function EmployeesMovementForm() {
     if (!employee) {
       toast({
         variant: 'destructive',
-        title: 'Erro ao registrar movimentação',
-        description: 'Por favor, selecione um colaborador.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: MESSAGE.MOVEMENT.EMPLOYEE_REQUIRED,
       });
       return;
     }

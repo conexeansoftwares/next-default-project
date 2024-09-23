@@ -30,7 +30,8 @@ export function VehicleHistorical() {
     if (!startDate || !endDate) {
       toast({
         variant: 'destructive',
-        description: 'Por favor, selecione as datas inicial e final.',
+        title: MESSAGE.MOVEMENT.REQUIRED_INFORMATIONS_TITLE,
+        description: MESSAGE.HISTORICAL.DATES_REQUIRED,
       });
       return;
     }

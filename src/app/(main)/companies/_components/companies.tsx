@@ -25,7 +25,7 @@ export function Companies({ result }: CompaniesProps) {
   useEffect(() => {
     if (!result.success) {
       toast({
-        variant: 'warning',
+        variant: 'destructive',
         title: MESSAGE.COMMON.GENERIC_WARNING_TITLE,
         description: result.error,
       });

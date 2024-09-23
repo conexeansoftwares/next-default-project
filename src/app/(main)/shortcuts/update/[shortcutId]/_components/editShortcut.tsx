@@ -7,6 +7,7 @@ import { ShortcutForm } from '../../../_components/shortcutForm';
 import React from 'react';
 import { ShortcutFormData } from '@/schemas/shortcutSchema';
 import { editShortcutAction } from '@/actions/shortcuts/editShortcutAction';
+import { MESSAGE } from '@/utils/message';
 
 export default function EditShortcut(shortcut: IShortcut) {
   const { toast } = useToast();
@@ -17,13 +18,13 @@ export default function EditShortcut(shortcut: IShortcut) {
     if (response.success) {
       toast({
         variant: 'success',
-        description: 'Atalho editado com sucesso!',
+        description: response.message,
       });
     } else {
       toast({
         variant: 'destructive',
-        title: 'Ah não. Algo deu errado.',
-        description: 'Não foi possível editar atalho.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
     }
   }

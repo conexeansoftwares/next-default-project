@@ -1,9 +1,10 @@
 import { getAllShortcuts } from '@/actions/shortcuts/getAllShortcuts';
 import { PageComponent } from '@/components/ui/page';
 import { ShortcutList } from './_components/shortcutList';
+import { GetAllShortcutsActionResult } from './types';
 
 export default async function Page() {
-  const { success, data } = await getAllShortcuts();
+  const result: GetAllShortcutsActionResult = await getAllShortcuts();
 
   return (
     <PageComponent.Root>
@@ -13,7 +14,7 @@ export default async function Page() {
         </div>
       </PageComponent.Header>
       <PageComponent.Content className="flex-col">
-        <ShortcutList success={success} data={data} />
+        <ShortcutList result={result} />
       </PageComponent.Content>
     </PageComponent.Root>
   );

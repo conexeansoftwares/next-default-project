@@ -24,6 +24,7 @@ import {
 import { MoreHorizontal, Trash2, UserRoundPen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { MESSAGE } from '@/utils/message';
 
 export function ShortcutDelete({
   shortcutId,
@@ -37,24 +38,24 @@ export function ShortcutDelete({
   const { toast } = useToast();
 
   const handleDelete = async () => {
-    try {
-      await deleteShortcutAction(shortcutId);
+    const result = await deleteShortcutAction(shortcutId);
+
+    if (result.success) {
       toast({
         variant: 'success',
-        title: 'Atalho excluído',
-        description: 'O atalho foi excluído com sucesso.',
+        description: result.message,
       });
-      onDelete();
-    } catch (error) {
+    } else {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível excluir o atalho. Tente novamente.',
         variant: 'destructive',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: result.error,
       });
-    } finally {
-      setIsAlertOpen(false);
-      setIsDropdownOpen(false);
     }
+
+    onDelete();
+    setIsAlertOpen(false);
+    setIsDropdownOpen(false);
   };
 
   return (

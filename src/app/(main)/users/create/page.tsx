@@ -89,7 +89,6 @@ export default function UserPage() {
     if (response.success) {
       toast({
         variant: 'success',
-        title: 'Usuário cadastrado com sucesso.',
         description: response.message,
       });
       form.reset();

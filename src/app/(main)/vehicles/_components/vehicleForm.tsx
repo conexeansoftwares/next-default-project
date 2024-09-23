@@ -62,7 +62,6 @@ const VehicleFormComponent: ForwardRefRenderFunction<
   VehicleFormProps
 > = ({ initialData, onSubmit, submitButtonText }, ref) => {
   const [companies, setCompanies] = useState<ICompanySelect[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
@@ -111,10 +110,6 @@ const VehicleFormComponent: ForwardRefRenderFunction<
       });
     }
   };
-
-  const filteredCompanies = companies.filter((company) =>
-    company.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
 
   return (
     <>

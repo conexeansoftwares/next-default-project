@@ -3,29 +3,40 @@
 import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { DefaultShortcutActionResult } from '@/app/(main)/shortcuts/types';
 
 const deleteShortcutSchema = z.string().cuid();
 
-export async function deleteShortcutAction(shortcutId: string) {
+export async function deleteShortcutAction(
+  shortcutId: string,
+): Promise<DefaultShortcutActionResult> {
   try {
     const validatedId = deleteShortcutSchema.parse(shortcutId);
 
-    await prisma.shortcut.delete({
-      where: { id: validatedId },
+    const result = await prisma.$transaction(async (tx) => {
+      const shortcurt = await tx.shortcut.findUnique({
+        where: { id: validatedId },
+      });
+
+      if (!shortcurt) {
+        throw new AppError(MESSAGE.SHORTCUT.NOT_FOUND, 404);
+      }
+
+      await tx.shortcut.delete({
+        where: { id: validatedId },
+      });
+
+      return MESSAGE.SHORTCUT.DELETED_SUCCESS;
     });
 
     revalidatePath('/shortcurts');
 
-    return { success: true, message: 'Atalho deletado com sucesso.' };
+    return { success: true, message: result };
   } catch (error) {
-    console.log(error);
-    console.error('Erro ao desativar colaborador:', error);
-    if (error instanceof z.ZodError) {
-      return { success: false, message: 'ID do colaborador inválido' };
-    }
-    return {
-      success: false,
-      message: 'Ocorreu um erro ao desativar o colaborador',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

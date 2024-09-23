@@ -2,32 +2,36 @@
 
 import { ShortcutFormData, shortcutFormSchema } from '@/schemas/shortcutSchema';
 import { prisma } from '../../lib/prisma';
-import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { DefaultShortcutActionResult } from '@/app/(main)/shortcuts/types';
 
-export async function createShortcutAction(data: ShortcutFormData) {
+export async function createShortcutAction(
+  data: ShortcutFormData,
+): Promise<DefaultShortcutActionResult> {
   try {
     const validatedData = shortcutFormSchema.parse(data);
 
     const { url, label, color } = validatedData;
-    console.log(color);
 
-    await prisma.shortcut.create({
-      data: {
-        url,
-        label,
-        color,
-      },
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.shortcut.create({
+        data: {
+          url,
+          label,
+          color,
+        },
+      });
+
+      return MESSAGE.SHORTCUT.CREATED_SUCCESS;
     });
 
     revalidatePath('/shortcuts');
 
-    return { success: true, message: 'Atalho criado com sucesso' };
+    return { success: true, message: result };
   } catch (error) {
-    console.log(error);
-    if (error instanceof z.ZodError) {
-      return { success: false, errors: error.errors };
-    }
-    return { success: false, message: 'Ocorreu um erro ao criar o atalho' };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

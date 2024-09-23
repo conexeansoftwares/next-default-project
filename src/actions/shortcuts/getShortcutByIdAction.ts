@@ -1,43 +1,43 @@
 'use server';
 
-import { IShortcut, IShortcutReturnProps } from '@/app/(main)/shortcuts/types';
+import {
+  GetShortcutActionResult,
+} from '@/app/(main)/shortcuts/types';
 import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
 
 const getShortcutSchema = z.string().cuid();
 
 export async function getShortcutByIdAction(
   shortcutId: string,
-): Promise<IShortcutReturnProps> {
+): Promise<GetShortcutActionResult> {
   try {
     const validatedId = getShortcutSchema.parse(shortcutId);
-    
-    const shortcut: IShortcut | null = await prisma.shortcut.findUnique({
-      select: {
-        id: true,
-        url: true,
-        label: true,
-        color: true,
-      },
-      where: {
-        id: validatedId,
-      },
+
+    const result = await prisma.$transaction(async (tx) => {
+      const shortcurt = await tx.shortcut.findUnique({
+        where: { id: validatedId },
+        select: {
+          id: true,
+          url: true,
+          label: true,
+          color: true,
+        },
+      });
+
+      if (!shortcurt) {
+        throw new AppError(MESSAGE.SHORTCUT.NOT_FOUND, 404);
+      }
+
+      return shortcurt;
     });
 
-    if (!shortcut) {
-      return {
-        success: false,
-        data: null,
-        message: 'Atalho não encontrado ou inativo',
-      };
-    }
-
-    return { success: true, data: shortcut };
+    return { success: true, data: result };
   } catch (error) {
-    return {
-      success: false,
-      data: null,
-      message: 'Ocorreu um erro ao buscar o atalho',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

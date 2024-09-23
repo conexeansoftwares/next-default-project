@@ -7,6 +7,7 @@ import { createVehicleMovementAction } from '@/actions/movements/vehicles/create
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getActiveVehicleByLicensePlateAction } from '@/actions/vehicles/getActiveVehicleByLicensePlateAction';
+import { MESSAGE } from '@/utils/message';
 
 interface IVehicleToMovement {
   id: string;
@@ -24,83 +25,62 @@ export function VehicleMovementForm() {
   const [action, setAction] = useState<'E' | 'S'>('E');
 
   const searchVehicle = async () => {
-    if (licensePlate.length !== 7) {
+    if (licensePlate === '') {
       toast({
-        variant: 'destructive',
-        title: 'Placa inválida',
-        description: 'A placa deve conter 7 caracteres.',
+        variant: 'warning',
+        title: MESSAGE.MOVEMENT.REQUIRED_INFORMATIONS_TITLE,
+        description: MESSAGE.MOVEMENT.LICENSE_PLATE_REQUIRED,
       });
+
       return;
     }
 
-    try {
-      setRequesting(true);
-      const response = await getActiveVehicleByLicensePlateAction(licensePlate);
+    setRequesting(true);
+    const response = await getActiveVehicleByLicensePlateAction(licensePlate);
 
-      if (response.success) {
-        setVehicle(response.data);
-        setLicensePlate('');
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Veículo não encontrado ou não cadastrado.',
-          description:
-            'Verifique se existe o veículo na base de dados ou entre em contato com a administração.',
-        });
-      }
-    } catch (error) {
+    if (response.success) {
+      setVehicle(response.data);
+      setLicensePlate('');
+    } else {
       toast({
         variant: 'destructive',
-        title: 'Ah não. Algo deu errado.',
-        description:
-          'Não foi possível encontrar o veículo. Entre em contato com a administração.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
-    } finally {
-      setRequesting(false);
     }
+
+    setRequesting(false);
   };
 
   const registerMovement = async () => {
     if (!vehicle || !vehicle.id) {
       toast({
         variant: 'destructive',
-        title: 'Erro ao registrar movimentação',
-        description:
-          'ID do veículo não encontrado. Por favor, tente novamente.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: MESSAGE.VEHICLE.NOT_FOUND,
       });
       return;
     }
 
-    try {
-      setRequesting(true);
-      const response = await createVehicleMovementAction(vehicle.id, action);
+    setRequesting(true);
+    const response = await createVehicleMovementAction(vehicle.id, action);
 
-      if (response.success) {
-        toast({
-          variant: 'success',
-          title: 'Movimentação registrada com sucesso',
-          description: `${
-            action === 'E' ? 'Entrada' : 'Saída'
-          } registrada para o veículo ${vehicle.licensePlate}`,
-        });
-        setVehicle(null);
-        setAction('E');
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Ocorreu um erro ao cadastrar a movimentação.',
-          description: 'Entre em contato com a administração.',
-        });
-      }
-    } catch (error) {
+    if (response.success) {
+      toast({
+        variant: 'success',
+        description: response.message,
+      });
+      setVehicle(null);
+      setAction('E');
+    } else {
       toast({
         variant: 'destructive',
-        title: 'Ocorreu um erro ao cadastrar a movimentação.',
-        description: 'Entre em contato com a administração.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
-    } finally {
-      setRequesting(false);
     }
+
+    setRequesting(false);
   };
 
   const cancelRequest = () => {
@@ -137,7 +117,9 @@ export function VehicleMovementForm() {
       ) : (
         <div className="bg-secondary/90 rounded-lg p-4 w-full">
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-primary">Informações do veículo</h3>
+            <h3 className="text-lg font-semibold text-primary">
+              Informações do veículo
+            </h3>
             <p className="text-sm text-muted-foreground">
               Verifique as informações e registre a movimentação
             </p>
@@ -145,24 +127,36 @@ export function VehicleMovementForm() {
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-background rounded-lg p-2">
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Placa</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                  Placa
+                </h4>
                 <p className="text-base font-medium">{vehicle.licensePlate}</p>
               </div>
               <div className="bg-background rounded-lg p-2">
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Modelo</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                  Modelo
+                </h4>
                 <p className="text-base font-medium">{vehicle.carModel}</p>
               </div>
               <div className="bg-background rounded-lg p-2">
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Dono</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                  Dono
+                </h4>
                 <p className="text-base font-medium">{vehicle.owner}</p>
               </div>
               <div className="bg-background rounded-lg p-2">
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Empresa</h4>
-                <p className="text-base font-medium">{vehicle.companyName || 'N/A'}</p>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                  Empresa
+                </h4>
+                <p className="text-base font-medium">
+                  {vehicle.companyName || 'N/A'}
+                </p>
               </div>
             </div>
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-muted-foreground">Selecione a ação da movimentação</h4>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Selecione a ação da movimentação
+              </h4>
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   type="button"

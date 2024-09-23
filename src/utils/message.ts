@@ -5,6 +5,13 @@ export const MESSAGE = {
       'Ocorreu um erro, entre em contato com a administração.',
     GENERIC_WARNING_TITLE: 'Atenção!',
   },
+  SHORTCUT: {
+    CREATED_SUCCESS: 'Atalho registrado com sucesso.',
+    NOT_FOUND: 'Atalho não encontrado.',
+    DELETED_SUCCESS: 'Atalho deletado com sucesso.',
+    UPDATED_SUCCESS: 'Atalho atualizado com sucesso.',
+    ALL_NOT_FOUND: 'Nenhum atalho encontrado.',
+  },
   COMPANY: {
     CREATED_SUCCESS: 'Empresa registrada com sucesso.',
     EXISTING_CNPJ: 'CNPJ já registrado.',
@@ -38,6 +45,11 @@ export const MESSAGE = {
     ALL_NOT_FOUND: 'Nenhum usuário encontrado.',
     PASSWORD_UPDATED_SUCCESS: 'Senha atualizada com sucesso.',
   },
+  MOVEMENT: {
+    REQUIRED_INFORMATIONS_TITLE: 'Informações obrigatórias!',
+    EMPLOYEE_REQUIRED: 'Por favor, selecione um colaborador.',
+    LICENSE_PLATE_REQUIRED: 'Por favor, informe a placa do veículo.',
+  },
   EMPLOYEE_MOVEMENT: {
     CREATED_SUCCESS: 'Movimentação do colaborador realizada com sucesso.',
     NOT_FOUND: 'Movimentação sem registros para o período informado.',
@@ -49,5 +61,8 @@ export const MESSAGE = {
   VISITOR_MOVEMENT: {
     CREATED_SUCCESS: 'Movimentação do visitante realizada com sucesso.',
     NOT_FOUND: 'Movimentação sem registros para o período informado.',
+  },
+  HISTORICAL: {
+    DATES_REQUIRED: 'Por favor, selecione as datas inial e final.',
   },
 };

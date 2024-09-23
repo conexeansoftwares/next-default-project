@@ -6,6 +6,7 @@ import { useRef } from 'react';
 import { ShortcutFormData } from '@/schemas/shortcutSchema';
 import { ShortcutForm } from '../_components/shortcutForm';
 import { createShortcutAction } from '@/actions/shortcuts/createShortcutAction';
+import { MESSAGE } from '@/utils/message';
 
 export default function CreateShortcutPage() {
   const { toast } = useToast();
@@ -17,7 +18,7 @@ export default function CreateShortcutPage() {
     if (response.success) {
       toast({
         variant: 'success',
-        description: 'Atalho cadastrado com sucesso!',
+        description: response.message,
       });
 
       if (formRef.current) {
@@ -26,8 +27,8 @@ export default function CreateShortcutPage() {
     } else {
       toast({
         variant: 'destructive',
-        title: 'Ah não. Algo deu errado.',
-        description: 'Não foi possível cadastrar atalho.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
     }
   }

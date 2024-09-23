@@ -1,34 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CirclePlus } from 'lucide-react';
 import { ShortcutDelete } from './shortcutDelete';
 import { useToast } from '@/hooks/use-toast';
+import { GetAllShortcutsActionResult, IShortcut } from '../types';
+import { MESSAGE } from '@/utils/message';
 
-interface Shortcut {
-  id: string;
-  url: string;
-  label: string;
-  color: string;
+interface ShortcutProps {
+  result: GetAllShortcutsActionResult;
 }
 
-export function ShortcutList({ success, data }: { success: boolean, data: Shortcut[] }) {
+export function ShortcutList({ result }: ShortcutProps) {
   const { toast } = useToast();
-  const [shortcuts, setShortcuts] = useState(data);
+  const [shortcuts, setShortcuts] = useState<IShortcut[]>(
+    result.success ? (result.data as IShortcut[]) : [],
+  );
 
   const handleDelete = (deletedId: string) => {
-    setShortcuts(shortcuts.filter(shortcut => shortcut.id !== deletedId));
+    setShortcuts(shortcuts.filter((shortcut) => shortcut.id !== deletedId));
   };
 
-  if (!success) {
-    toast({
-      variant: 'destructive',
-      title: 'Ah não. Algo deu errado.',
-      description: 'Ocorreu um erro ao listar os atalhos. Entre com contato com a administração.',
-    });
-  }
+  useEffect(() => {
+    if (!result.success) {
+      toast({
+        variant: 'destructive',
+        title: MESSAGE.COMMON.GENERIC_WARNING_TITLE,
+        description: result.error,
+      });
+    }
+  }, [result, toast]);
 
   return (
     <>
@@ -52,7 +55,10 @@ export function ShortcutList({ success, data }: { success: boolean, data: Shortc
             <span className="text-xs sm:text-sm lg:text-base xl:text-lg font-normal text-center mt-1">
               {shortcut.label}
             </span>
-            <ShortcutDelete shortcutId={shortcut.id} onDelete={() => handleDelete(shortcut.id)} />
+            <ShortcutDelete
+              shortcutId={shortcut.id}
+              onDelete={() => handleDelete(shortcut.id)}
+            />
           </a>
         ))}
       </div>
