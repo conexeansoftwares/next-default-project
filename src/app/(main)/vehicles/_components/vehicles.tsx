@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { CirclePlus } from 'lucide-react';
 import { PageComponent } from '../../../../components/ui/page';
@@ -8,46 +8,51 @@ import { Button } from '../../../../components/ui/button';
 import { DataTable } from '../../../../components/ui/dataTable';
 import { useToast } from '../../../../hooks/use-toast';
 import { getColumns } from '../columns';
-import { desactivateVehicleAction } from '../../../../actions/vehicles/desactiveVehicleAction';
-import { IVehicle, IVehiclesReturnProps } from '../types';
+import { MESSAGE } from '@/utils/message';
+import { GetAllVehiclesActionResult, IVehicle } from '../types';
+import { deactivateVehicleAction } from '@/actions/vehicles/desactiveVehicleAction';
 
-export function Vehicles({ success, data, message }: IVehiclesReturnProps) {
+interface VehiclesProps {
+  result: GetAllVehiclesActionResult;
+}
+
+export function Vehicles({ result }: VehiclesProps) {
   const { toast } = useToast();
-  const [vehicles, setVehicles] = useState<IVehicle[]>(data ?? []);
+  const [vehicles, setVehicles] = useState<IVehicle[]>(
+    result.success ? (result.data as IVehicle[]) : [],
+  );
 
-  if (!success) {
-    toast({
-      variant: 'destructive',
-      title: 'Ah não. Algo deu errado.',
-      description: message,
-    });
-  }
+  useEffect(() => {
+    if (!result.success) {
+      toast({
+        variant: 'warning',
+        title: MESSAGE.COMMON.GENERIC_WARNING_TITLE,
+        description: result.error,
+      });
+    }
+  }, [result, toast]);
 
-  const handleDelete = useCallback(async (vehicleId: string) => {
-    try {
-      const result = await desactivateVehicleAction(vehicleId);
-      if (result.success) {
+  const handleDelete = useCallback(
+    async (vehicleId: string) => {
+      const deleteResult = await deactivateVehicleAction(vehicleId);
+      if (deleteResult.success) {
         toast({
           variant: 'success',
-          description: 'Veículo desativado com sucesso!',
+          description: deleteResult.message,
         });
-        setVehicles(prevVehicles => prevVehicles.filter(vehicle => vehicle.id !== vehicleId));
+        setVehicles((prevVehicles) =>
+          prevVehicles.filter((vehicle) => vehicle.id !== vehicleId),
+        );
       } else {
         toast({
           variant: 'destructive',
-          title: 'Erro',
-          description: result.message || 'Não foi possível desativar o veículo.',
+          title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+          description: deleteResult.error,
         });
       }
-    } catch (error) {
-      console.error('Erro ao desativar veículo:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Ocorreu um erro inesperado ao desativar o veículo.',
-      });
-    }
-  }, [toast]);
+    },
+    [toast],
+  );
 
   const columns = getColumns({ onDelete: handleDelete });
 
@@ -63,7 +68,7 @@ export function Vehicles({ success, data, message }: IVehiclesReturnProps) {
           <Link href={'/vehicles/create'}>
             <Button className="mb-2">
               <CirclePlus className="w-4 h-4 me-2" />
-              Cadastar veículo
+              Cadastrar veículo
             </Button>
           </Link>
         </div>

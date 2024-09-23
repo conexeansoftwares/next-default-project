@@ -4,6 +4,7 @@ import { DataTable } from '../../../../../components/ui/dataTable';
 import { format } from 'date-fns';
 import { formatCPF } from '@/utils/cpfUtils';
 import { formatCellphone } from '@/utils/telephoneUtils';
+import { IVisitorMovementSimplified } from '@/app/(main)/movement/types';
 
 export interface IVisitorMovement {
   fullName: string;
@@ -14,7 +15,7 @@ export interface IVisitorMovement {
   date: string;
 }
 
-export const getColumns = (): ColumnDef<IVisitorMovement>[] => [
+export const getColumns = (): ColumnDef<IVisitorMovementSimplified>[] => [
   {
     accessorKey: 'fullName',
     header: ({ column }) => (

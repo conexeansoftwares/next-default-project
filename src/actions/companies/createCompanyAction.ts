@@ -13,7 +13,7 @@ import { handleErrors } from '@/utils/handleErrors';
 import { DefaultCompanyActionResult } from '@/app/(main)/companies/types';
 
 export async function createCompanyAction(
-  data: CompanyFormData,
+  data: CompanyFormData
 ): Promise<DefaultCompanyActionResult> {
   try {
     const validatedData = companyFormSchema.parse(data);
@@ -22,24 +22,28 @@ export async function createCompanyAction(
 
     const cleanCnpj = removeCnpjMask(cnpj);
 
-    const existingCompany = await prisma.company.findUnique({
-      where: { cnpj: cleanCnpj },
-    });
+    const result = await prisma.$transaction(async (tx) => {
+      const existingCompany = await tx.company.findUnique({
+        where: { cnpj: cleanCnpj },
+      });
 
-    if (existingCompany) {
-      throw new AppError(MESSAGE.COMPANY.EXISTING_CNPJ, 409);
-    }
+      if (existingCompany) {
+        throw new AppError(MESSAGE.COMPANY.EXISTING_CNPJ, 409);
+      }
 
-    await prisma.company.create({
-      data: {
-        name,
-        cnpj: cleanCnpj,
-      },
+      await tx.company.create({
+        data: {
+          name,
+          cnpj: cleanCnpj,
+        },
+      });
+
+      return MESSAGE.COMPANY.CREATED_SUCCESS;
     });
 
     revalidatePath('/companies');
 
-    return { success: true, message: MESSAGE.COMPANY.CREATED_SUCCESS };
+    return { success: true, message: result };
   } catch (error) {
     const errorResult = handleErrors(error);
     return { success: false, error: errorResult.error };

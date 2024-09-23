@@ -1,4 +1,4 @@
-import { getActiveVechileByIdAction } from '../../../../../actions/vehicles/getActiveVehicleByIdAction';
+import { getActiveVehicleByIdAction } from '@/actions/vehicles/getActiveVehicleByIdAction';
 import { EntityNotFound } from '../../../../../components/ui/entityNotFound';
 import EditVehicle from './_components/editVehicle';
 
@@ -7,13 +7,16 @@ export default async function Page({
 }: {
   params: { vehicleId: string };
 }) {
-  const response = await getActiveVechileByIdAction(params.vehicleId);
+  const response = await getActiveVehicleByIdAction(params.vehicleId);
 
-  if (response.success && response.data) {
+  if (response.success) {
     return <EditVehicle {...response.data} />;
   }
 
   return (
-    <EntityNotFound title='Veículo não encontrado ou inativo.' href='/vehicles' />
+    <EntityNotFound 
+      title='Veículo não encontrado ou inativo.' 
+      href='/vehicles' 
+    />
   );
 }

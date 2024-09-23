@@ -1,66 +1,57 @@
 'use server';
 
-import {
-  IVehicleReturnMovementProps,
-  IVehicleToMovement,
-} from '../../app/(main)/vehicles/types';
 import { prisma } from '../../lib/prisma';
-import { z } from 'zod';
+import { vehicleFormSchema } from '../../schemas/vehicleSchema';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { GetVehicleActionResult } from '@/app/(main)/vehicles/types';
 
-const getVehicleSchema = z
-  .string()
-  .length(7, { message: 'Placa deve conter 7 caracteres' });
+const getLicensePlateSchema = vehicleFormSchema.shape.licensePlate;
 
-export async function getActiveVechileByLicensePlateAction(
-  licensePlate: string,
-): Promise<IVehicleReturnMovementProps> {
+export async function getActiveVehicleByLicensePlateAction(
+  licensePlate: string
+): Promise<GetVehicleActionResult> {
   try {
-    const validatedLisencePlate = getVehicleSchema.parse(licensePlate);
-
-    const vehicleData = await prisma.vehicle.findUnique({
-      select: {
-        id: true,
-        licensePlate: true,
-        carModel: true,
-        owner: true,
-        companyId: true,
-        company: {
-          select: {
-            name: true,
+    const validatedLicensePlate = getLicensePlateSchema.parse(licensePlate);
+    
+    const result = await prisma.$transaction(async (tx) => {
+      const vehicle = await tx.vehicle.findUnique({
+        select: {
+          id: true,
+          licensePlate: true,
+          carModel: true,
+          owner: true,
+          companyId: true,
+          company: {
+            select: {
+              name: true,
+            },
           },
         },
-      },
-      where: {
-        licensePlate: validatedLisencePlate,
-        active: true,
-      },
+        where: {
+          licensePlate: validatedLicensePlate,
+          active: true,
+        },
+      });
+
+      if (!vehicle) {
+        throw new AppError(MESSAGE.VEHICLE.NOT_FOUND, 404);
+      }
+
+      return {
+        id: vehicle.id,
+        licensePlate: vehicle.licensePlate,
+        owner: vehicle.owner,
+        carModel: vehicle.carModel,
+        companyId: vehicle.companyId,
+        companyName: vehicle.company.name,
+      };
     });
 
-    if (!vehicleData) {
-      return {
-        success: false,
-        data: null,
-        message: 'Veículo não encontrado ou inativo',
-      };
-    }
-
-    const vehicles: IVehicleToMovement = {
-      id: vehicleData.id,
-      licensePlate: vehicleData.licensePlate,
-      owner: vehicleData.owner,
-      carModel: vehicleData.carModel,
-      companyId: vehicleData.companyId,
-      companyName: vehicleData.company.name,
-    };
-
-    return { success: true, data: vehicles };
+    return { success: true, data: result };
   } catch (error) {
-    console.log(error);
-    console.error('Erro ao buscar veículo:', error);
-    return {
-      success: false,
-      data: null,
-      message: 'Ocorreu um erro ao buscar o veículo',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

@@ -10,48 +10,51 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { getVehicleMovementByDateAction } from '@/actions/movements/vehicles/getVehicleMovementByDateAction';
 import { getColumns, IVehicleMovement } from './columns';
 import { DataTable } from '@/components/ui/dataTable';
+import { getVehicleMovementByDateAction } from '@/actions/movements/vehicles/getVehicleMovementByDateAction';
+import { MESSAGE } from '@/utils/message';
+import { useToast } from '@/hooks/use-toast';
+import { GetVehicleMovementActionResult } from '@/app/(main)/movement/types';
 
 export function VehicleHistorical() {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [movements, setMovements] = useState<IVehicleMovement[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const columns = getColumns();
 
   const handleGenerateHistorical = async () => {
     if (!startDate || !endDate) {
-      setError('Por favor, selecione as datas inicial e final.');
+      toast({
+        variant: 'destructive',
+        description: 'Por favor, selecione as datas inicial e final.',
+      });
       return;
     }
 
     setIsLoading(true);
-    setError(null);
 
-    try {
-      const result = await getVehicleMovementByDateAction(
+    const result: GetVehicleMovementActionResult =
+      await getVehicleMovementByDateAction(
         startDate.toISOString(),
         endDate.toISOString(),
       );
 
-      console.log(result);
-
-      if (result.success && Array.isArray(result.data)) {
-        setMovements(result.data as IVehicleMovement[]);
-      } else {
-        setError(result.message || 'Ocorreu um erro ao buscar os dados.');
-        setMovements([]);
-      }
-    } catch (err) {
-      setError('Ocorreu um erro ao buscar os dados.');
+    if (result.success) {
+      setMovements(result.data);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: result.error,
+      });
       setMovements([]);
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -140,8 +143,6 @@ export function VehicleHistorical() {
           {isLoading ? 'Carregando...' : 'Gerar histórico'}
         </Button>
       </div>
-
-      {error && <p className="text-red-500">{error}</p>}
 
       {movements.length > 0 && (
         <DataTable.Root columns={columns} data={movements}>

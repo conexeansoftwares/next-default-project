@@ -11,8 +11,8 @@ import {
 } from '@/components/ui/select';
 import { Car, User, UserPlus } from 'lucide-react';
 import { VehicleMovementForm } from './_components/vehiclesMovementForm';
-import { ContributorMovementForm } from './_components/contributorsMovementForm';
 import { VisitorsMovementForm } from './_components/visitorsMovementForm';
+import { EmployeesMovementForm } from './_components/employeesMovementForm';
 
 type TipoMovimentacao = 'veiculo' | 'colaborador' | 'visitante';
 
@@ -57,7 +57,7 @@ export default function Page() {
         </div>
 
         {tipoMovimentacao === 'veiculo' && <VehicleMovementForm />}
-        {tipoMovimentacao === 'colaborador' && <ContributorMovementForm />}
+        {tipoMovimentacao === 'colaborador' && <EmployeesMovementForm />}
         {tipoMovimentacao === 'visitante' && <VisitorsMovementForm />}
       </PageComponent.Content>
     </PageComponent.Root>

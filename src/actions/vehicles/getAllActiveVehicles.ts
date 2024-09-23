@@ -1,43 +1,76 @@
 'use server';
 
-import { IVehicle, IVehiclesReturnProps } from '../../app/(main)/vehicles/types';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '../../lib/prisma';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { GetAllVehiclesActionResult, IVehicle, IVehicleSelect } from '@/app/(main)/vehicles/types';
 
-export async function getAllActiveVehicles(): Promise<IVehiclesReturnProps> {
+type VehicleFields = {
+  id?: boolean;
+  licensePlate?: boolean;
+  owner?: boolean;
+  carModel?: boolean;
+  companyId?: boolean;
+  company?: boolean;
+};
+
+export async function getAllActiveVehiclesAction(
+  fields: VehicleFields = { id: true, licensePlate: true, owner: true },
+  forSelect = false
+): Promise<GetAllVehiclesActionResult> {
   try {
-    const vehiclesData = await prisma.vehicle.findMany({
-      select: {
-        id: true,
-        licensePlate: true,
-        owner: true,
-        carModel: true,
-        companyId: true,
-        company: {
+    const result = await prisma.$transaction(async (tx) => {
+      if (forSelect) {
+        const vehicles = await tx.vehicle.findMany({
+          select: { id: true, licensePlate: true, owner: true },
+          where: { active: true },
+        });
+
+        if (vehicles.length === 0) {
+          throw new AppError(MESSAGE.VEHICLE.ALL_NOT_FOUND, 404);
+        }
+
+        return vehicles as IVehicleSelect[];
+      } else {
+        const vehicles = await tx.vehicle.findMany({
           select: {
-            name: true,
+            ...fields,
+            company: fields.company
+              ? {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                }
+              : undefined,
           },
-        },
-      },
-      where: { active: true },
+          where: { active: true },
+        });
+
+        if (vehicles.length === 0) {
+          throw new AppError(MESSAGE.VEHICLE.ALL_NOT_FOUND, 404);
+        }
+
+        const formattedVehicles: IVehicle[] = vehicles.map(vehicle => ({
+          id: vehicle.id,
+          licensePlate: vehicle.licensePlate,
+          owner: vehicle.owner,
+          carModel: vehicle.carModel,
+          companyId: vehicle.companyId,
+          companyName: vehicle.company ? vehicle.company.name : '',
+        }));
+
+        return formattedVehicles;
+      }
     });
 
-    const vehicles: IVehicle[] = vehiclesData.map((vehicle) => ({
-      id: vehicle.id,
-      licensePlate: vehicle.licensePlate,
-      owner: vehicle.owner,
-      carModel: vehicle.carModel,
-      companyId: vehicle.companyId,
-      companyName: vehicle.company.name,
-    }));
+    revalidatePath('/vehicles');
 
-    return { success: true, data: vehicles };
+    return { success: true, data: result };
   } catch (error) {
-    console.log(error);
-    console.error('Erro ao listar veículos:', error);
-    return {
-      success: false,
-      data: [],
-      message: 'Ocorreu um erro ao listar os veículos',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

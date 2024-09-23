@@ -1,10 +1,8 @@
-// src/app/(main)/users/[userId]/_components/editUser.tsx
-
 'use client';
 
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UserFormData, userFormSchema } from '@/schemas/userSchema';
 import { editUserAction } from '@/actions/users/editUserAction';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +16,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageComponent } from '@/components/ui/page';
 import Link from 'next/link';
-import { CheckIcon, CircleArrowLeft } from 'lucide-react';
+import {
+  CheckIcon,
+  CircleArrowLeft,
+  Key,
+  EyeIcon,
+  EyeOffIcon,
+} from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import {
@@ -26,9 +30,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useEffect, useMemo, useState } from 'react';
-import { getAllActiveContributorsToSelect } from '@/actions/contributors/getAllActiveContributorsToSelect';
-import { IContributorToSelect } from '../../../../contributors/types';
 import { useToast } from '@/hooks/use-toast';
 import { CaretSortIcon } from '@radix-ui/react-icons';
 import {
@@ -41,30 +42,47 @@ import {
 } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { IUserToEdit, IUserPermission } from '../../../types';
-
-const modules = [
-  { id: 'users', name: 'Usuários' },
-  { id: 'companies', name: 'Empresas' },
-  { id: 'vehicles', name: 'Veículos' },
-  { id: 'movements', name: 'Movimentações' },
-];
-
-const permissions = ['Ler', 'Escrever', 'Deletar', 'Admin'];
+import { MESSAGE } from '@/utils/message';
+import { IEmployeeToSelect } from '@/app/(main)/employees/types';
+import { getAllActiveEmployeesAction } from '@/actions/employees/getAllActiveEmployee';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  PasswordFormSchema,
+  passwordSchema,
+  userFormSchemaWithoutPassword,
+  UserFormWithoutPassword,
+} from '@/schemas/userSchema';
+import { updateUserPasswordAction } from '@/actions/users/updatePasswordAction';
+import { modules } from '../../../modules';
 
 export default function EditUser({ user }: { user: IUserToEdit }) {
   const [requesting, setRequesting] = useState<boolean>(false);
-  const [contributors, setContributors] = useState<IContributorToSelect[]>([]);
+  const [employees, setEmployees] = useState<IEmployeeToSelect[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const filteredModules = useMemo(
-    () => modules.filter((module) => module.name.toLowerCase().includes(searchQuery.toLowerCase())),
-    [searchQuery]
+    () =>
+      modules.filter((module) =>
+        module.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [searchQuery],
   );
 
   const { toast } = useToast();
 
-  const convertPermissionsToFormFormat = (userPermissions: IUserPermission[]): Record<string, Record<string, boolean>> => {
+  const convertPermissionsToFormFormat = (
+    userPermissions: IUserPermission[],
+  ): Record<string, Record<string, boolean>> => {
     const formattedPermissions: Record<string, Record<string, boolean>> = {};
     userPermissions.forEach(({ module, permission }) => {
       if (!formattedPermissions[module]) {
@@ -75,58 +93,85 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
     return formattedPermissions;
   };
 
-  const form = useForm<UserFormData>({
-    resolver: zodResolver(userFormSchema),
+  const form = useForm<UserFormWithoutPassword>({
+    resolver: zodResolver(userFormSchemaWithoutPassword),
     defaultValues: {
       email: user.email,
-      contributorId: user.contributorId || '',
+      employeeId: user.employeeId,
       permissions: convertPermissionsToFormFormat(user.userPermissions),
     },
   });
 
-  async function onSubmit(values: UserFormData) {
+  const passwordForm = useForm<PasswordFormSchema>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  async function onSubmit(values: UserFormWithoutPassword) {
     setRequesting(true);
     const response = await editUserAction(user.id, values);
 
     if (response.success) {
       toast({
         variant: 'success',
-        title: 'Usuário editado com sucesso.',
+        title: MESSAGE.USER.UPDATED_SUCCESS,
         description: response.message,
       });
     } else {
       toast({
         variant: 'destructive',
-        title: 'Ah não. Ocorreu um erro.',
-        description: response.message,
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
     }
+
+    setRequesting(false);
+  }
+
+  async function onPasswordSubmit(values: PasswordFormSchema) {
+    setRequesting(true);
+    const response = await updateUserPasswordAction(user.id, values);
+
+    if (response.success) {
+      toast({
+        variant: 'success',
+        title: MESSAGE.USER.PASSWORD_UPDATED_SUCCESS,
+        description: response.message,
+      });
+      setIsChangePasswordOpen(false);
+      passwordForm.reset();
+    } else {
+      toast({
+        variant: 'destructive',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
+      });
+    }
+
     setRequesting(false);
   }
 
   useEffect(() => {
-    const fetchCollaborators = async () => {
-      try {
-        const fetchedContributors = await getAllActiveContributorsToSelect();
-        if (fetchedContributors.success) {
-          setContributors(fetchedContributors.data);
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Erro ao carregar colaboradores',
-            description: 'Não foi possível carregar a lista de colaboradores.',
-          });
-        }
-      } catch (error) {
+    const fetchEmployees = async () => {
+      const response = await getAllActiveEmployeesAction({
+        id: true,
+        fullName: true,
+      });
+      if (response.success) {
+        setEmployees(response.data as IEmployeeToSelect[]);
+      } else {
         toast({
           variant: 'destructive',
-          title: 'Erro ao carregar colaboradores',
-          description: 'Não foi possível carregar a lista de colaboradores.',
+          title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+          description: response.error,
         });
       }
     };
 
-    fetchCollaborators();
+    fetchEmployees();
   }, [toast]);
 
   return (
@@ -135,7 +180,106 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
         <PageComponent.Title text="Editar usuário" />
       </PageComponent.Header>
       <PageComponent.Content className="flex-col">
-        <div className="w-full flex justify-end">
+        <div className="w-full flex justify-end gap-2">
+          <Dialog
+            open={isChangePasswordOpen}
+            onOpenChange={setIsChangePasswordOpen}
+          >
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Key className="w-4 h-4 me-2" /> Alterar Senha
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Alterar Senha</DialogTitle>
+              </DialogHeader>
+              <Form {...passwordForm}>
+                <form
+                  onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={passwordForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nova Senha</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? 'text' : 'password'}
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                              aria-label={
+                                showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                              }
+                            >
+                              {showPassword ? (
+                                <EyeOffIcon className="h-4 w-4" />
+                              ) : (
+                                <EyeIcon className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={passwordForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirmar Nova Senha</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={showConfirmPassword ? 'text' : 'password'}
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                              }
+                              aria-label={
+                                showConfirmPassword
+                                  ? 'Ocultar senha'
+                                  : 'Mostrar senha'
+                              }
+                            >
+                              {showConfirmPassword ? (
+                                <EyeOffIcon className="h-4 w-4" />
+                              ) : (
+                                <EyeIcon className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end w-full">
+                    <Button type="submit" disabled={requesting}>
+                      {requesting ? 'Alterando...' : 'Alterar Senha'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
           <Link href={'/users'}>
             <Button>
               <CircleArrowLeft className="w-4 h-4 me-2" /> Voltar
@@ -143,16 +287,23 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
           </Link>
         </div>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-y-4"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem className='col-span-full'>
+                  <FormItem className="col-span-full">
                     <FormLabel>E-mail *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Informe o e-mail" type="email" {...field} />
+                      <Input
+                        placeholder="Informe o e-mail"
+                        type="email"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -161,7 +312,7 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
 
               <FormField
                 control={form.control}
-                name="contributorId"
+                name="employeeId"
                 render={({ field }) => (
                   <FormItem className="flex flex-col col-span-full">
                     <FormLabel>Colaborador *</FormLabel>
@@ -178,7 +329,9 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
                             )}
                           >
                             {field.value
-                              ? contributors.find((contributor) => contributor.id === field.value)?.fullName
+                              ? employees.find(
+                                  (employee) => employee.id === field.value,
+                                )?.fullName
                               : 'Selecione o colaborador'}
                             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -186,24 +339,31 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
                       </PopoverTrigger>
                       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                         <Command>
-                          <CommandInput placeholder="Procurar colaborador..." className="h-9" />
+                          <CommandInput
+                            placeholder="Procurar colaborador..."
+                            className="h-9"
+                          />
                           <CommandList>
-                            <CommandEmpty>Nenhum colaborador encontrado.</CommandEmpty>
+                            <CommandEmpty>
+                              Nenhum colaborador encontrado.
+                            </CommandEmpty>
                             <CommandGroup>
-                              {contributors.map((contributor) => (
+                              {employees.map((employee) => (
                                 <CommandItem
-                                  value={contributor.fullName}
-                                  key={contributor.id}
+                                  value={employee.fullName}
+                                  key={employee.id}
                                   onSelect={() => {
-                                    form.setValue('contributorId', contributor.id);
+                                    form.setValue('employeeId', employee.id);
                                     setOpen(false);
                                   }}
                                 >
-                                  {contributor.fullName}
+                                  {employee.fullName}
                                   <CheckIcon
                                     className={cn(
                                       'ml-auto h-4 w-4',
-                                      contributor.id === field.value ? 'opacity-100' : 'opacity-0',
+                                      employee.id === field.value
+                                        ? 'opacity-100'
+                                        : 'opacity-0',
                                     )}
                                   />
                                 </CommandItem>
@@ -225,43 +385,81 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
                   render={({ field }) => (
                     <FormItem>
                       <div className="mb-4">
-                        <FormLabel className="text-base">Permissões de Módulos</FormLabel>
+                        <FormLabel className="text-base">
+                          Permissões de Módulos
+                        </FormLabel>
                       </div>
                       <FormControl>
                         <Command className="rounded-lg border shadow-md">
-                          <CommandInput placeholder="Procurar módulo..." onValueChange={setSearchQuery} />
+                          <CommandInput
+                            placeholder="Procurar módulo..."
+                            onValueChange={setSearchQuery}
+                          />
                           <CommandList className="max-h-full">
-                            {filteredModules.length === 0 && searchQuery !== '' && (
-                              <CommandEmpty>Nenhum módulo encontrado.</CommandEmpty>
-                            )}
+                            {filteredModules.length === 0 &&
+                              searchQuery !== '' && (
+                                <CommandEmpty>
+                                  Nenhum módulo encontrado.
+                                </CommandEmpty>
+                              )}
                             <CommandGroup>
                               <ScrollArea className="h-[300px] w-full p-4">
                                 {filteredModules.map((module) => (
-                                  <CommandItem key={module.id} value={module.name} className="px-2 py-3">
+                                  <CommandItem
+                                    key={module.id}
+                                    value={module.name}
+                                    className="px-2 py-3"
+                                  >
                                     <div className="w-full">
-                                      <FormLabel className="text-sm font-semibold">{module.name}</FormLabel>
+                                      <FormLabel className="text-sm font-semibold">
+                                        {module.name}
+                                      </FormLabel>
                                       <div className="flex flex-wrap gap-4 mt-2">
-                                        {permissions.map((permission) => (
-                                          <FormItem
-                                            key={`${module.id}-${permission}`}
-                                            className="flex flex-row items-start space-x-3 space-y-0"
-                                          >
-                                            <FormControl>
-                                              <Checkbox
-                                                checked={field.value?.[module.id]?.[permission.toLowerCase()] || false}
-                                                onCheckedChange={(checked) => {
-                                                  const updatedPermissions = { ...field.value };
-                                                  if (!updatedPermissions[module.id]) {
-                                                    updatedPermissions[module.id] = {};
+                                        {module.permissions.map(
+                                          (permission) => (
+                                            <FormItem
+                                              key={`${module.id}-${permission}`}
+                                              className="flex flex-row items-start space-x-3 space-y-0"
+                                            >
+                                              <FormControl>
+                                                <Checkbox
+                                                  checked={
+                                                    field.value?.[module.id]?.[
+                                                      permission.toLowerCase()
+                                                    ] || false
                                                   }
-                                                  updatedPermissions[module.id][permission.toLowerCase()] = checked === true;
-                                                  field.onChange(updatedPermissions);
-                                                }}
-                                              />
-                                            </FormControl>
-                                            <FormLabel className="text-sm font-normal">{permission}</FormLabel>
-                                          </FormItem>
-                                        ))}
+                                                  onCheckedChange={(
+                                                    checked,
+                                                  ) => {
+                                                    const updatedPermissions = {
+                                                      ...field.value,
+                                                    };
+                                                    if (
+                                                      !updatedPermissions[
+                                                        module.id
+                                                      ]
+                                                    ) {
+                                                      updatedPermissions[
+                                                        module.id
+                                                      ] = {};
+                                                    }
+                                                    updatedPermissions[
+                                                      module.id
+                                                    ][
+                                                      permission.toLowerCase()
+                                                    ] = checked === true;
+                                                    field.onChange(
+                                                      updatedPermissions,
+                                                    );
+                                                  }}
+                                                />
+                                              </FormControl>
+                                              <FormLabel className="text-sm font-normal">
+                                                {permission}
+                                              </FormLabel>
+                                            </FormItem>
+                                          ),
+                                        )}
                                       </div>
                                     </div>
                                   </CommandItem>

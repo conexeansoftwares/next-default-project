@@ -1,8 +1,11 @@
-import { getAllActiveVehicles } from '../../../actions/vehicles/getAllActiveVehicles';
+
+import { getAllActiveVehiclesAction } from '@/actions/vehicles/getAllActiveVehicles';
 import { Vehicles } from './_components/vehicles';
+import { GetAllVehiclesActionResult } from './types';
 
 export default async function Page() {
-  const { success, data, message } = await getAllActiveVehicles();
+  const result: GetAllVehiclesActionResult =
+    await getAllActiveVehiclesAction({ id: true, licensePlate: true, carModel: true, owner: true });
 
-  return <Vehicles success={success} data={data} message={message} />;
+  return <Vehicles result={result} />;
 }

@@ -61,8 +61,8 @@ export default function MainLayout({
               </Sidebar.Item>
 
               <Sidebar.Item
-                href="/contributors"
-                active={isActiveRoute(pathname, '/contributors')}
+                href="/employees"
+                active={isActiveRoute(pathname, '/employees')}
               >
                 <Users className="w-4 h-4" />
                 Colaboradores

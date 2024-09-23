@@ -1,22 +1,28 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client';
+
 import React, {
   forwardRef,
   useImperativeHandle,
-  useEffect,
   useState,
+  useEffect,
   useRef,
 } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import {
+  EmployeeFormData,
+  employeeFormSchema,
+} from '../../../../schemas/employeeSchema';
 import { Button } from '../../../../components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '../../../../components/ui/form';
 import { ScrollArea } from '../../../../components/ui/scroll-area';
 import { Input } from '../../../../components/ui/input';
@@ -24,28 +30,29 @@ import { Textarea } from '../../../../components/ui/textarea';
 import { Checkbox } from '../../../../components/ui/checkbox';
 import Link from 'next/link';
 import { CircleArrowLeft } from 'lucide-react';
-import {
-  ICompaniesReturnToSelectProps,
-  ICompanyToSelect,
-} from '../../companies/types';
-import { getAllActiveCompaniesToSelect } from '../../../../actions/companies/getAllActiveCompaniesToSelect';
 import { useToast } from '../../../../hooks/use-toast';
-import {
-  ContributorFormData,
-  contributorFormSchema,
-} from '../../../../schemas/contributorSchema';
 import FileUploadField from '../../../../components/ui/fileUploadField';
 import { uploadToS3 } from '@/utils/s3Upload';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { z } from 'zod';
+import { ICompanySelect } from '../../companies/types';
+import { getAllActiveCompanies } from '@/actions/companies/getAllActiveCompanies';
+import { MESSAGE } from '@/utils/message';
 
-const localContributorFormSchema = contributorFormSchema.extend({
+const localEmployeeFormSchema = employeeFormSchema.extend({
   photoFile: z
     .any()
     .optional()
     .refine(
       (file) => {
         if (file) {
-          // Verificar se é um objeto e tem a propriedade 'type'
           return (
             typeof file === 'object' &&
             'type' in file &&
@@ -56,37 +63,31 @@ const localContributorFormSchema = contributorFormSchema.extend({
         }
         return true;
       },
-      {
-        message: 'O arquivo deve ser uma imagem (JPEG, PNG ou GIF).',
-      },
+      { message: 'O arquivo deve ser uma imagem (JPEG, PNG ou GIF).' },
     ),
 });
 
-type LocalContributorFormData = z.infer<typeof localContributorFormSchema>;
+type LocalEmployeeFormData = z.infer<typeof localEmployeeFormSchema>;
 
-interface ContributorFormProps {
-  initialData?: Partial<ContributorFormData>;
-  onSubmit: (values: ContributorFormData) => Promise<void>;
+interface EmployeeFormProps {
+  initialData?: Partial<EmployeeFormData>;
+  onSubmit: (values: EmployeeFormData) => Promise<void>;
   submitButtonText: string;
 }
 
-export const ContributorForm = forwardRef<
+export const EmployeeForm = forwardRef<
   { reset: () => void },
-  ContributorFormProps
+  EmployeeFormProps
 >(({ initialData, onSubmit, submitButtonText }, ref) => {
-  const [companies, setCompanies] = useState<ICompanyToSelect[]>([]);
-  const [selectKey, setSelectKey] = useState(0);
+  const [companies, setCompanies] = useState<ICompanySelect[]>([]);
   const [observationLength, setObservationLength] = useState(0);
   const [uploading, setUploading] = useState(false);
   const fileUploadRef = useRef<{ reset: () => void } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const { toast } = useToast();
 
-  const filteredCompanies = companies.filter((company) =>
-    company.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  const form = useForm<LocalContributorFormData>({
-    resolver: zodResolver(localContributorFormSchema),
+  const form = useForm<LocalEmployeeFormData>({
+    resolver: zodResolver(localEmployeeFormSchema),
     defaultValues: {
       fullName: '',
       registration: '',
@@ -105,24 +106,20 @@ export const ContributorForm = forwardRef<
     reset: () => {
       form.reset();
       fileUploadRef.current?.reset();
-      setSelectKey((prev) => prev + 1);
+      setObservationLength(0);
     },
   }));
 
-  const { toast } = useToast();
-
   useEffect(() => {
     const fetchCompanies = async () => {
-      const result: ICompaniesReturnToSelectProps =
-        await getAllActiveCompaniesToSelect();
+      const result = await getAllActiveCompanies(true);
       if (result.success) {
         setCompanies(result.data);
       } else {
-        console.log(result);
         toast({
           variant: 'destructive',
-          title: 'Ah não. Algo deu errado.',
-          description: 'Não foi possível listar as empresas.',
+          title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+          description: result.error,
         });
       }
     };
@@ -130,7 +127,7 @@ export const ContributorForm = forwardRef<
     fetchCompanies();
   }, [toast]);
 
-  const handleSubmit = async (values: LocalContributorFormData) => {
+  const handleSubmit = async (values: LocalEmployeeFormData) => {
     setUploading(true);
     try {
       if (values.photoFile instanceof File) {
@@ -141,21 +138,24 @@ export const ContributorForm = forwardRef<
       const { photoFile, ...submissionData } = values;
       await onSubmit(submissionData);
     } catch (error) {
-      console.error(error);
       toast({
         variant: 'destructive',
-        title: 'Erro',
-        description: 'Não foi possível salvar o colaborador.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: MESSAGE.COMMON.GENERIC_ERROR_MESSAGE,
       });
     } finally {
       setUploading(false);
     }
   };
 
+  const filteredCompanies = companies.filter((company) =>
+    company.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   return (
     <>
       <div className="w-full flex justify-end">
-        <Link href={'/contributors'}>
+        <Link href={'/employees'}>
           <Button>
             <CircleArrowLeft className="w-4 h-4 me-2" /> Voltar
           </Button>
@@ -194,7 +194,6 @@ export const ContributorForm = forwardRef<
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="registration"
@@ -212,7 +211,6 @@ export const ContributorForm = forwardRef<
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="cellPhone"
@@ -231,7 +229,6 @@ export const ContributorForm = forwardRef<
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="telephone"
@@ -250,7 +247,6 @@ export const ContributorForm = forwardRef<
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="internalPassword"
@@ -268,36 +264,32 @@ export const ContributorForm = forwardRef<
                 </FormItem>
               )}
             />
-
-            <div className="col-span-full">
-              <FormField
-                control={form.control}
-                name="observation"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Observação</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Informe a observação"
-                        className="resize-none"
-                        maxLength={200}
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setObservationLength(e.target.value.length);
-                        }}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {200 - observationLength} caracteres restantes
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="observation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observação</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Informe a observação"
+                      className="resize-none"
+                      maxLength={200}
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setObservationLength(e.target.value.length);
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {200 - observationLength} caracteres restantes
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-
           <div className="bg-secondary/90 rounded-lg p-4 col-span-full">
             <FormField
               control={form.control}
@@ -310,7 +302,7 @@ export const ContributorForm = forwardRef<
                       Selecione as empresas a qual o colaborador pertence
                     </FormDescription>
                   </div>
-                  <Command className='rounded-lg border shadow-md'>
+                  <Command className="rounded-lg border shadow-md">
                     <CommandInput
                       placeholder="Procurar empresa..."
                       onValueChange={setSearchQuery}
@@ -368,7 +360,6 @@ export const ContributorForm = forwardRef<
               )}
             />
           </div>
-
           <div className="flex justify-end w-100 mt-6">
             <Button type="submit" disabled={uploading}>
               {uploading ? 'Enviando...' : submitButtonText}
@@ -380,6 +371,6 @@ export const ContributorForm = forwardRef<
   );
 });
 
-ContributorForm.displayName = 'ContributorForm';
+EmployeeForm.displayName = 'EmployeeForm';
 
-export default ContributorForm;
+export default EmployeeForm;

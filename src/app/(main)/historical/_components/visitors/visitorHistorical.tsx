@@ -13,45 +13,48 @@ import { cn } from '@/lib/utils';
 import { getColumns, IVisitorMovement } from './columns';
 import { DataTable } from '@/components/ui/dataTable';
 import { getVisitorMovementByDateAction } from '@/actions/movements/visitors/getVisitorMovementByDateAction';
+import { MESSAGE } from '@/utils/message';
+import { useToast } from '@/hooks/use-toast';
+import { GetVisitorMovementsByDateActionResult, IVisitorMovementSimplified } from '@/app/(main)/movement/types';
 
 export function VisitorHistorical() {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const [movements, setMovements] = useState<IVisitorMovement[]>([]);
+  const [movements, setMovements] = useState<IVisitorMovementSimplified[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const columns = getColumns();
 
   const handleGenerateHistorical = async () => {
     if (!startDate || !endDate) {
-      setError('Por favor, selecione as datas inicial e final.');
+      toast({
+        variant: 'destructive',
+        description: 'Por favor, selecione as datas inicial e final.',
+      });
       return;
     }
 
     setIsLoading(true);
-    setError(null);
 
-    try {
-      const result = await getVisitorMovementByDateAction(
+    const result: GetVisitorMovementsByDateActionResult =
+      await getVisitorMovementByDateAction(
         startDate.toISOString(),
         endDate.toISOString(),
       );
 
-      console.log(result);
-
-      if (result.success && Array.isArray(result.data)) {
-        setMovements(result.data as IVisitorMovement[]);
-      } else {
-        setError(result.message || 'Ocorreu um erro ao buscar os dados.');
-        setMovements([]);
-      }
-    } catch (err) {
-      setError('Ocorreu um erro ao buscar os dados.');
+    if (result.success) {
+      setMovements(result.data);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: result.error,
+      });
       setMovements([]);
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -141,13 +144,11 @@ export function VisitorHistorical() {
         </Button>
       </div>
 
-      {error && <p className="text-red-500">{error}</p>}
-
       {movements.length > 0 && (
         <DataTable.Root columns={columns} data={movements}>
           <DataTable.Tools
-            searchKey="licensePlate"
-            searchPlaceholder="Filtrar por placa..."
+            searchKey="fullName"
+            searchPlaceholder="Filtrar por nome..."
           />
           <DataTable.Content columns={columns} />
           <DataTable.Pagination />

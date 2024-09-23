@@ -20,51 +20,55 @@ import {
 } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 
-import { getAllActiveContributors } from '@/actions/contributors/getAllActiveContributors';
-import { IContributor } from '../../contributors/types';
 import { UserIcon } from 'lucide-react';
 import Image from 'next/image';
-import { createContributorMovementAction } from '@/actions/movements/contributors/createContributorMovementAction';
+import { IEmployee } from '../../employees/types';
+import { getAllActiveEmployeesAction } from '@/actions/employees/getAllActiveEmployee';
+import { MESSAGE } from '@/utils/message';
+import { createEmployeeMovementAction } from '@/actions/movements/employees/createEmployeeMovementAction';
 
-export function ContributorMovementForm() {
+export function EmployeesMovementForm() {
   const { toast } = useToast();
-  const [selectedCollaboratorId, setSelectedCollaboratorId] = useState('');
-  const [collaborator, setCollaborator] = useState<IContributor | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+  const [employee, setEmployee] = useState<IEmployee | null>(null);
   const [action, setAction] = useState<'E' | 'S'>('E');
   const [requesting, setRequesting] = useState(false);
   const [open, setOpen] = useState(false);
-  const [collaborators, setCollaborators] = useState<IContributor[]>([]);
+  const [employees, setEmployees] = useState<IEmployee[]>([]);
 
   useEffect(() => {
-    const fetchCollaborators = async () => {
-      try {
-        setRequesting(true);
-        const fetchedCollaborators = await getAllActiveContributors();
-        if (fetchedCollaborators.success) {
-          setCollaborators(fetchedCollaborators.data);
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Erro ao carregar colaboradores',
-            description: 'Não foi possível carregar a lista de colaboradores.',
-          });
-        }
-        setRequesting(false);
-      } catch (error) {
-        setRequesting(false);
+    const fetchEmployees = async () => {
+      setRequesting(true);
+
+      const response = await getAllActiveEmployeesAction({
+        id: true,
+        fullName: true,
+        registration: true,
+        internalPassword: true,
+        telephone: true,
+        cellPhone: true,
+        observation: true,
+        photoURL: true,
+      });
+      if (response.success) {
+        const employeeData = response.data as IEmployee[];
+        setEmployees(employeeData);
+      } else {
         toast({
           variant: 'destructive',
-          title: 'Erro ao carregar colaboradores',
-          description: 'Não foi possível carregar a lista de colaboradores.',
+          title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+          description: response.error,
         });
       }
+
+      setRequesting(false);
     };
 
-    fetchCollaborators();
+    fetchEmployees();
   }, [toast]);
 
-  const searchCollaborator = async () => {
-    if (!selectedCollaboratorId) {
+  const searchEmployee = async () => {
+    if (!selectedEmployeeId) {
       toast({
         variant: 'destructive',
         title: 'Erro ao buscar colaborador',
@@ -74,8 +78,8 @@ export function ContributorMovementForm() {
     }
 
     setRequesting(true);
-    const found = collaborators.find((c) => c.id === selectedCollaboratorId);
-    setCollaborator(found || null);
+    const found = employees.find((c) => c.id === selectedEmployeeId);
+    setEmployee(found || null);
     setRequesting(false);
 
     if (!found) {
@@ -88,7 +92,7 @@ export function ContributorMovementForm() {
   };
 
   const registerMovement = async () => {
-    if (!collaborator) {
+    if (!employee) {
       toast({
         variant: 'destructive',
         title: 'Erro ao registrar movimentação',
@@ -97,51 +101,41 @@ export function ContributorMovementForm() {
       return;
     }
 
-    try {
-      setRequesting(true);
-      const response = await createContributorMovementAction(collaborator.id, action);
+    setRequesting(true);
+    const response = await createEmployeeMovementAction(employee.id, action);
 
-      if (response.success) {
-        toast({
-          variant: 'success',
-          title: 'Movimentação registrada com sucesso',
-          description: `${
-            action === 'E' ? 'Entrada' : 'Saída'
-          } registrada para o veículo ${collaborator.fullName}`,
-        });
-        setCollaborator(null);
-        setAction('E');
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Ocorreu um erro ao cadastrar a movimentação.',
-          description: 'Entre em contato com a administração.',
-        });
-      }
-    } catch (error) {
+    if (response.success) {
+      toast({
+        variant: 'success',
+        description: response.message,
+      });
+      setEmployee(null);
+      setAction('E');
+    } else {
       toast({
         variant: 'destructive',
-        title: 'Ocorreu um erro ao cadastrar a movimentação.',
-        description: 'Entre em contato com a administração.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
-    } finally {
-      setRequesting(false);
     }
+
+    setRequesting(false);
+
     resetForm();
   };
 
   const resetForm = () => {
-    setSelectedCollaboratorId('');
-    setCollaborator(null);
+    setSelectedEmployeeId('');
+    setEmployee(null);
     setAction('E');
   };
 
   return (
     <div className="w-full">
-      {!collaborator ? (
+      {!employee ? (
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="collaborator">Nome do colaborador</Label>
+            <Label htmlFor="employee">Nome do colaborador</Label>
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -151,8 +145,8 @@ export function ContributorMovementForm() {
                   className="w-full justify-between"
                   disabled={requesting}
                 >
-                  {selectedCollaboratorId
-                    ? collaborators.find((c) => c.id === selectedCollaboratorId)
+                  {selectedEmployeeId
+                    ? employees.find((c) => c.id === selectedEmployeeId)
                         ?.fullName
                     : 'Selecione um colaborador'}
                   <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -167,20 +161,20 @@ export function ContributorMovementForm() {
                   <CommandList>
                     <CommandEmpty>Nenhum colaborador encontrado.</CommandEmpty>
                     <CommandGroup>
-                      {collaborators.map((collaborator) => (
+                      {employees.map((employee) => (
                         <CommandItem
-                          key={collaborator.id}
-                          value={collaborator.fullName}
+                          key={employee.id}
+                          value={employee.fullName}
                           onSelect={() => {
-                            setSelectedCollaboratorId(collaborator.id);
+                            setSelectedEmployeeId(employee.id);
                             setOpen(false);
                           }}
                         >
-                          {collaborator.fullName}
+                          {employee.fullName}
                           <CheckIcon
                             className={cn(
                               'ml-auto h-4 w-4',
-                              collaborator.id === selectedCollaboratorId
+                              employee.id === selectedEmployeeId
                                 ? 'opacity-100'
                                 : 'opacity-0',
                             )}
@@ -198,7 +192,7 @@ export function ContributorMovementForm() {
             </p>
           </div>
           <Button
-            onClick={searchCollaborator}
+            onClick={searchEmployee}
             disabled={requesting}
             className="w-full"
           >
@@ -219,10 +213,10 @@ export function ContributorMovementForm() {
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
               <div className="bg-background rounded-lg p-2 col-span-1 xl:col-span-3 flex items-center justify-center">
                 <div className="w-48 h-48 relative">
-                  {collaborator.photoURL ? (
+                  {employee.photoURL ? (
                     <Image
-                      src={collaborator.photoURL}
-                      alt={`Foto de ${collaborator.fullName}`}
+                      src={employee.photoURL}
+                      alt={`Foto de ${employee.fullName}`}
                       layout="fill"
                       objectFit="cover"
                       className="rounded-lg"
@@ -240,14 +234,14 @@ export function ContributorMovementForm() {
                     <h4 className="text-sm font-medium text-muted-foreground mb-1">
                       Nome
                     </h4>
-                    <p className="text-base font-medium">{collaborator.fullName}</p>
+                    <p className="text-base font-medium">{employee.fullName}</p>
                   </div>
                   <div className="bg-background rounded-lg p-3">
                     <h4 className="text-sm font-medium text-muted-foreground mb-1">
                       Matrícula
                     </h4>
                     <p className="text-base font-medium">
-                      {collaborator.registration}
+                      {employee.registration}
                     </p>
                   </div>
                   <div className="bg-background rounded-lg p-3 col-span-full">
@@ -255,7 +249,7 @@ export function ContributorMovementForm() {
                       Observação
                     </h4>
                     <p className="text-base font-medium">
-                      {collaborator.observation}
+                      {employee.observation}
                     </p>
                   </div>
                 </div>

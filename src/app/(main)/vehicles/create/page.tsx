@@ -1,11 +1,12 @@
 'use client';
 
-import { createVehicleAction } from '../../../../actions/vehicles/createVehicleAction';
+import { VehicleFormData } from '../../../../schemas/vehicleSchema';
 import { PageComponent } from '../../../../components/ui/page';
 import { useToast } from '../../../../hooks/use-toast';
-import { VehicleFormData } from '../../../../schemas/vehicleSchema';
 import { useRef } from 'react';
+import { createVehicleAction } from '@/actions/vehicles/createVehicleAction';
 import { VehicleForm } from '../_components/vehicleForm';
+import { MESSAGE } from '@/utils/message';
 
 export default function CreateVehiclePage() {
   const { toast } = useToast();
@@ -17,7 +18,7 @@ export default function CreateVehiclePage() {
     if (response.success) {
       toast({
         variant: 'success',
-        description: 'Veículo cadastrado com sucesso!',
+        description: response.message,
       });
 
       if (formRef.current) {
@@ -26,8 +27,8 @@ export default function CreateVehiclePage() {
     } else {
       toast({
         variant: 'destructive',
-        title: 'Ah não. Algo deu errado.',
-        description: 'Não foi possível cadastrar veículo.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
     }
   }

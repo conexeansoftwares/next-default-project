@@ -1,66 +1,51 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { CirclePlus } from 'lucide-react';
 import { PageComponent } from '../../../../components/ui/page';
 import { Button } from '../../../../components/ui/button';
 import { DataTable } from '../../../../components/ui/dataTable';
 import { useToast } from '../../../../hooks/use-toast';
-import { IUserReturnProps, IContributorToSelect } from '../types';
-import { desactivateUserAction } from '@/actions/users/desactiveUserAction';
 import { getColumns } from '../columns';
-import { Permission } from '@prisma/client';
+import { GetAllActiveUsersActionResult, IUser } from '../types';
+import { MESSAGE } from '@/utils/message';
+import { deactivateUserAction } from '@/actions/users/desactiveUserAction';
 
-interface IUser {
-  id: string;
-  email: string;
-  contributorId: string;
-  userPermissions: {
-    module: string;
-    permission: Permission;
-  }[];
+interface UsersProps {
+  result: GetAllActiveUsersActionResult;
 }
 
-export function Users({ success, data, message }: IUserReturnProps) {
+export function Users({ result }: UsersProps) {
   const { toast } = useToast();
-  const [contributors, setContributors] = useState<IUser[]>(data ?? []);
+  const [users, setUsers] = useState<IUser[]>(
+    result.success ? (result.data as IUser[]) : [],
+  );
 
-  if (!success) {
-    toast({
-      variant: 'destructive',
-      title: 'Ah não. Algo deu errado.',
-      description: message,
-    });
-  }
+  useEffect(() => {
+    if (!result.success) {
+      toast({
+        variant: 'warning',
+        title: MESSAGE.COMMON.GENERIC_WARNING_TITLE,
+        description: result.error,
+      });
+    }
+  }, [result, toast]);
 
   const handleDelete = useCallback(
     async (userId: string) => {
-      try {
-        const result = await desactivateUserAction(userId);
-        if (result.success) {
-          toast({
-            variant: 'success',
-            description: 'Colaborador desativado com sucesso!',
-          });
-          setContributors((prevContributors) =>
-            prevContributors.filter(
-              (contributor) => contributor.id !== userId,
-            ),
-          );
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Erro',
-            description:
-              result.message || 'Não foi possível desativar o colaborador.',
-          });
-        }
-      } catch (error) {
+      const deleteResult = await deactivateUserAction(userId);
+      if (deleteResult.success) {
+        toast({
+          variant: 'success',
+          description: deleteResult.message,
+        });
+        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+      } else {
         toast({
           variant: 'destructive',
-          title: 'Erro',
-          description: 'Ocorreu um erro inesperado ao desativar o colaborador.',
+          title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+          description: deleteResult.error,
         });
       }
     },
@@ -81,11 +66,11 @@ export function Users({ success, data, message }: IUserReturnProps) {
           <Link href={'/users/create'}>
             <Button className="mb-2">
               <CirclePlus className="w-4 h-4 me-2" />
-              Cadastar colaborador
+              Cadastrar colaborador
             </Button>
           </Link>
         </div>
-        <DataTable.Root columns={columns} data={contributors}>
+        <DataTable.Root columns={columns} data={users}>
           <DataTable.Tools
             searchKey="email"
             searchPlaceholder="Filtrar por e-mail..."

@@ -1,10 +1,13 @@
 'use client';
 
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UserFormData, userFormSchema } from '../../../../schemas/userSchema';
+import {
+  CombinedUserForm,
+  combinedUserFormSchema,
+} from '../../../../schemas/userSchema';
 import { createUserAction } from '../../../../actions/users/createUserAction';
-
 import { Button } from '../../../../components/ui/button';
 import {
   Form,
@@ -18,20 +21,15 @@ import {
 import { Input } from '../../../../components/ui/input';
 import { PageComponent } from '../../../../components/ui/page';
 import Link from 'next/link';
-
-import { CheckIcon, CircleArrowLeft } from 'lucide-react';
+import { CheckIcon, CircleArrowLeft, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { Label } from '@/components/ui/label';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useEffect, useMemo, useState } from 'react';
-import { getAllActiveContributorsToSelect } from '@/actions/contributors/getAllActiveContributorsToSelect';
-import { IContributorToSelect } from '../../contributors/types';
-import { toast, useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { CaretSortIcon } from '@radix-ui/react-icons';
 import {
   Command,
@@ -42,21 +40,27 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { MESSAGE } from '@/utils/message';
+import { IEmployeeToSelect } from '../../employees/types';
+import { getAllActiveEmployeesAction } from '@/actions/employees/getAllActiveEmployee';
+import { modules } from '../modules';
 
-const modules = [
-  { id: 'users', name: 'Usuários' },
-  { id: 'companies', name: 'Empresas' },
-  { id: 'vehicles', name: 'Veículos' },
-  { id: 'movements', name: 'Movimentações' },
-];
-
-const permissions = ['Ler', 'Escrever', 'Deletar', 'Admin'];
-
-export default function Page() {
+export default function UserPage() {
   const [requesting, setRequesting] = useState<boolean>(false);
-  const [contributors, setContributors] = useState<IContributorToSelect[]>([]);
+  const [contributors, setContributors] = useState<IEmployeeToSelect[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   const filteredModules = useMemo(
     () =>
@@ -66,21 +70,20 @@ export default function Page() {
     [searchQuery],
   );
 
-  const { toast } = useToast();
-
-  const form = useForm<UserFormData>({
-    resolver: zodResolver(userFormSchema),
+  const form = useForm<CombinedUserForm>({
+    resolver: zodResolver(combinedUserFormSchema),
     defaultValues: {
       email: '',
-      contributorId: '',
+      employeeId: '',
       permissions: {},
       password: '',
       confirmPassword: '',
     },
   });
 
-  async function onSubmit(values: UserFormData) {
+  async function onSubmit(values: CombinedUserForm) {
     setRequesting(true);
+
     const response = await createUserAction(values);
 
     if (response.success) {
@@ -93,36 +96,32 @@ export default function Page() {
     } else {
       toast({
         variant: 'destructive',
-        title: 'Ah não. Ocorreu um erro.',
-        description: response.message,
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
     }
+
     setRequesting(false);
   }
 
   useEffect(() => {
-    const fetchCollaborators = async () => {
-      try {
-        const fetchedContributors = await getAllActiveContributorsToSelect();
-        if (fetchedContributors.success) {
-          setContributors(fetchedContributors.data);
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Erro ao carregar colaboradores',
-            description: 'Não foi possível carregar a lista de colaboradores.',
-          });
-        }
-      } catch (error) {
+    const fetchContributors = async () => {
+      const response = await getAllActiveEmployeesAction({
+        id: true,
+        fullName: true,
+      });
+      if (response.success) {
+        setContributors(response.data);
+      } else {
         toast({
           variant: 'destructive',
-          title: 'Erro ao carregar colaboradores',
-          description: 'Não foi possível carregar a lista de colaboradores.',
+          title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+          description: response.error,
         });
       }
     };
 
-    fetchCollaborators();
+    fetchContributors();
   }, [toast]);
 
   return (
@@ -148,7 +147,7 @@ export default function Page() {
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem className='col-span-full'>
+                  <FormItem className="col-span-full">
                     <FormLabel>E-mail *</FormLabel>
                     <FormControl>
                       <Input
@@ -169,11 +168,29 @@ export default function Page() {
                   <FormItem>
                     <FormLabel>Senha *</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Informe a senha"
-                        type="password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          placeholder="Informe a senha"
+                          type={showPassword ? 'text' : 'password'}
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={togglePasswordVisibility}
+                          aria-label={
+                            showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                          }
+                        >
+                          {showPassword ? (
+                            <EyeOffIcon className="h-4 w-4" />
+                          ) : (
+                            <EyeIcon className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormDescription>
                       Senha deve conter pelo menos uma letra maiúscula, uma
@@ -191,11 +208,31 @@ export default function Page() {
                   <FormItem>
                     <FormLabel>Confirme a senha *</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Confirme a senha"
-                        type="password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          placeholder="Confirme a senha"
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={toggleConfirmPasswordVisibility}
+                          aria-label={
+                            showConfirmPassword
+                              ? 'Ocultar senha'
+                              : 'Mostrar senha'
+                          }
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOffIcon className="h-4 w-4" />
+                          ) : (
+                            <EyeIcon className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,7 +241,7 @@ export default function Page() {
 
               <FormField
                 control={form.control}
-                name="contributorId"
+                name="employeeId"
                 render={({ field }) => (
                   <FormItem className="flex flex-col col-span-full">
                     <FormLabel>Colaborador *</FormLabel>
@@ -246,10 +283,7 @@ export default function Page() {
                                   value={contributor.fullName}
                                   key={contributor.id}
                                   onSelect={() => {
-                                    form.setValue(
-                                      'contributorId',
-                                      contributor.id,
-                                    );
+                                    form.setValue('employeeId', contributor.id);
                                     setOpen(false);
                                   }}
                                 >
@@ -275,101 +309,88 @@ export default function Page() {
               />
 
               <div className="bg-secondary/90 rounded-lg p-4 col-span-full">
-                <FormField
-                  control={form.control}
-                  name="permissions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="mb-4">
-                        <FormLabel className="text-base">
-                          Permissões de Módulos
-                        </FormLabel>
-                        <FormDescription>
-                          Selecione as permissões para cada módulo
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Command className="rounded-lg border shadow-md">
-                          <CommandInput
-                            placeholder="Procurar módulo..."
-                            onValueChange={setSearchQuery}
-                          />
-                          <CommandList className="max-h-full">
-                            {filteredModules.length === 0 &&
-                              searchQuery !== '' && (
-                                <CommandEmpty>
-                                  Nenhum módulo encontrado.
-                                </CommandEmpty>
-                              )}
-                            <CommandGroup>
-                              <ScrollArea className="h-[300px] w-full p-4">
-                                {filteredModules.map((module) => (
-                                  <CommandItem
-                                    key={module.id}
-                                    value={module.name}
-                                    className="px-2 py-3"
-                                  >
-                                    <div className="w-full">
-                                      <FormLabel className="text-sm font-semibold">
-                                        {module.name}
-                                      </FormLabel>
-                                      <div className="flex flex-wrap gap-4 mt-2">
-                                        {permissions.map((permission) => (
-                                          <FormItem
-                                            key={`${module.id}-${permission}`}
-                                            className="flex flex-row items-start space-x-3 space-y-0"
-                                          >
-                                            <FormControl>
-                                              <Checkbox
-                                                checked={
-                                                  field.value?.[module.id]?.[
-                                                    permission
-                                                  ] || false
+              <FormField
+                control={form.control}
+                name="permissions"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="mb-4">
+                      <FormLabel className="text-base">Permissões de Módulos</FormLabel>
+                      <FormDescription>Selecione as permissões para cada módulo</FormDescription>
+                    </div>
+                    <FormControl>
+                      <Command className="rounded-lg border shadow-md">
+                        <CommandInput
+                          placeholder="Procurar módulo..."
+                          onValueChange={setSearchQuery}
+                        />
+                        <CommandList className="max-h-full">
+                          {filteredModules.length === 0 && searchQuery !== '' && (
+                            <CommandEmpty>Nenhum módulo encontrado.</CommandEmpty>
+                          )}
+                          <CommandGroup>
+                            <ScrollArea className="h-[300px] w-full p-4">
+                              {filteredModules.map((module) => (
+                                <CommandItem
+                                  key={module.id}
+                                  value={module.name}
+                                  className="px-2 py-3"
+                                >
+                                  <div className="w-full">
+                                    <FormLabel className="text-sm font-semibold">
+                                      {module.name}
+                                    </FormLabel>
+                                    <div className="flex flex-wrap gap-4 mt-2">
+                                      {module.permissions.map((permission) => (
+                                        <FormItem
+                                          key={`${module.id}-${permission}`}
+                                          className="flex flex-row items-start space-x-3 space-y-0"
+                                        >
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={
+                                                field.value?.[module.id]?.[
+                                                  permission.toLowerCase()
+                                                ] || false
+                                              }
+                                              onCheckedChange={(checked) => {
+                                                const updatedPermissions = {
+                                                  ...field.value,
+                                                };
+                                                if (!updatedPermissions[module.id]) {
+                                                  updatedPermissions[module.id] = {};
                                                 }
-                                                onCheckedChange={(checked) => {
-                                                  const updatedPermissions = {
-                                                    ...field.value,
-                                                  };
-                                                  if (
-                                                    !updatedPermissions[
-                                                      module.id
-                                                    ]
-                                                  ) {
-                                                    updatedPermissions[
-                                                      module.id
-                                                    ] = {};
-                                                  }
-                                                  updatedPermissions[module.id][
-                                                    permission
-                                                  ] = checked === true;
-                                                  field.onChange(
-                                                    updatedPermissions,
-                                                  );
-                                                }}
-                                              />
-                                            </FormControl>
-                                            <FormLabel className="text-sm font-normal">
-                                              {permission}
-                                            </FormLabel>
-                                          </FormItem>
-                                        ))}
-                                      </div>
+                                                updatedPermissions[module.id][
+                                                  permission.toLowerCase()
+                                                ] = checked === true;
+                                                field.onChange(updatedPermissions);
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <FormLabel className="text-sm font-normal">
+                                            {permission}
+                                          </FormLabel>
+                                        </FormItem>
+                                      ))}
                                     </div>
-                                  </CommandItem>
-                                ))}
-                              </ScrollArea>
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                                  </div>
+                                </CommandItem>
+                              ))}
+                            </ScrollArea>
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               </div>
             </div>
             <div className="flex justify-end w-100 mt-6">
-              <Button type="submit" disabled={requesting}>{requesting ? 'Registrando...' : 'Registrar usuário'}</Button>
+              <Button type="submit" disabled={requesting}>
+                {requesting ? 'Registrando...' : 'Registrar usuário'}
+              </Button>
             </div>
           </form>
         </Form>

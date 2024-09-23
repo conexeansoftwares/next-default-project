@@ -1,23 +1,24 @@
 'use client';
 
-import { ContributorFormData } from '@/schemas/contributorSchema';
+import { EmployeeFormData } from '../../../../schemas/employeeSchema';
 import { PageComponent } from '../../../../components/ui/page';
 import { useToast } from '../../../../hooks/use-toast';
 import { useRef } from 'react';
-import { createContributorAction } from '@/actions/contributors/createContributorAction';
-import { ContributorForm } from '../_components/contributorForm';
+import { createEmployeeAction } from '@/actions/employees/createEmployeeAction';
+import { EmployeeForm } from '../_components/employeeForm';
+import { MESSAGE } from '@/utils/message';
 
-export default function CreateContributorPage() {
+export default function CreateEmployeePage() {
   const { toast } = useToast();
   const formRef = useRef<{ reset: () => void } | null>(null);
 
-  async function onSubmit(values: ContributorFormData) {
-    const response = await createContributorAction(values);
+  async function onSubmit(values: EmployeeFormData) {
+    const response = await createEmployeeAction(values);
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: 'Colaborador cadastrado com sucesso!',
+        description: response.message,
       });
 
       if (formRef.current) {
@@ -26,8 +27,8 @@ export default function CreateContributorPage() {
     } else {
       toast({
         variant: 'destructive',
-        title: 'Ah não. Algo deu errado.',
-        description: 'Não foi possível cadastrar colaborador.',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: response.error,
       });
     }
   }
@@ -38,7 +39,7 @@ export default function CreateContributorPage() {
         <PageComponent.Title text="Cadastrar colaborador" />
       </PageComponent.Header>
       <PageComponent.Content className="flex-col">
-        <ContributorForm 
+        <EmployeeForm 
           ref={formRef}
           onSubmit={onSubmit} 
           submitButtonText="Cadastrar colaborador" 

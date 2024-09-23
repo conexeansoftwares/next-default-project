@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { CirclePlus } from 'lucide-react';
 import { PageComponent } from '../../../../components/ui/page';
@@ -10,6 +10,7 @@ import { useToast } from '../../../../hooks/use-toast';
 import { GetAllActiveCompanyActionResult, ICompany } from '../types';
 import { getColumns } from '../columns';
 import { deactivateCompanyAction } from '@/actions/companies/deactivateCompanyAction';
+import { MESSAGE } from '@/utils/message';
 
 interface CompaniesProps {
   result: GetAllActiveCompanyActionResult;
@@ -18,42 +19,40 @@ interface CompaniesProps {
 export function Companies({ result }: CompaniesProps) {
   const { toast } = useToast();
   const [companies, setCompanies] = useState<ICompany[]>(
-    result.success ? (result.data as ICompany[]) : []
+    result.success ? (result.data as ICompany[]) : [],
   );
 
-  if (!result.success) {
-    toast({
-      variant: 'destructive',
-      title: 'Ah não. Algo deu errado.',
-      description: result.error,
-    });
-  }
+  useEffect(() => {
+    if (!result.success) {
+      toast({
+        variant: 'warning',
+        title: MESSAGE.COMMON.GENERIC_WARNING_TITLE,
+        description: result.error,
+      });
+    }
+  }, [result, toast]);
 
-  const handleDelete = useCallback(async (companyId: string) => {
-    try {
+  const handleDelete = useCallback(
+    async (companyId: string) => {
       const deleteResult = await deactivateCompanyAction(companyId);
       if (deleteResult.success) {
         toast({
           variant: 'success',
           description: deleteResult.message,
         });
-        setCompanies(prevCompanies => prevCompanies.filter(company => company.id !== companyId));
+        setCompanies((prevCompanies) =>
+          prevCompanies.filter((company) => company.id !== companyId),
+        );
       } else {
         toast({
           variant: 'destructive',
-          title: 'Ah não. Algo deu errado.',
-          description: deleteResult.error || 'Não foi possível desativar a empresa.',
+          title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+          description: deleteResult.error,
         });
       }
-    } catch (error) {
-      console.error('Erro ao desativar empresa:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Ocorreu um erro inesperado ao desativar a empresa.',
-      });
-    }
-  }, [toast]);
+    },
+    [toast],
+  );
 
   const columns = getColumns({ onDelete: handleDelete });
 
@@ -73,16 +72,15 @@ export function Companies({ result }: CompaniesProps) {
             </Button>
           </Link>
         </div>
-        {result.success && (
-          <DataTable.Root columns={columns} data={companies}>
-            <DataTable.Tools
-              searchKey="name"
-              searchPlaceholder="Filtrar por nome..."
-            />
-            <DataTable.Content columns={columns} />
-            <DataTable.Pagination />
-          </DataTable.Root>
-        )}
+
+        <DataTable.Root columns={columns} data={companies}>
+          <DataTable.Tools
+            searchKey="name"
+            searchPlaceholder="Filtrar por nome..."
+          />
+          <DataTable.Content columns={columns} />
+          <DataTable.Pagination />
+        </DataTable.Root>
       </PageComponent.Content>
     </PageComponent.Root>
   );

@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-export const contributorFormSchema = z.object({
+export const employeeFormSchema = z.object({
   fullName: z
     .string()
     .min(2, { message: 'Nome deve conter pelo menos 2 caracteres' })
@@ -32,4 +32,4 @@ export const contributorFormSchema = z.object({
   companyIds: z.array(z.string().cuid({ message: 'Empresa inválida' })).min(1, { message: 'É necessário informar pelo menos 1 empresa' }),
 });
 
-export type ContributorFormData = z.infer<typeof contributorFormSchema>;
+export type EmployeeFormData = z.infer<typeof employeeFormSchema>;

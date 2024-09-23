@@ -1,47 +1,92 @@
-// src/actions/users/editUserAction.ts
-
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { UserFormData } from '@/schemas/userSchema';
+import { revalidatePath } from 'next/cache';
+import {
+  userFormSchemaWithoutPassword,
+  UserFormWithoutPassword,
+} from '@/schemas/userSchema';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { DefaultUserActionResult } from '@/app/(main)/users/types';
 import { Permission } from '@prisma/client';
 
-export async function editUserAction(userId: string, data: UserFormData) {
+const permissionMapping: Record<string, Permission> = {
+  ler: Permission.READ,
+  escrever: Permission.WRITE,
+  deletar: Permission.DELETE,
+  admin: Permission.ADMIN,
+};
+
+export async function editUserAction(
+  userId: string,
+  data: UserFormWithoutPassword,
+): Promise<DefaultUserActionResult> {
   try {
-    const { email, contributorId, permissions } = data;
+    const validatedData = userFormSchemaWithoutPassword.parse(data);
 
-    // Update user
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        email,
-        contributorId,
-      },
+    const { email, employeeId, permissions } = validatedData;
+
+    const result = await prisma.$transaction(async (tx) => {
+      const existingUser = await tx.user.findUnique({
+        where: { id: userId },
+        include: { userPermissions: true },
+      });
+
+      if (!existingUser) {
+        throw new AppError(MESSAGE.USER.NOT_FOUND, 404);
+      }
+
+      const userWithSameEmail = await tx.user.findFirst({
+        where: {
+          email,
+          id: { not: userId },
+        },
+      });
+
+      if (userWithSameEmail) {
+        throw new AppError(MESSAGE.USER.EXISTING_EMAIL, 400);
+      }
+
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          email,
+          employeeId,
+        },
+      });
+
+      await tx.userPermission.deleteMany({
+        where: { userId },
+      });
+
+      const newPermissions = Object.entries(permissions).flatMap(
+        ([module, modulePermissions]) =>
+          Object.entries(modulePermissions)
+            .filter(([, isGranted]) => isGranted)
+            .map(([permission]) => ({
+              userId,
+              module,
+              permission: permissionMapping[permission.toLowerCase() as keyof typeof permissionMapping],
+            }))
+            .filter((up): up is { userId: string; module: string; permission: Permission } => 
+              up.permission !== undefined
+            )
+      );
+
+      await tx.userPermission.createMany({
+        data: newPermissions,
+      });
+
+      return MESSAGE.USER.UPDATED_SUCCESS;
     });
 
-    // Delete existing permissions
-    await prisma.userPermission.deleteMany({
-      where: { userId },
-    });
+    revalidatePath('/users');
 
-    // Create new permissions
-    const newPermissions = Object.entries(permissions).flatMap(([module, modulePermissions]) =>
-      Object.entries(modulePermissions)
-        .filter(([, isGranted]) => isGranted)
-        .map(([permission]) => ({
-          userId,
-          module,
-          permission: permission as Permission,
-        }))
-    );
-
-    await prisma.userPermission.createMany({
-      data: newPermissions,
-    });
-
-    return { success: true, message: 'Usuário atualizado com sucesso.' };
+    return { success: true, message: result };
   } catch (error) {
-    console.error('Erro ao atualizar usuário:', error);
-    return { success: false, message: 'Ocorreu um erro ao atualizar o usuário.' };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

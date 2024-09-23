@@ -3,6 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '../../../lib/prisma';
 import { z } from 'zod';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { GetVisitorMovementsByDateActionResult, IVisitorMovementSimplified } from '@/app/(main)/movement/types';
 
 const getVisitorMovementSchema = z.object({
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
@@ -15,10 +19,9 @@ const getVisitorMovementSchema = z.object({
 
 export async function getVisitorMovementByDateAction(
   startDate: string,
-  endDate: string,
-) {
+  endDate: string
+): Promise<GetVisitorMovementsByDateActionResult> {
   try {
-
     const validatedData = getVisitorMovementSchema.parse({
       startDate,
       endDate,
@@ -29,54 +32,49 @@ export async function getVisitorMovementByDateAction(
 
     endDateTime.setHours(23, 59, 59, 999);
 
-    const movements = await prisma.visitorMovement.findMany({
-      where: {
-        createdAt: {
-          gte: startDateTime,
-          lte: endDateTime,
+    const result = await prisma.$transaction(async (tx) => {
+      const movements = await tx.visitorMovement.findMany({
+        where: {
+          createdAt: {
+            gte: startDateTime,
+            lte: endDateTime,
+          },
         },
-      },
-      select: {
-        fullName: true,
-        cpf: true,
-        telephone: true,
-        licensePlate: true,
-        action: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: 'asc',
-      },
-    });
+        select: {
+          fullName: true,
+          cpf: true,
+          telephone: true,
+          licensePlate: true,
+          action: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      });
 
-    const formattedMovements = movements.map((movement) => ({
-      fullName: movement.fullName,
-      cpf: movement.cpf,
-      telephone: movement.telephone,
-      licensePlate: movement.licensePlate,
-      action: movement.action,
-      date: movement.createdAt.toISOString(),
-    }));
+      if (movements.length === 0) {
+        throw new AppError(MESSAGE.VISITOR_MOVEMENT.NOT_FOUND, 404);
+      }
+
+      return movements.map((movement): IVisitorMovementSimplified => ({
+        fullName: movement.fullName,
+        cpf: movement.cpf,
+        telephone: movement.telephone,
+        licensePlate: movement.licensePlate,
+        action: movement.action,
+        date: movement.createdAt.toISOString(),
+      }));
+    });
 
     revalidatePath('/historical');
 
     return {
       success: true,
-      message: 'Movimentações listadas com sucesso',
-      data: formattedMovements,
+      data: result,
     };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        message: 'Dados inválidos',
-        errors: error.errors,
-      };
-    }
-
-    return {
-      success: false,
-      message: 'Ocorreu um erro ao listar movimentações',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

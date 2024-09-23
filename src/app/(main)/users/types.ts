@@ -10,30 +10,34 @@ export interface IUserPermission {
 export interface IUser {
   id: string;
   email: string;
-  contributorId: string;
-  userPermissions: {
-    module: string;
-    permission: Permission;
-  }[];
+  employeeId: string;
+  userPermissions: IUserPermission[];
 }
 
-// If IUserToEdit is different from IUser, you might want to create a separate interface or type alias
-export type IUserToEdit = IUser;
-
-
-export interface IUserReturnProps {
-  success: boolean;
-  data: IUserToEdit | null;
-  message?: string;
+export interface IUserWithCompanies extends IUser {
+  companies: { companyId: string }[];
 }
 
-export interface IContributorToSelect {
+export interface IUserToEdit {
   id: string;
-  fullName: string;
+  email: string;
+  employeeId: string;
+  userPermissions: IUserPermission[];
+  companyIds: string[];
 }
 
-export interface IUsersReturnProps {
-  success: boolean;
-  data: IUser[] | null;
-  message?: string;
-}
+export type DefaultUserActionResult =
+  | { success: true; message: string }
+  | { success: false; error: string };
+
+export type GetActiveUserActionResult =
+  | (Omit<Extract<DefaultUserActionResult, { success: true }>, 'message'> & {
+      data: IUserToEdit;
+    })
+  | Extract<DefaultUserActionResult, { success: false }>;
+
+export type GetAllActiveUsersActionResult =
+  | (Omit<Extract<DefaultUserActionResult, { success: true }>, 'message'> & {
+      data: IUser[];
+    })
+  | Extract<DefaultUserActionResult, { success: false }>;

@@ -11,8 +11,8 @@ import {
 } from '@/components/ui/select';
 import { Car, User, UserPlus } from 'lucide-react';
 import { VehicleHistorical } from './_components/vehicles/vehiclesHistorical';
-import { ContributorHistorical } from './_components/contributors/contributorHistorical';
 import { VisitorHistorical } from './_components/visitors/visitorHistorical';
+import { EmployeeHistorical } from './_components/employees/employeeHistorical';
 
 type HistoricaType = 'veiculo' | 'colaborador' | 'visitante';
 
@@ -63,7 +63,7 @@ export default function Page() {
           </Select>
         </div>
         {tipoMovimentacao === 'veiculo' && <VehicleHistorical />}
-        {tipoMovimentacao === 'colaborador' && <ContributorHistorical />}
+        {tipoMovimentacao === 'colaborador' && <EmployeeHistorical />}
         {tipoMovimentacao === 'visitante' && <VisitorHistorical />}
       </PageComponent.Content>
     </PageComponent.Root>

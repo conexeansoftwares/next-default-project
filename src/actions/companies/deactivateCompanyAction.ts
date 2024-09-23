@@ -22,10 +22,10 @@ export async function deactivateCompanyAction(companyId: string): Promise<Defaul
             where: { active: true },
             select: { id: true },
           },
-          contributors: {
-            where: { contributor: { active: true } },
+          employees: {
+            where: { employee: { active: true } },
             select: { 
-              contributor: {
+              employee: {
                 select: { 
                   id: true,
                   user: {
@@ -44,17 +44,12 @@ export async function deactivateCompanyAction(companyId: string): Promise<Defaul
       }
 
       const activeVehicles = company.vehicles.length;
-      const activeContributors = company.contributors.length;
-      const activeUsers = company.contributors.reduce((sum, contrib) => 
-        sum + (contrib.contributor.user ? 1 : 0), 0);
+      const activeEmployees = company.employees.length;
+      const activeUsers = company.employees.reduce((sum, empl) => 
+        sum + (empl.employee.user ? 1 : 0), 0);
 
-      if (activeVehicles > 0 || activeContributors > 0 || activeUsers > 0) {
-        let error = 'Não é possível desativar a empresa devido a:';
-        if (activeVehicles > 0) error += `\n- ${activeVehicles} veículo(s) ativo(s)`;
-        if (activeContributors > 0) error += `\n- ${activeContributors} colaborador(es) ativo(s)`;
-        if (activeUsers > 0) error += `\n- ${activeUsers} usuário(s) ativo(s)`;
-        error += '\nPor favor, desative estas entidades antes de desativar a empresa.';
-        
+      if (activeVehicles > 0 || activeEmployees > 0 || activeUsers > 0) {
+        const error = 'Não é possível desativar a empresa devido a veículo(s), colaborador(es) e/ou usuário(s) vinculados. Desative essas entidades antes de desativar a empresa.';      
         throw new AppError(error, 400);
       }
 

@@ -3,22 +3,28 @@
 import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { DefaultUserActionResult } from '@/app/(main)/users/types';
 
 const deactivateUserSchema = z.string().cuid();
 
-export async function desactivateUserAction(userId: string) {
+export async function deactivateUserAction(
+  userId: string
+): Promise<DefaultUserActionResult> {
   try {
     const validatedId = deactivateUserSchema.parse(userId);
 
-    const user = await prisma.user.findUnique({
-      where: { id: validatedId },
-    });
-
-    if (!user) {
-      return { success: false, message: 'Usuário não encontrado' };
-    }
-
     const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: validatedId, active: true },
+      });
+
+      if (!user) {
+        throw new AppError(MESSAGE.USER.NOT_FOUND, 404);
+      }
+
       await tx.user.update({
         where: { id: validatedId },
         data: {
@@ -27,24 +33,14 @@ export async function desactivateUserAction(userId: string) {
         },
       });
 
-      return {
-        success: true,
-        message: 'Usuário desativado com sucesso',
-      };
+      return MESSAGE.USER.DEACTIVATED_SUCCESS;
     });
 
     revalidatePath('/users');
 
-    return result;
+    return { success: true, message: result };
   } catch (error) {
-    console.log(error);
-    console.error('Erro ao desativar usuario:', error);
-    if (error instanceof z.ZodError) {
-      return { success: false, message: 'ID do usuario inválido' };
-    }
-    return {
-      success: false,
-      message: 'Ocorreu um erro ao desativar o usuario',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

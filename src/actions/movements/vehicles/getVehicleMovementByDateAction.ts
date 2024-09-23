@@ -3,6 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '../../../lib/prisma';
 import { z } from 'zod';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { GetVehicleMovementActionResult } from '@/app/(main)/movement/types';
 
 const getVehicleMovementSchema = z.object({
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
@@ -15,10 +19,9 @@ const getVehicleMovementSchema = z.object({
 
 export async function getVehicleMovementByDateAction(
   startDate: string,
-  endDate: string,
-) {
+  endDate: string
+): Promise<GetVehicleMovementActionResult> {
   try {
-
     const validatedData = getVehicleMovementSchema.parse({
       startDate,
       endDate,
@@ -29,60 +32,55 @@ export async function getVehicleMovementByDateAction(
 
     endDateTime.setHours(23, 59, 59, 999);
 
-    const movements = await prisma.vehicleMovement.findMany({
-      where: {
-        createdAt: {
-          gte: startDateTime,
-          lte: endDateTime,
+    const result = await prisma.$transaction(async (tx) => {
+      const movements = await tx.vehicleMovement.findMany({
+        where: {
+          createdAt: {
+            gte: startDateTime,
+            lte: endDateTime,
+          },
         },
-      },
-      select: {
-        action: true,
-        createdAt: true,
-        vehicle: {
-          select: {
-            licensePlate: true,
-            carModel: true,
-            company: {
-              select: {
-                name: true,
+        select: {
+          action: true,
+          createdAt: true,
+          vehicle: {
+            select: {
+              licensePlate: true,
+              carModel: true,
+              company: {
+                select: {
+                  name: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'asc',
-      },
-    });
+        orderBy: {
+          createdAt: 'asc',
+        },
+      });
 
-    const formattedMovements = movements.map((movement) => ({
-      licensePlate: movement.vehicle.licensePlate,
-      carModel: movement.vehicle.carModel,
-      companyName: movement.vehicle.company.name,
-      action: movement.action,
-      date: movement.createdAt.toISOString(),
-    }));
+      if (movements.length === 0) {
+        throw new AppError(MESSAGE.VEHICLE_MOVEMENT.NOT_FOUND, 404);
+      }
+
+      return movements.map((movement) => ({
+        licensePlate: movement.vehicle.licensePlate,
+        carModel: movement.vehicle.carModel,
+        companyName: movement.vehicle.company.name,
+        action: movement.action,
+        date: movement.createdAt.toISOString(),
+      }));
+    });
 
     revalidatePath('/historical');
 
     return {
       success: true,
-      message: 'Movimentações listadas com sucesso',
-      data: formattedMovements,
+      data: result,
     };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        message: 'Dados inválidos',
-        errors: error.errors,
-      };
-    }
-
-    return {
-      success: false,
-      message: 'Ocorreu um erro ao listar movimentações',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

@@ -1,68 +1,90 @@
 'use server';
 
 import { prisma } from '../../lib/prisma';
-import { UserFormData, userFormSchema } from '../../schemas/userSchema';
 import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { Permission } from '@prisma/client';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { DefaultUserActionResult } from '@/app/(main)/users/types';
+import { CombinedUserForm, combinedUserFormSchema } from '@/schemas/userSchema';
 
-const permissionMapping = {
-  'Ler': Permission.READ,
-  'Escrever': Permission.WRITE,
-  'Deletar': Permission.DELETE,
-  'Admin': Permission.ADMIN,
+const permissionMapping: Record<string, Permission> = {
+  ler: Permission.READ,
+  escrever: Permission.WRITE,
+  deletar: Permission.DELETE,
+  admin: Permission.ADMIN,
 };
 
-export async function createUserAction(data: UserFormData) {
+export async function createUserAction(
+  data: CombinedUserForm,
+): Promise<DefaultUserActionResult> {
   try {
-    const validatedData = userFormSchema.parse(data);
+    const validatedData = combinedUserFormSchema.parse(data);
 
-    const { email, password, contributorId, permissions } = validatedData;
+    const { email, password, employeeId, permissions } = validatedData;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await prisma.$transaction(async (tx) => {
+      const existingUser = await tx.user.findUnique({
+        where: { email },
+      });
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        contributorId,
-      },
-    });
+      if (existingUser) {
+        throw new AppError(MESSAGE.USER.EXISTING_EMAIL, 409);
+      }
 
-    const userPermissions = [];
+      const existingEmployee = await tx.employee.findUnique({
+        where: { id: employeeId },
+      });
 
-    for (const [moduleId, modulePermissions] of Object.entries(permissions)) {
-      for (const [permission, isGranted] of Object.entries(modulePermissions)) {
-        if (isGranted) {
-          const mappedPermission = permissionMapping[permission as keyof typeof permissionMapping];
-          if (mappedPermission) {
-            userPermissions.push({
+      if (!existingEmployee) {
+        throw new AppError(MESSAGE.EMPLOYEE.NOT_FOUND, 400);
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const user = await tx.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          employeeId,
+        },
+      });
+
+      const userPermissions = Object.entries(permissions).flatMap(
+        ([moduleId, modulePermissions]) =>
+          Object.entries(modulePermissions)
+            .filter(([_, isGranted]) => isGranted)
+            .map(([permission, _]) => ({
               userId: user.id,
               module: moduleId,
-              permission: mappedPermission,
-            });
-          }
-        }
-      }
-    }
+              permission: permissionMapping[permission.toLowerCase() as keyof typeof permissionMapping],
+            }))
+            .filter(
+              (
+                up,
+              ): up is {
+                userId: string;
+                module: string;
+                permission: Permission;
+              } => up.permission !== undefined,
+            ),
+      );
 
-    await prisma.userPermission.createMany({
-      data: userPermissions,
-      skipDuplicates: true,
+      await tx.userPermission.createMany({
+        data: userPermissions,
+        skipDuplicates: true,
+      });
+
+      return MESSAGE.USER.CREATED_SUCCESS;
     });
 
     revalidatePath('/users');
 
-    return { success: true, message: 'Usuário criado com sucesso' };
+    return { success: true, message: result };
   } catch (error) {
-    console.log(error);
-    if (error instanceof z.ZodError) {
-      return { success: false, errors: error.errors };
-    }
-    if (error instanceof Error) {
-      return { success: false, message: error.message };
-    }
-    return { success: false, message: 'Ocorreu um erro ao criar o usuário' };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

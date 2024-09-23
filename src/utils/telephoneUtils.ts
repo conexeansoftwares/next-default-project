@@ -1,8 +1,11 @@
-export function removeTelephoneMask(value: string) {
+export function removeTelephoneMask(value: string | null | undefined): string {
+  if (value == null) {
+    return '';
+  }
   return value.replace(/\D/g, '');
 }
 
-export function formatLandline(value: string) {
+export function formatLandline(value: string | null | undefined): string {
   const cleanedValue = removeTelephoneMask(value);
   
   if (cleanedValue.length === 10) {
@@ -12,7 +15,7 @@ export function formatLandline(value: string) {
   }
 }
 
-export function formatCellphone(value: string) {
+export function formatCellphone(value: string | null | undefined): string {
   const cleanedValue = removeTelephoneMask(value);
   
   if (cleanedValue.length === 11) {
@@ -22,7 +25,7 @@ export function formatCellphone(value: string) {
   }
 }
 
-export function formatPhoneNumber(value: string) {
+export function formatPhoneNumber(value: string | null | undefined): string {
   const cleanedValue = removeTelephoneMask(value);
   
   if (cleanedValue.length === 10) {

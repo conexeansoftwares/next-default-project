@@ -1,57 +1,48 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
-import {
-  VisitorMovementFormData,
-  visitorMovementFormSchema,
-} from '@/schemas/visitorMovementSchema';
+import { Action } from '@prisma/client';
+import { prisma } from '../../../lib/prisma';
+import { revalidatePath } from 'next/cache';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
 import { removeCpfMask } from '@/utils/cpfUtils';
 import { removeTelephoneMask } from '@/utils/telephoneUtils';
-import { Action } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
+import { VisitorMovementFormData, visitorMovementFormSchema } from '@/schemas/visitorMovementSchema';
+import { DefaultActionResult } from '@/app/(main)/movement/types';
 
 export async function createVisitorMovementAction(
-  data: VisitorMovementFormData,
-) {
+  data: VisitorMovementFormData
+): Promise<DefaultActionResult> {
   try {
-    const { fullName, cpf, telephone, licensePlate, companyIds, action } = visitorMovementFormSchema.parse(data);
-    
-    const visitorMovement = await prisma.visitorMovement.create({
-      data: {
-        fullName,
-        cpf: removeCpfMask(cpf as string),
-        telephone: removeTelephoneMask(telephone),
-        licensePlate,
-        action: action as Action,
-        companies: {
-          create: companyIds.map((companyId) => ({
-            company: { connect: { id: companyId } },
-          })),
+    const validatedData = visitorMovementFormSchema.parse(data);
+
+    await prisma.$transaction(async (tx) => {
+      const visitorMovement = await tx.visitorMovement.create({
+        data: {
+          fullName: validatedData.fullName,
+          cpf: validatedData.cpf ? removeCpfMask(validatedData.cpf) : undefined,
+          telephone: validatedData.telephone ? removeTelephoneMask(validatedData.telephone) : undefined,
+          licensePlate: validatedData.licensePlate,
+          action: validatedData.action as Action,
+          companies: {
+            create: validatedData.companyIds.map((companyId) => ({
+              company: { connect: { id: companyId } },
+            })),
+          },
         },
-      },
+      });
+
+      return visitorMovement;
     });
 
     revalidatePath('/contributors');
 
     return {
       success: true,
-      message: 'Movimentação criada com sucesso',
-      data: visitorMovement,
+      message: MESSAGE.VISITOR_MOVEMENT.CREATED_SUCCESS,
     };
   } catch (error) {
-    console.error('Error in createVisitorMovementAction:', error);
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        message: 'Dados inválidos',
-        errors: error.errors,
-      };
-    }
-
-    return {
-      success: false,
-      message: 'Ocorreu um erro ao criar movimentação',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }

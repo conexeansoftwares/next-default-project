@@ -12,46 +12,49 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getColumns, IContributorMovement } from './columns';
 import { DataTable } from '@/components/ui/dataTable';
-import { getContributorMovementByDateAction } from '@/actions/movements/contributors/getContributorMovementByDateAction';
+import { getEmployeeMovementsByDateAction } from '@/actions/movements/employees/getEmployeeMovementByDateAction';
+import { GetEmployeeMovementsByDateActionResult } from '@/app/(main)/movement/types';
+import { MESSAGE } from '@/utils/message';
+import { useToast } from '@/hooks/use-toast';
 
-export function ContributorHistorical() {
+export function EmployeeHistorical() {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [movements, setMovements] = useState<IContributorMovement[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const columns = getColumns();
 
   const handleGenerateHistorical = async () => {
     if (!startDate || !endDate) {
-      setError('Por favor, selecione as datas inicial e final.');
+      toast({
+        variant: 'destructive',
+        description: 'Por favor, selecione as datas inicial e final.',
+      });
       return;
     }
 
     setIsLoading(true);
-    setError(null);
 
-    try {
-      const result = await getContributorMovementByDateAction(
+    const result: GetEmployeeMovementsByDateActionResult =
+      await getEmployeeMovementsByDateAction(
         startDate.toISOString(),
         endDate.toISOString(),
       );
 
-      console.log(result);
-
-      if (result.success && Array.isArray(result.data)) {
-        setMovements(result.data as IContributorMovement[]);
-      } else {
-        setError(result.message || 'Ocorreu um erro ao buscar os dados.');
-        setMovements([]);
-      }
-    } catch (err) {
-      setError('Ocorreu um erro ao buscar os dados.');
+    if (result.success) {
+      setMovements(result.data);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
+        description: result.error,
+      });
       setMovements([]);
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -140,8 +143,6 @@ export function ContributorHistorical() {
           {isLoading ? 'Carregando...' : 'Gerar histórico'}
         </Button>
       </div>
-
-      {error && <p className="text-red-500">{error}</p>}
 
       {movements.length > 0 && (
         <DataTable.Root columns={columns} data={movements}>

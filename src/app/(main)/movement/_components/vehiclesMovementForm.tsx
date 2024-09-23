@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { getActiveVechileByLicensePlateAction } from '@/actions/vehicles/getActiveVehicleByLicensePlateAction';
 import { createVehicleMovementAction } from '@/actions/movements/vehicles/createVehicleMovementAction';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getActiveVehicleByLicensePlateAction } from '@/actions/vehicles/getActiveVehicleByLicensePlateAction';
 
 interface IVehicleToMovement {
   id: string;
@@ -35,7 +35,7 @@ export function VehicleMovementForm() {
 
     try {
       setRequesting(true);
-      const response = await getActiveVechileByLicensePlateAction(licensePlate);
+      const response = await getActiveVehicleByLicensePlateAction(licensePlate);
 
       if (response.success) {
         setVehicle(response.data);

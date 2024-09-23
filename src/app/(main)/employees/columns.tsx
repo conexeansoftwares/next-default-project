@@ -1,11 +1,5 @@
-'use client';
-
 import { ColumnDef } from '@tanstack/react-table';
-import {
-  MoreHorizontal,
-  UserRoundPen,
-  UserRoundX,
-} from 'lucide-react';
+import { MoreHorizontal, UserRoundPen, UserRoundX } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import {
   DropdownMenu,
@@ -27,15 +21,15 @@ import {
 } from '../../../components/ui/alert-dialog';
 import Link from 'next/link';
 import { DataTable } from '../../../components/ui/dataTable';
-import { IContributor } from './types';
+import { IEmployeeWithCompanies } from './types';
 
-type ContributorColumnProps = {
+type EmployeeColumnProps = {
   onDelete: (id: string) => void;
 };
 
 export const getColumns = ({
   onDelete,
-}: ContributorColumnProps): ColumnDef<IContributor>[] => [
+}: EmployeeColumnProps): ColumnDef<IEmployeeWithCompanies>[] => [
   {
     accessorKey: 'fullName',
     header: ({ column }) => (
@@ -49,10 +43,21 @@ export const getColumns = ({
     ),
   },
   {
-    accessorKey: 'companyName',
+    accessorKey: 'companies',
     header: ({ column }) => (
-      <DataTable.ColumnHeader column={column} title="Empresa" />
+      <DataTable.ColumnHeader column={column} title="Empresas" />
     ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex flex-wrap gap-2">
+          {row.original.companies.map((c) => (
+            <div key={c.company.id} className="bg-primary text-white rounded-lg px-2 py-1 text-sm">
+              {c.company.name}
+            </div>
+          ))}
+        </div>
+      );
+    },
   },
   {
     id: 'actions',
@@ -68,7 +73,7 @@ export const getColumns = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <Link href={`/contributors/update/${contributor.id}`}>
+            <Link href={`/employees/update/${contributor.id}`}>
               <DropdownMenuItem className="justify-between">
                 Editar <UserRoundPen className="w-4 h-4" />
               </DropdownMenuItem>

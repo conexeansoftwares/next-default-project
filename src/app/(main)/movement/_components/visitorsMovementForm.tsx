@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -18,20 +17,17 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import {
-  ICompaniesReturnToSelectProps,
-  ICompanyToSelect,
-} from '../../companies/types';
-import { getAllActiveCompaniesToSelect } from '@/actions/companies/getAllActiveCompaniesToSelect';
 import { createVisitorMovementAction } from '@/actions/movements/visitors/createVisitorMovementAction';
 import {
   VisitorMovementFormData,
   visitorMovementFormSchema,
 } from '@/schemas/visitorMovementSchema';
 import { Skeleton } from '@/components/ui/skeleton';
+import { GetAllActiveCompanyActionResult, ICompanySelect } from '../../companies/types';
+import { getAllActiveCompanies } from '@/actions/companies/getAllActiveCompanies';
 
 export function VisitorsMovementForm() {
-  const [companies, setCompanies] = useState<ICompanyToSelect[]>([]);
+  const [companies, setCompanies] = useState<ICompanySelect[]>([]);
   const [action, setAction] = useState<'E' | 'S'>('E');
   const [requesting, setRequesting] = useState<boolean>(false);
   const [requestingCompanies, setRequestingCompanies] = useState<boolean>(false);
@@ -60,7 +56,7 @@ export function VisitorsMovementForm() {
           title: 'Movimentação registrada com sucesso',
           description: `${
             action === 'E' ? 'Entrada' : 'Saída'
-          } registrada para o visitante ${response.data?.fullName}`,
+          } registrada para o visitante`,
         });
         form.reset();
         setAction('E');
@@ -85,8 +81,8 @@ export function VisitorsMovementForm() {
   useEffect(() => {
     const fetchCompanies = async () => {
       setRequestingCompanies(true);
-      const result: ICompaniesReturnToSelectProps =
-        await getAllActiveCompaniesToSelect();
+      const result: GetAllActiveCompanyActionResult =
+        await getAllActiveCompanies(true);
       if (result.success) {
         setCompanies(result.data);
       } else {

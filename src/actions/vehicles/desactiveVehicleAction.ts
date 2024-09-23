@@ -3,22 +3,26 @@
 import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { AppError } from '@/error/appError';
+import { MESSAGE } from '@/utils/message';
+import { handleErrors } from '@/utils/handleErrors';
+import { DefaultVehicleActionResult } from '@/app/(main)/vehicles/types';
 
 const deactivateVehicleSchema = z.string().cuid();
 
-export async function desactivateVehicleAction(vehicleId: string) {
+export async function deactivateVehicleAction(vehicleId: string): Promise<DefaultVehicleActionResult> {
   try {
     const validatedId = deactivateVehicleSchema.parse(vehicleId);
 
-    const vehicle = await prisma.vehicle.findUnique({
-      where: { id: validatedId },
-    });
-
-    if (!vehicle) {
-      return { success: false, message: 'Veículo não encontrado' };
-    }
-
     const result = await prisma.$transaction(async (tx) => {
+      const vehicle = await tx.vehicle.findUnique({
+        where: { id: validatedId, active: true },
+      });
+
+      if (!vehicle) {
+        throw new AppError(MESSAGE.VEHICLE.NOT_FOUND, 404);
+      }
+
       await tx.vehicle.update({
         where: { id: validatedId },
         data: {
@@ -27,24 +31,14 @@ export async function desactivateVehicleAction(vehicleId: string) {
         },
       });
 
-      return {
-        success: true,
-        message: 'Veículo desativado com sucesso',
-      };
+      return MESSAGE.VEHICLE.DEACTIVATED_SUCCESS;
     });
 
     revalidatePath('/vehicles');
 
-    return result;
+    return { success: true, message: result };
   } catch (error) {
-    console.log(error);
-    console.error('Erro ao desativar veículo:', error);
-    if (error instanceof z.ZodError) {
-      return { success: false, message: 'ID do veículo inválido' };
-    }
-    return {
-      success: false,
-      message: 'Ocorreu um erro ao desativar o veículo',
-    };
+    const errorResult = handleErrors(error);
+    return { success: false, error: errorResult.error };
   }
 }
