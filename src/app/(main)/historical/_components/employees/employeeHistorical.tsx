@@ -12,10 +12,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getColumns, IContributorMovement } from './columns';
 import { DataTable } from '@/components/ui/dataTable';
-import { getEmployeeMovementsByDateAction } from '@/actions/movements/employees/getEmployeeMovementByDateAction';
-import { GetEmployeeMovementsByDateActionResult } from '@/app/(main)/movement/types';
+import { getEmployeeMovementsByDateAction, IGetEmployeeMovementByDateReturnProps } from '@/actions/movements/employees/getEmployeeMovementByDateAction';
 import { MESSAGE } from '@/utils/message';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 
 export function EmployeeHistorical() {
   const [startDate, setStartDate] = useState<Date>();
@@ -38,13 +37,13 @@ export function EmployeeHistorical() {
 
     setIsLoading(true);
 
-    const result: GetEmployeeMovementsByDateActionResult =
-      await getEmployeeMovementsByDateAction(
-        startDate.toISOString(),
-        endDate.toISOString(),
-      );
+    const result: IGetEmployeeMovementByDateReturnProps =
+      await getEmployeeMovementsByDateAction({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
 
-    if (result.success) {
+    if (result.success && result.data) {
       setMovements(result.data);
     } else {
       toast({

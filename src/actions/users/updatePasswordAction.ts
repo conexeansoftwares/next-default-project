@@ -4,16 +4,26 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
-import { handleErrors } from '@/utils/handleErrors';
-import { DefaultUserActionResult } from '@/app/(main)/users/types';
 import { hash } from 'bcryptjs';
 import { passwordSchema, type PasswordFormSchema } from '@/schemas/userSchema';
+import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
+import { handleErrors } from '@/utils/handleErrors';
 
-export async function updateUserPasswordAction(
-  userId: string,
-  data: PasswordFormSchema
-): Promise<DefaultUserActionResult> {
-  try {
+interface EditPasswordActionParams {
+  userId: string;
+  data: PasswordFormSchema;
+}
+
+export interface IUpdateUserReturnProps {
+  success: boolean;
+  data?: string;
+  error?: string;
+}
+
+export const updateUserPasswordAction = withPermissions('users', 'WRITE',
+  async (params: EditPasswordActionParams): Promise<IUpdateUserReturnProps> => {
+    try {
+      const { userId, data } = params;
     const validatedData = passwordSchema.parse(data);
 
     const result = await prisma.$transaction(async (tx) => {
@@ -39,9 +49,9 @@ export async function updateUserPasswordAction(
 
     revalidatePath('/users');
 
-    return { success: true, message: result };
-  } catch (error) {
-    const errorResult = handleErrors(error);
-    return { success: false, error: errorResult.error };
-  }
-}
+    return { success: true, data: result };
+    } catch (error) {
+      const errorResult = handleErrors(error);
+      return { success: false, error: errorResult.error };
+    }
+  });

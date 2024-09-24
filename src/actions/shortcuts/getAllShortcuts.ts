@@ -2,15 +2,19 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '../../lib/prisma';
-import {
-  GetAllShortcutsActionResult,
-  IShortcut,
-} from '@/app/(main)/shortcuts/types';
+import { IShortcut } from '@/app/(main)/shortcuts/types';
 import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
+import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware'; 
 import { handleErrors } from '@/utils/handleErrors';
 
-export async function getAllShortcuts(): Promise<GetAllShortcutsActionResult> {
+export interface IGetAllShortcutsReturnProps {
+  success: boolean;
+  data?: IShortcut[];
+  error?: string;
+}
+
+export const getAllShortcuts = withPermissions('shortcuts', 'READ', async (): Promise<IGetAllShortcutsReturnProps> => {
   try {
     const result = await prisma.$transaction(async (tx) => {
       const shortcuts: IShortcut[] = await tx.shortcut.findMany({
@@ -36,4 +40,4 @@ export async function getAllShortcuts(): Promise<GetAllShortcutsActionResult> {
     const errorResult = handleErrors(error);
     return { success: false, error: errorResult.error };
   }
-}
+});

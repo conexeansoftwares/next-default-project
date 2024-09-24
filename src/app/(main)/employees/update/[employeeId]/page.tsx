@@ -9,8 +9,6 @@ export default async function Page({
 }) {
   const response = await getActiveEmployeeByIdAction(params.employeeId);
 
-  console.log(response);
-
   if (response.success) {
     return <EditEmployee {...response.data} />;
   }

@@ -1,11 +1,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import {
-  MoreHorizontal,
-  UserRoundPen,
-  UserRoundX,
-} from 'lucide-react';
+import { MoreHorizontal, UserRoundPen, UserRoundX } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import {
   DropdownMenu,
@@ -31,10 +27,14 @@ import { IUser } from './types';
 
 type userColumnProps = {
   onDelete: (id: string) => void;
+  canEditAndCreate: boolean;
+  canDelete: boolean;
 };
 
 export const getColumns = ({
   onDelete,
+  canEditAndCreate,
+  canDelete,
 }: userColumnProps): ColumnDef<IUser>[] => [
   {
     accessorKey: 'email',
@@ -47,6 +47,10 @@ export const getColumns = ({
     cell: ({ row }) => {
       const user = row.original;
 
+      if (!canEditAndCreate && !canDelete) {
+        return null;
+      }
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -56,41 +60,46 @@ export const getColumns = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <Link href={`/users/update/${user.id}`}>
-              <DropdownMenuItem className="justify-between">
-                Editar <UserRoundPen className="w-4 h-4" />
-              </DropdownMenuItem>
-            </Link>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="justify-between"
-                >
-                  Excluir <UserRoundX className="w-4 h-4" />
+            {canEditAndCreate && (
+              <Link href={`/users/update/${user.id}`}>
+                <DropdownMenuItem className="justify-between">
+                  Editar <UserRoundPen className="w-4 h-4" />
                 </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Tem certeza que deseja excluir?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta ação não pode ser desfeita. Isso irá desativar
-                    permanentemente o colaborador e remover os dados associados.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-destructive"
-                    onClick={() => onDelete(user.id)}
+              </Link>
+            )}
+            {canDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="justify-between"
                   >
-                    Continuar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    Excluir <UserRoundX className="w-4 h-4" />
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Tem certeza que deseja excluir?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta ação não pode ser desfeita. Isso irá desativar
+                      permanentemente o colaborador e remover os dados
+                      associados.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive"
+                      onClick={() => onDelete(user.id)}
+                    >
+                      Continuar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

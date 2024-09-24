@@ -16,22 +16,19 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
-import { createVisitorMovementAction } from '@/actions/movements/visitors/createVisitorMovementAction';
+import { useToast } from '@/hooks/useToast';
+import { createVisitorMovementAction, ICreateVehicleMovementReturnProps } from '@/actions/movements/visitors/createVisitorMovementAction';
 import {
   VisitorMovementFormData,
   visitorMovementFormSchema,
 } from '@/schemas/visitorMovementSchema';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  GetAllActiveCompanyActionResult,
-  ICompanySelect,
-} from '../../companies/types';
-import { getAllActiveCompanies } from '@/actions/companies/getAllActiveCompanies';
 import { MESSAGE } from '@/utils/message';
+import { getAllActiveCompaniesToSelect, IGetAllActiveCompaniesToSelectReturnProps } from '@/actions/companies/getAllActiveCompaniesToSelect';
+import { ICompany } from '../../companies/types';
 
 export function VisitorsMovementForm() {
-  const [companies, setCompanies] = useState<ICompanySelect[]>([]);
+  const [companies, setCompanies] = useState<Omit<ICompany, 'cnpj'>[]>([]);
   const [action, setAction] = useState<'E' | 'S'>('E');
   const [requesting, setRequesting] = useState<boolean>(false);
   const [requestingCompanies, setRequestingCompanies] =
@@ -52,12 +49,12 @@ export function VisitorsMovementForm() {
 
   const onSubmit = async (data: VisitorMovementFormData) => {
     setRequesting(true);
-    const response = await createVisitorMovementAction(data);
+    const response: ICreateVehicleMovementReturnProps = await createVisitorMovementAction(data);
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
       form.reset();
       setAction('E');
@@ -74,9 +71,9 @@ export function VisitorsMovementForm() {
   useEffect(() => {
     const fetchCompanies = async () => {
       setRequestingCompanies(true);
-      const result: GetAllActiveCompanyActionResult =
-        await getAllActiveCompanies(true);
-      if (result.success) {
+      const result: IGetAllActiveCompaniesToSelectReturnProps =
+        await getAllActiveCompaniesToSelect();
+      if (result.success && result.data) {
         setCompanies(result.data);
       } else {
         toast({

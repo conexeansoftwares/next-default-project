@@ -12,10 +12,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getColumns, IVehicleMovement } from './columns';
 import { DataTable } from '@/components/ui/dataTable';
-import { getVehicleMovementByDateAction } from '@/actions/movements/vehicles/getVehicleMovementByDateAction';
+import { getVehicleMovementByDateAction, IGetVehicleMovementByDateReturnProps } from '@/actions/movements/vehicles/getVehicleMovementByDateAction';
 import { MESSAGE } from '@/utils/message';
-import { useToast } from '@/hooks/use-toast';
-import { GetVehicleMovementActionResult } from '@/app/(main)/movement/types';
+import { useToast } from '@/hooks/useToast';
 
 export function VehicleHistorical() {
   const [startDate, setStartDate] = useState<Date>();
@@ -38,13 +37,13 @@ export function VehicleHistorical() {
 
     setIsLoading(true);
 
-    const result: GetVehicleMovementActionResult =
-      await getVehicleMovementByDateAction(
-        startDate.toISOString(),
-        endDate.toISOString(),
-      );
+    const result: IGetVehicleMovementByDateReturnProps =
+      await getVehicleMovementByDateAction({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
 
-    if (result.success) {
+    if (result.success && result.data) {
       setMovements(result.data);
     } else {
       toast({

@@ -5,8 +5,9 @@ import { prisma } from '../../../lib/prisma';
 import { z } from 'zod';
 import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
+import { IVisitorMovementSimplified } from '@/app/(main)/movements/types';
+import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
-import { GetVisitorMovementsByDateActionResult, IVisitorMovementSimplified } from '@/app/(main)/movement/types';
 
 const getVisitorMovementSchema = z.object({
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
@@ -17,64 +18,78 @@ const getVisitorMovementSchema = z.object({
   }),
 });
 
-export async function getVisitorMovementByDateAction(
-  startDate: string,
-  endDate: string
-): Promise<GetVisitorMovementsByDateActionResult> {
-  try {
-    const validatedData = getVisitorMovementSchema.parse({
-      startDate,
-      endDate,
-    });
+interface GetVisitorMovementActionParams {
+  startDate: string;
+  endDate: string;
+}
 
-    const startDateTime = new Date(validatedData.startDate);
-    const endDateTime = new Date(validatedData.endDate);
+export interface IGetVisitorMovementByDate {
+  success: boolean;
+  data?: IVisitorMovementSimplified[];
+  error?: string;
+}
 
-    endDateTime.setHours(23, 59, 59, 999);
-
-    const result = await prisma.$transaction(async (tx) => {
-      const movements = await tx.visitorMovement.findMany({
-        where: {
-          createdAt: {
-            gte: startDateTime,
-            lte: endDateTime,
-          },
-        },
-        select: {
-          fullName: true,
-          cpf: true,
-          telephone: true,
-          licensePlate: true,
-          action: true,
-          createdAt: true,
-        },
-        orderBy: {
-          createdAt: 'asc',
-        },
+export const getVisitorMovementByDateAction = withPermissions(
+  'movements',
+  'READ',
+  async (
+    params: GetVisitorMovementActionParams,
+  ): Promise<IGetVisitorMovementByDate> => {
+    try {
+      const { startDate, endDate } = params;
+      const validatedData = getVisitorMovementSchema.parse({
+        startDate,
+        endDate,
       });
 
-      if (movements.length === 0) {
-        throw new AppError(MESSAGE.VISITOR_MOVEMENT.NOT_FOUND, 404);
-      }
+      const startDateTime = new Date(validatedData.startDate);
+      const endDateTime = new Date(validatedData.endDate);
 
-      return movements.map((movement): IVisitorMovementSimplified => ({
-        fullName: movement.fullName,
-        cpf: movement.cpf,
-        telephone: movement.telephone,
-        licensePlate: movement.licensePlate,
-        action: movement.action,
-        date: movement.createdAt.toISOString(),
-      }));
-    });
+      endDateTime.setHours(23, 59, 59, 999);
 
-    revalidatePath('/historical');
+      const result = await prisma.$transaction(async (tx) => {
+        const movements = await tx.visitorMovement.findMany({
+          where: {
+            createdAt: {
+              gte: startDateTime,
+              lte: endDateTime,
+            },
+          },
+          select: {
+            fullName: true,
+            cpf: true,
+            telephone: true,
+            licensePlate: true,
+            action: true,
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        });
 
-    return {
-      success: true,
-      data: result,
-    };
-  } catch (error) {
-    const errorResult = handleErrors(error);
-    return { success: false, error: errorResult.error };
-  }
-}
+        if (movements.length === 0) {
+          throw new AppError(MESSAGE.VISITOR_MOVEMENT.NOT_FOUND, 404);
+        }
+
+        return movements.map(
+          (movement): IVisitorMovementSimplified => ({
+            fullName: movement.fullName,
+            cpf: movement.cpf,
+            telephone: movement.telephone,
+            licensePlate: movement.licensePlate,
+            action: movement.action,
+            date: movement.createdAt.toISOString(),
+          }),
+        );
+      });
+
+      revalidatePath('/historical');
+
+      return { success: true, data: result };
+    } catch (error) {
+      const errorResult = handleErrors(error);
+      return { success: false, error: errorResult.error };
+    }
+  },
+);

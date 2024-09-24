@@ -6,39 +6,37 @@ import { CirclePlus } from 'lucide-react';
 import { PageComponent } from '../../../../components/ui/page';
 import { Button } from '../../../../components/ui/button';
 import { DataTable } from '../../../../components/ui/dataTable';
-import { useToast } from '../../../../hooks/use-toast';
-import { GetAllActiveCompanyActionResult, ICompany } from '../types';
+import { useToast } from '../../../../hooks/useToast';
+import { ICompany } from '../types';
 import { getColumns } from '../columns';
-import { deactivateCompanyAction } from '@/actions/companies/deactivateCompanyAction';
+import { deactivateCompanyAction, IDeactiveCompanyReturnProps } from '@/actions/companies/deactivateCompanyAction';
+import { useAuth } from '@/hooks/usePermissions';
+import { IGetAllActiveCompaniesReturnProps } from '@/actions/companies/getAllActiveCompanies';
 import { MESSAGE } from '@/utils/message';
 
-interface CompaniesProps {
-  result: GetAllActiveCompanyActionResult;
+interface ICompaniesProps {
+  result: IGetAllActiveCompaniesReturnProps;
 }
 
-export function Companies({ result }: CompaniesProps) {
+export function Companies({ result }: ICompaniesProps) {
   const { toast } = useToast();
+  const { checkPermission } = useAuth();
+
+  const canEditAndCreate = checkPermission('companies', 'WRITE');
+  const canDelete = checkPermission('companies', 'DELETE');
+
   const [companies, setCompanies] = useState<ICompany[]>(
     result.success ? (result.data as ICompany[]) : [],
   );
 
-  useEffect(() => {
-    if (!result.success) {
-      toast({
-        variant: 'destructive',
-        title: MESSAGE.COMMON.GENERIC_WARNING_TITLE,
-        description: result.error,
-      });
-    }
-  }, [result, toast]);
-
   const handleDelete = useCallback(
     async (companyId: string) => {
-      const deleteResult = await deactivateCompanyAction(companyId);
-      if (deleteResult.success) {
+      const response: IDeactiveCompanyReturnProps = await deactivateCompanyAction(companyId);
+
+      if (response.success) {
         toast({
           variant: 'success',
-          description: deleteResult.message,
+          description: response.data,
         });
         setCompanies((prevCompanies) =>
           prevCompanies.filter((company) => company.id !== companyId),
@@ -47,14 +45,18 @@ export function Companies({ result }: CompaniesProps) {
         toast({
           variant: 'destructive',
           title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
-          description: deleteResult.error,
-        });
+          description: response.error,
+        })
       }
     },
     [toast],
   );
 
-  const columns = getColumns({ onDelete: handleDelete });
+  const columns = getColumns({
+    onDelete: handleDelete,
+    canDelete,
+    canEditAndCreate,
+  });
 
   return (
     <PageComponent.Root>
@@ -64,14 +66,16 @@ export function Companies({ result }: CompaniesProps) {
         </div>
       </PageComponent.Header>
       <PageComponent.Content className="flex-col">
-        <div className="flex w-full justify-end">
-          <Link href={'/companies/create'}>
-            <Button className="mb-2">
-              <CirclePlus className="w-4 h-4 me-2" />
-              Cadastrar empresa
-            </Button>
-          </Link>
-        </div>
+        {canEditAndCreate && (
+          <div className="flex w-full justify-end">
+            <Link href={'/companies/create'}>
+              <Button className="mb-2">
+                <CirclePlus className="w-4 h-4 me-2" />
+                Cadastrar empresa
+              </Button>
+            </Link>
+          </div>
+        )}
 
         <DataTable.Root columns={columns} data={companies}>
           <DataTable.Tools

@@ -53,4 +53,6 @@ export const companyFormSchema = z.object({
     .refine((cnpj) => validateCNPJ(removeCnpjMask(cnpj)), { message: 'CNPJ inválido' }),
 });
 
+export const idCompanySchema = z.string().cuid({ message: 'ID inválido ou inexistente.' });
+
 export type CompanyFormData = z.infer<typeof companyFormSchema>;

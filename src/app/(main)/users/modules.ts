@@ -25,6 +25,11 @@ export const modules = [
     permissions: ['Ler', 'Escrever', 'Deletar', 'Admin'],
   },
   {
+    id: 'employees',
+    name: 'Colaboradores',
+    permissions: ['Ler', 'Escrever', 'Deletar', 'Admin'],
+  },
+  {
     id: 'movements',
     name: 'Movimentações',
     permissions: ['Ler', 'Escrever', 'Deletar', 'Admin'],

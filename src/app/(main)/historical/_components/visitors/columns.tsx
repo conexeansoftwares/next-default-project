@@ -4,7 +4,7 @@ import { DataTable } from '../../../../../components/ui/dataTable';
 import { format } from 'date-fns';
 import { formatCPF } from '@/utils/cpfUtils';
 import { formatCellphone } from '@/utils/telephoneUtils';
-import { IVisitorMovementSimplified } from '@/app/(main)/movement/types';
+import { IVisitorMovementSimplified } from '@/app/(main)/movements/types';
 
 export interface IVisitorMovement {
   fullName: string;

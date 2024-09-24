@@ -10,12 +10,15 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { getColumns, IVisitorMovement } from './columns';
+import { getColumns } from './columns';
 import { DataTable } from '@/components/ui/dataTable';
-import { getVisitorMovementByDateAction } from '@/actions/movements/visitors/getVisitorMovementByDateAction';
+import {
+  getVisitorMovementByDateAction,
+  IGetVisitorMovementByDate,
+} from '@/actions/movements/visitors/getVisitorMovementByDateAction';
 import { MESSAGE } from '@/utils/message';
-import { useToast } from '@/hooks/use-toast';
-import { GetVisitorMovementsByDateActionResult, IVisitorMovementSimplified } from '@/app/(main)/movement/types';
+import { useToast } from '@/hooks/useToast';
+import { IVisitorMovementSimplified } from '@/app/(main)/movements/types';
 
 export function VisitorHistorical() {
   const [startDate, setStartDate] = useState<Date>();
@@ -38,13 +41,12 @@ export function VisitorHistorical() {
 
     setIsLoading(true);
 
-    const result: GetVisitorMovementsByDateActionResult =
-      await getVisitorMovementByDateAction(
-        startDate.toISOString(),
-        endDate.toISOString(),
-      );
+    const result: IGetVisitorMovementByDate = await getVisitorMovementByDateAction({
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    });
 
-    if (result.success) {
+    if (result.success && result.data) {
       setMovements(result.data);
     } else {
       toast({

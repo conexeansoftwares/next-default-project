@@ -3,7 +3,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { editUserAction } from '@/actions/users/editUserAction';
+import {
+  editUserAction,
+  IEditUserReturnProps,
+} from '@/actions/users/editUserAction';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -30,7 +33,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { CaretSortIcon } from '@radix-ui/react-icons';
 import {
   Command,
@@ -58,8 +61,12 @@ import {
   userFormSchemaWithoutPassword,
   UserFormWithoutPassword,
 } from '@/schemas/userSchema';
-import { updateUserPasswordAction } from '@/actions/users/updatePasswordAction';
+import { IUpdateUserReturnProps, updateUserPasswordAction } from '@/actions/users/updatePasswordAction';
 import { modules } from '../../../modules';
+import {
+  getAllActiveEmployeesToSelectAction,
+  IGetAllACtiveEmplyeesToSelectReturnProps,
+} from '@/actions/employees/getAllActiveEmployeeToSelect';
 
 export default function EditUser({ user }: { user: IUserToEdit }) {
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -112,13 +119,15 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
 
   async function onSubmit(values: UserFormWithoutPassword) {
     setRequesting(true);
-    const response = await editUserAction(user.id, values);
+    const response: IEditUserReturnProps = await editUserAction({
+      userId: user.id,
+      data: values,
+    });
 
     if (response.success) {
       toast({
         variant: 'success',
-        title: MESSAGE.USER.UPDATED_SUCCESS,
-        description: response.message,
+        description: response.data,
       });
     } else {
       toast({
@@ -133,13 +142,15 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
 
   async function onPasswordSubmit(values: PasswordFormSchema) {
     setRequesting(true);
-    const response = await updateUserPasswordAction(user.id, values);
+    const response: IUpdateUserReturnProps = await updateUserPasswordAction({
+      userId: user.id,
+      data: values,
+    });
 
     if (response.success) {
       toast({
         variant: 'success',
-        title: MESSAGE.USER.PASSWORD_UPDATED_SUCCESS,
-        description: response.message,
+        description: response.data,
       });
       setIsChangePasswordOpen(false);
       passwordForm.reset();
@@ -156,12 +167,10 @@ export default function EditUser({ user }: { user: IUserToEdit }) {
 
   useEffect(() => {
     const fetchEmployees = async () => {
-      const response = await getAllActiveEmployeesAction({
-        id: true,
-        fullName: true,
-      });
-      if (response.success) {
-        setEmployees(response.data as IEmployeeToSelect[]);
+      const response: IGetAllACtiveEmplyeesToSelectReturnProps =
+        await getAllActiveEmployeesToSelectAction();
+      if (response.success && response.data) {
+        setEmployees(response.data);
       } else {
         toast({
           variant: 'destructive',

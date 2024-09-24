@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -22,36 +22,27 @@ import { Label } from '@/components/ui/label';
 
 import { UserIcon } from 'lucide-react';
 import Image from 'next/image';
-import { IEmployee } from '../../employees/types';
-import { getAllActiveEmployeesAction } from '@/actions/employees/getAllActiveEmployee';
 import { MESSAGE } from '@/utils/message';
-import { createEmployeeMovementAction } from '@/actions/movements/employees/createEmployeeMovementAction';
+import { createEmployeeMovementAction, ICreateEmployeeMovementReturnProps } from '@/actions/movements/employees/createEmployeeMovementAction';
+import { getAllActiveEmployeesToMovementAction, IGetAllACtiveEmplyeesToMovementReturnProps } from '@/actions/employees/getAllActiveEmployeeToMovement';
+import { IEmployeeToMovement } from '../../employees/types';
 
 export function EmployeesMovementForm() {
   const { toast } = useToast();
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
-  const [employee, setEmployee] = useState<IEmployee | null>(null);
+  const [employee, setEmployee] = useState<IEmployeeToMovement | null>(null);
   const [action, setAction] = useState<'E' | 'S'>('E');
   const [requesting, setRequesting] = useState(false);
   const [open, setOpen] = useState(false);
-  const [employees, setEmployees] = useState<IEmployee[]>([]);
+  const [employees, setEmployees] = useState<IEmployeeToMovement[]>([]);
 
   useEffect(() => {
     const fetchEmployees = async () => {
       setRequesting(true);
 
-      const response = await getAllActiveEmployeesAction({
-        id: true,
-        fullName: true,
-        registration: true,
-        internalPassword: true,
-        telephone: true,
-        cellPhone: true,
-        observation: true,
-        photoURL: true,
-      });
-      if (response.success) {
-        const employeeData = response.data as IEmployee[];
+      const response: IGetAllACtiveEmplyeesToMovementReturnProps = await getAllActiveEmployeesToMovementAction();
+      if (response.success && response.data) {
+        const employeeData = response.data as IEmployeeToMovement[];
         setEmployees(employeeData);
       } else {
         toast({
@@ -102,12 +93,15 @@ export function EmployeesMovementForm() {
     }
 
     setRequesting(true);
-    const response = await createEmployeeMovementAction(employee.id, action);
+    const response: ICreateEmployeeMovementReturnProps = await createEmployeeMovementAction({
+      employeeId: employee.id,
+      action,
+    });
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
       setEmployee(null);
       setAction('E');

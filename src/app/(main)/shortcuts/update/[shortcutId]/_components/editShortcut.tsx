@@ -1,7 +1,7 @@
 'use client';
 
 import { PageComponent } from '../../../../../../components/ui/page';
-import { useToast } from '../../../../../../hooks/use-toast';
+import { useToast } from '../../../../../../hooks/useToast';
 import { IShortcut } from '../../../types';
 import { ShortcutForm } from '../../../_components/shortcutForm';
 import React from 'react';
@@ -13,12 +13,15 @@ export default function EditShortcut(shortcut: IShortcut) {
   const { toast } = useToast();
 
   async function onSubmit(values: ShortcutFormData) {
-    const response = await editShortcutAction(shortcut.id, values);
+    const response = await editShortcutAction({
+      shortcutId: shortcut.id,
+      data: values,
+    });
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
     } else {
       toast({
@@ -38,7 +41,7 @@ export default function EditShortcut(shortcut: IShortcut) {
         <ShortcutForm
           initialData={shortcut}
           onSubmit={onSubmit}
-          submitButtonText="Atualizar empresa"
+          submitButtonText="Atualizar atalho"
         />
       </PageComponent.Content>
     </PageComponent.Root>

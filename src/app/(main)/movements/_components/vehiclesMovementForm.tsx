@@ -2,25 +2,21 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { createVehicleMovementAction } from '@/actions/movements/vehicles/createVehicleMovementAction';
+import { useToast } from '@/hooks/useToast';
+import { createVehicleMovementAction, ICreateVehicleMovementReturnProps } from '@/actions/movements/vehicles/createVehicleMovementAction';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getActiveVehicleByLicensePlateAction } from '@/actions/vehicles/getActiveVehicleByLicensePlateAction';
+import {
+  getActiveVehicleByLicensePlateAction,
+  IGetActiveVehicleByLicensePlate,
+} from '@/actions/vehicles/getActiveVehicleByLicensePlateAction';
 import { MESSAGE } from '@/utils/message';
-
-interface IVehicleToMovement {
-  id: string;
-  licensePlate: string;
-  carModel: string;
-  owner: string;
-  companyName?: string;
-}
+import { IVehicle } from '../../vehicles/types';
 
 export function VehicleMovementForm() {
   const { toast } = useToast();
   const [requesting, setRequesting] = useState<boolean>(false);
-  const [vehicle, setVehicle] = useState<IVehicleToMovement | null>(null);
+  const [vehicle, setVehicle] = useState<IVehicle | null>(null);
   const [licensePlate, setLicensePlate] = useState('');
   const [action, setAction] = useState<'E' | 'S'>('E');
 
@@ -36,9 +32,10 @@ export function VehicleMovementForm() {
     }
 
     setRequesting(true);
-    const response = await getActiveVehicleByLicensePlateAction(licensePlate);
+    const response: IGetActiveVehicleByLicensePlate =
+      await getActiveVehicleByLicensePlateAction(licensePlate);
 
-    if (response.success) {
+    if (response.success && response.data) {
       setVehicle(response.data);
       setLicensePlate('');
     } else {
@@ -63,12 +60,15 @@ export function VehicleMovementForm() {
     }
 
     setRequesting(true);
-    const response = await createVehicleMovementAction(vehicle.id, action);
+    const response: ICreateVehicleMovementReturnProps = await createVehicleMovementAction({
+      vehicleId: vehicle.id,
+      action,
+    });
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
       setVehicle(null);
       setAction('E');

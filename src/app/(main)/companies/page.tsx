@@ -1,9 +1,8 @@
-import { getAllActiveCompanies } from '../../../actions/companies/getAllActiveCompanies';
+import { getAllActiveCompanies, IGetAllActiveCompaniesReturnProps } from '../../../actions/companies/getAllActiveCompanies';
 import { Companies } from './_components/companies';
-import { GetAllActiveCompanyActionResult } from '@/app/(main)/companies/types';
 
 export default async function Page() {
-  const result: GetAllActiveCompanyActionResult = await getAllActiveCompanies();
+  const result: IGetAllActiveCompaniesReturnProps = await getAllActiveCompanies({});
 
   return (
     <Companies result={result} />

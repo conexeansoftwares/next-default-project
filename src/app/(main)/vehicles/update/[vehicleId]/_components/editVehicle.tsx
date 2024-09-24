@@ -2,11 +2,12 @@
 
 import { VehicleFormData } from '../../../../../../schemas/vehicleSchema';
 import { PageComponent } from '../../../../../../components/ui/page';
-import { useToast } from '../../../../../../hooks/use-toast';
+import { useToast } from '../../../../../../hooks/useToast';
 import { editVehicleAction } from '@/actions/vehicles/editVehicleAction';
 import { VehicleForm } from '../../../_components/vehicleForm';
 import { MESSAGE } from '@/utils/message';
 import { IVehicle } from '../../../types';
+import { IDeactiveVehicleReturnProps } from '@/actions/vehicles/desactiveVehicleAction';
 
 export default function EditVehicle(vehicle: IVehicle) {
   const { toast } = useToast();
@@ -19,12 +20,15 @@ export default function EditVehicle(vehicle: IVehicle) {
   };
 
   async function onSubmit(values: VehicleFormData) {
-    const response = await editVehicleAction(vehicle.id, values);
+    const response: IDeactiveVehicleReturnProps = await editVehicleAction({ 
+      vehicleId: vehicle.id,
+      data: values
+     });
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
     } else {
       toast({

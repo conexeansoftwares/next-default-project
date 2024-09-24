@@ -6,18 +6,25 @@ import { CirclePlus } from 'lucide-react';
 import { PageComponent } from '../../../../components/ui/page';
 import { Button } from '../../../../components/ui/button';
 import { DataTable } from '../../../../components/ui/dataTable';
-import { useToast } from '../../../../hooks/use-toast';
+import { useToast } from '../../../../hooks/useToast';
 import { getColumns } from '../columns';
-import { GetAllActiveUsersActionResult, IUser } from '../types';
+import { IUser } from '../types';
 import { MESSAGE } from '@/utils/message';
 import { deactivateUserAction } from '@/actions/users/desactiveUserAction';
+import { useAuth } from '@/hooks/usePermissions';
+import { IGetAllActiveUsersReturnProps } from '@/actions/users/getAllActivesUsersAction';
 
 interface UsersProps {
-  result: GetAllActiveUsersActionResult;
+  result: IGetAllActiveUsersReturnProps;
 }
 
 export function Users({ result }: UsersProps) {
   const { toast } = useToast();
+  const { checkPermission } = useAuth();
+
+  const canEditAndCreate = checkPermission('users', 'WRITE');
+  const canDelete = checkPermission('users', 'DELETE');
+
   const [users, setUsers] = useState<IUser[]>(
     result.success ? (result.data as IUser[]) : [],
   );
@@ -52,24 +59,30 @@ export function Users({ result }: UsersProps) {
     [toast],
   );
 
-  const columns = getColumns({ onDelete: handleDelete });
+  const columns = getColumns({
+    onDelete: handleDelete,
+    canEditAndCreate,
+    canDelete,
+  });
 
   return (
     <PageComponent.Root>
       <PageComponent.Header>
         <div className="flex flex-col">
-          <PageComponent.Title text="Colaboradores" />
+          <PageComponent.Title text="Usuários" />
         </div>
       </PageComponent.Header>
       <PageComponent.Content className="flex-col">
-        <div className="flex w-full justify-end">
-          <Link href={'/users/create'}>
-            <Button className="mb-2">
-              <CirclePlus className="w-4 h-4 me-2" />
-              Cadastrar colaborador
-            </Button>
-          </Link>
-        </div>
+        {canEditAndCreate && (
+          <div className="flex w-full justify-end">
+            <Link href={'/users/create'}>
+              <Button className="mb-2">
+                <CirclePlus className="w-4 h-4 me-2" />
+                Cadastrar usuário
+              </Button>
+            </Link>
+          </div>
+        )}
         <DataTable.Root columns={columns} data={users}>
           <DataTable.Tools
             searchKey="email"

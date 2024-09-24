@@ -7,7 +7,7 @@ import {
   CombinedUserForm,
   combinedUserFormSchema,
 } from '../../../../schemas/userSchema';
-import { createUserAction } from '../../../../actions/users/createUserAction';
+import { createUserAction, ICreateUserReturnProps } from '../../../../actions/users/createUserAction';
 import { Button } from '../../../../components/ui/button';
 import {
   Form,
@@ -29,7 +29,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { CaretSortIcon } from '@radix-ui/react-icons';
 import {
   Command,
@@ -42,8 +42,11 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MESSAGE } from '@/utils/message';
 import { IEmployeeToSelect } from '../../employees/types';
-import { getAllActiveEmployeesAction } from '@/actions/employees/getAllActiveEmployee';
 import { modules } from '../modules';
+import {
+  getAllActiveEmployeesToSelectAction,
+  IGetAllACtiveEmplyeesToSelectReturnProps,
+} from '@/actions/employees/getAllActiveEmployeeToSelect';
 
 export default function UserPage() {
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -84,12 +87,12 @@ export default function UserPage() {
   async function onSubmit(values: CombinedUserForm) {
     setRequesting(true);
 
-    const response = await createUserAction(values);
+    const response: ICreateUserReturnProps = await createUserAction(values);
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
       form.reset();
     } else {
@@ -105,11 +108,9 @@ export default function UserPage() {
 
   useEffect(() => {
     const fetchContributors = async () => {
-      const response = await getAllActiveEmployeesAction({
-        id: true,
-        fullName: true,
-      });
-      if (response.success) {
+      const response: IGetAllACtiveEmplyeesToSelectReturnProps =
+        await getAllActiveEmployeesToSelectAction();
+      if (response.success && response.data) {
         setContributors(response.data);
       } else {
         toast({
@@ -308,82 +309,103 @@ export default function UserPage() {
               />
 
               <div className="bg-secondary/90 rounded-lg p-4 col-span-full">
-              <FormField
-                control={form.control}
-                name="permissions"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="mb-4">
-                      <FormLabel className="text-base">Permissões de Módulos</FormLabel>
-                      <FormDescription>Selecione as permissões para cada módulo</FormDescription>
-                    </div>
-                    <FormControl>
-                      <Command className="rounded-lg border shadow-md">
-                        <CommandInput
-                          placeholder="Procurar módulo..."
-                          onValueChange={setSearchQuery}
-                        />
-                        <CommandList className="max-h-full">
-                          {filteredModules.length === 0 && searchQuery !== '' && (
-                            <CommandEmpty>Nenhum módulo encontrado.</CommandEmpty>
-                          )}
-                          <CommandGroup>
-                            <ScrollArea className="h-[300px] w-full p-4">
-                              {filteredModules.map((module) => (
-                                <CommandItem
-                                  key={module.id}
-                                  value={module.name}
-                                  className="px-2 py-3"
-                                >
-                                  <div className="w-full">
-                                    <FormLabel className="text-sm font-semibold">
-                                      {module.name}
-                                    </FormLabel>
-                                    <div className="flex flex-wrap gap-4 mt-2">
-                                      {module.permissions.map((permission) => (
-                                        <FormItem
-                                          key={`${module.id}-${permission}`}
-                                          className="flex flex-row items-start space-x-3 space-y-0"
-                                        >
-                                          <FormControl>
-                                            <Checkbox
-                                              checked={
-                                                field.value?.[module.id]?.[
-                                                  permission.toLowerCase()
-                                                ] || false
-                                              }
-                                              onCheckedChange={(checked) => {
-                                                const updatedPermissions = {
-                                                  ...field.value,
-                                                };
-                                                if (!updatedPermissions[module.id]) {
-                                                  updatedPermissions[module.id] = {};
-                                                }
-                                                updatedPermissions[module.id][
-                                                  permission.toLowerCase()
-                                                ] = checked === true;
-                                                field.onChange(updatedPermissions);
-                                              }}
-                                            />
-                                          </FormControl>
-                                          <FormLabel className="text-sm font-normal">
-                                            {permission}
-                                          </FormLabel>
-                                        </FormItem>
-                                      ))}
+                <FormField
+                  control={form.control}
+                  name="permissions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="mb-4">
+                        <FormLabel className="text-base">
+                          Permissões de Módulos
+                        </FormLabel>
+                        <FormDescription>
+                          Selecione as permissões para cada módulo
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Command className="rounded-lg border shadow-md">
+                          <CommandInput
+                            placeholder="Procurar módulo..."
+                            onValueChange={setSearchQuery}
+                          />
+                          <CommandList className="max-h-full">
+                            {filteredModules.length === 0 &&
+                              searchQuery !== '' && (
+                                <CommandEmpty>
+                                  Nenhum módulo encontrado.
+                                </CommandEmpty>
+                              )}
+                            <CommandGroup>
+                              <ScrollArea className="h-[300px] w-full p-4">
+                                {filteredModules.map((module) => (
+                                  <CommandItem
+                                    key={module.id}
+                                    value={module.name}
+                                    className="px-2 py-3"
+                                  >
+                                    <div className="w-full">
+                                      <FormLabel className="text-sm font-semibold">
+                                        {module.name}
+                                      </FormLabel>
+                                      <div className="flex flex-wrap gap-4 mt-2">
+                                        {module.permissions.map(
+                                          (permission) => (
+                                            <FormItem
+                                              key={`${module.id}-${permission}`}
+                                              className="flex flex-row items-start space-x-3 space-y-0"
+                                            >
+                                              <FormControl>
+                                                <Checkbox
+                                                  checked={
+                                                    field.value?.[module.id]?.[
+                                                      permission.toLowerCase()
+                                                    ] || false
+                                                  }
+                                                  onCheckedChange={(
+                                                    checked,
+                                                  ) => {
+                                                    const updatedPermissions = {
+                                                      ...field.value,
+                                                    };
+                                                    if (
+                                                      !updatedPermissions[
+                                                        module.id
+                                                      ]
+                                                    ) {
+                                                      updatedPermissions[
+                                                        module.id
+                                                      ] = {};
+                                                    }
+                                                    updatedPermissions[
+                                                      module.id
+                                                    ][
+                                                      permission.toLowerCase()
+                                                    ] = checked === true;
+                                                    field.onChange(
+                                                      updatedPermissions,
+                                                    );
+                                                  }}
+                                                />
+                                              </FormControl>
+                                              <FormLabel className="text-sm font-normal">
+                                                {permission}
+                                              </FormLabel>
+                                            </FormItem>
+                                          ),
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                </CommandItem>
-                              ))}
-                            </ScrollArea>
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                                  </CommandItem>
+                                ))}
+                              </ScrollArea>
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
             <div className="flex justify-end w-100 mt-6">

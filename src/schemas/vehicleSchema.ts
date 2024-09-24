@@ -12,4 +12,6 @@ export const vehicleFormSchema = z.object({
   companyId: z.string().cuid({ message: 'Empresa inválida' }),
 });
 
+export const idVehicleSchema = z.string().cuid({ message: 'ID inválido ou inexistente.' });
+
 export type VehicleFormData = z.infer<typeof vehicleFormSchema>;

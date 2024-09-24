@@ -6,20 +6,27 @@ import { CirclePlus } from 'lucide-react';
 import { PageComponent } from '../../../../components/ui/page';
 import { Button } from '../../../../components/ui/button';
 import { DataTable } from '../../../../components/ui/dataTable';
-import { useToast } from '../../../../hooks/use-toast';
+import { useToast } from '../../../../hooks/useToast';
 import { getColumns } from '../columns';
-import { GetAllActiveEmployeesActionResult, IEmployeeWithCompanies } from '../types';
-import { deactivateEmployeeAction } from '@/actions/employees/deactiveEmployeeAction';
+import { deactivateEmployeeAction, IDeactiveEmployeeReturnProps } from '@/actions/employees/deactiveEmployeeAction';
 import { MESSAGE } from '@/utils/message';
+import { useAuth } from '@/hooks/usePermissions';
+import { IGetAllACtiveEmplyeesReturnProps } from '@/actions/employees/getAllActiveEmployee';
+import { IEmployeeDataTable } from '../types';
 
 interface EmployeesProps {
-  result: GetAllActiveEmployeesActionResult;
+  result: IGetAllACtiveEmplyeesReturnProps;
 }
 
 export function Employees({ result }: EmployeesProps) {
   const { toast } = useToast();
-  const [employees, setEmployees] = useState<IEmployeeWithCompanies[]>(
-    result.success ? (result.data as IEmployeeWithCompanies[]) : [],
+  const { checkPermission } = useAuth();
+
+  const canEditAndCreate = checkPermission('employees', 'WRITE');
+  const canDelete = checkPermission('employees', 'DELETE');
+
+  const [employees, setEmployees] = useState<IEmployeeDataTable[]>(
+    result.success ? (result.data as IEmployeeDataTable[]) : [],
   );
 
   useEffect(() => {
@@ -34,11 +41,11 @@ export function Employees({ result }: EmployeesProps) {
 
   const handleDelete = useCallback(
     async (employeeId: string) => {
-      const deleteResult = await deactivateEmployeeAction(employeeId);
+      const deleteResult: IDeactiveEmployeeReturnProps = await deactivateEmployeeAction(employeeId);
       if (deleteResult.success) {
         toast({
           variant: 'success',
-          description: deleteResult.message,
+          description: deleteResult.data,
         });
         setEmployees((prevEmployees) =>
           prevEmployees.filter((employee) => employee.id !== employeeId),
@@ -54,7 +61,11 @@ export function Employees({ result }: EmployeesProps) {
     [toast],
   );
 
-  const columns = getColumns({ onDelete: handleDelete });
+  const columns = getColumns({
+    onDelete: handleDelete,
+    canEditAndCreate,
+    canDelete,
+  });
 
   return (
     <PageComponent.Root>
@@ -64,14 +75,16 @@ export function Employees({ result }: EmployeesProps) {
         </div>
       </PageComponent.Header>
       <PageComponent.Content className="flex-col">
-        <div className="flex w-full justify-end">
-          <Link href={'/employees/create'}>
-            <Button className="mb-2">
-              <CirclePlus className="w-4 h-4 me-2" />
-              Cadastrar colaborador
-            </Button>
-          </Link>
-        </div>
+        {canEditAndCreate && (
+          <div className="flex w-full justify-end">
+            <Link href={'/employees/create'}>
+              <Button className="mb-2">
+                <CirclePlus className="w-4 h-4 me-2" />
+                Cadastrar colaborador
+              </Button>
+            </Link>
+          </div>
+        )}
 
         <DataTable.Root columns={columns} data={employees}>
           <DataTable.Tools

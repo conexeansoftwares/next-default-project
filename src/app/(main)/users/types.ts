@@ -25,19 +25,3 @@ export interface IUserToEdit {
   userPermissions: IUserPermission[];
   companyIds: string[];
 }
-
-export type DefaultUserActionResult =
-  | { success: true; message: string }
-  | { success: false; error: string };
-
-export type GetActiveUserActionResult =
-  | (Omit<Extract<DefaultUserActionResult, { success: true }>, 'message'> & {
-      data: IUserToEdit;
-    })
-  | Extract<DefaultUserActionResult, { success: false }>;
-
-export type GetAllActiveUsersActionResult =
-  | (Omit<Extract<DefaultUserActionResult, { success: true }>, 'message'> & {
-      data: IUser[];
-    })
-  | Extract<DefaultUserActionResult, { success: false }>;

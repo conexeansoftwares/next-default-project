@@ -2,9 +2,9 @@
 
 import { EmployeeFormData } from '../../../../schemas/employeeSchema';
 import { PageComponent } from '../../../../components/ui/page';
-import { useToast } from '../../../../hooks/use-toast';
+import { useToast } from '../../../../hooks/useToast';
 import { useRef } from 'react';
-import { createEmployeeAction } from '@/actions/employees/createEmployeeAction';
+import { createEmployeeAction, ICreateEmployeeReturnProps } from '@/actions/employees/createEmployeeAction';
 import { EmployeeForm } from '../_components/employeeForm';
 import { MESSAGE } from '@/utils/message';
 
@@ -13,12 +13,12 @@ export default function CreateEmployeePage() {
   const formRef = useRef<{ reset: () => void } | null>(null);
 
   async function onSubmit(values: EmployeeFormData) {
-    const response = await createEmployeeAction(values);
+    const response: ICreateEmployeeReturnProps = await createEmployeeAction(values);
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
 
       if (formRef.current) {

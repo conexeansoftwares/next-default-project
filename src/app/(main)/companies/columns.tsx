@@ -28,19 +28,19 @@ import {
 import { formatCNPJ } from '../../../utils/cnpjUtils';
 import Link from 'next/link';
 import { DataTable } from '../../../components/ui/dataTable';
+import { ICompany } from './types';
 
-export interface ICompany {
-  id: string;
-  name: string;
-  cnpj: string;
-}
 
 type CompanyColumnProps = {
   onDelete: (id: string) => void;
+  canEditAndCreate: boolean;
+  canDelete: boolean;
 };
 
 export const getColumns = ({
   onDelete,
+  canEditAndCreate,
+  canDelete,
 }: CompanyColumnProps): ColumnDef<ICompany>[] => [
   {
     accessorKey: 'name',
@@ -64,6 +64,10 @@ export const getColumns = ({
     cell: ({ row }) => {
       const company = row.original;
 
+      if (!canEditAndCreate && !canDelete) {
+        return null;
+      }
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -73,39 +77,43 @@ export const getColumns = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <Link href={`/companies/update/${company.id}`}>
-              <DropdownMenuItem className="justify-between">
-                Editar <UserRoundPen className="w-4 h-4" />
-              </DropdownMenuItem>
-            </Link>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="justify-between"
-                >
-                  Excluir <UserRoundX className="w-4 h-4" />
+            {canEditAndCreate && (
+              <Link href={`/companies/update/${company.id}`}>
+                <DropdownMenuItem className="justify-between">
+                  Editar <UserRoundPen className="w-4 h-4" />
                 </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Tem certeza que deseja inativar?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta irá desativar a empresa e remover os dados associados.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => onDelete(company.id)}
+              </Link>
+            )}
+            {canDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="justify-between"
                   >
-                    Continuar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    Excluir <UserRoundX className="w-4 h-4" />
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Tem certeza que deseja inativar?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta irá desativar a empresa e remover os dados associados.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => onDelete(company.id)}
+                    >
+                      Continuar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

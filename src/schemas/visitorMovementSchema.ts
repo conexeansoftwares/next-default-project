@@ -1,4 +1,5 @@
 import { removeCpfMask } from '@/utils/cpfUtils';
+import { removeTelephoneMask } from '@/utils/telephoneUtils';
 import * as z from 'zod';
 
 function validateCPF(cpf: string): boolean {
@@ -59,12 +60,12 @@ export const visitorMovementFormSchema = z.object({
     (value) => {
       if (value.trim() === '') return true;
       
-      const digitsOnly = value.replace(/\D/g, '');
+      const digitsOnly = removeTelephoneMask(value);
       
       return digitsOnly.length === 11;
     },
     {
-      message: 'Quando preenchido, o telefone deve conter 11 dígitos numéricos',
+      message: 'O telefone deve conter 11 dígitos numéricos',
     }
   ),
   licensePlate: z

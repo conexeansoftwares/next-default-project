@@ -1,10 +1,9 @@
-import { getAllShortcuts } from '@/actions/shortcuts/getAllShortcuts';
+import { getAllShortcuts, IGetAllShortcutsReturnProps } from '@/actions/shortcuts/getAllShortcuts';
 import { PageComponent } from '@/components/ui/page';
 import { ShortcutList } from './_components/shortcutList';
-import { GetAllShortcutsActionResult } from './types';
 
 export default async function Page() {
-  const result: GetAllShortcutsActionResult = await getAllShortcuts();
+  const result: IGetAllShortcutsReturnProps = await getAllShortcuts();
 
   return (
     <PageComponent.Root>

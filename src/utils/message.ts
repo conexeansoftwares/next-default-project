@@ -19,6 +19,8 @@ export const MESSAGE = {
     ALL_NOT_FOUND: 'Nenhuma empresa encontrada.',
     DEACTIVATED_SUCCESS: 'Empresa desativada com sucesso.',
     UPDATED_SUCCESS: 'Informações da empresa atualizadas com sucesso.',
+    EXISTING_DEPENDENCIES: 'Não é possível desativar a empresa devido a veículo(s), colaborador(es) e/ou usuário(s) vinculados. Desative essas entidades antes de desativar a empresa.',
+
   },
   EMPLOYEE: {
     CREATED_SUCCESS: 'Colaborador registrado com sucesso.',
@@ -27,6 +29,7 @@ export const MESSAGE = {
     DEACTIVATED_SUCCESS: 'Colaborador desativado com sucesso.',
     UPDATED_SUCCESS: 'Informaçãoes do colaborador atualizadas com sucesso.',
     ALL_NOT_FOUND: 'Nenhum colaborador encontrado.',
+    EXISTING_DEPENDENCIES: 'Não é possível desativar colaborador devido a usuário vinculado. Desative essas entidades antes de desativar a empresa.',
   },
   VEHICLE: {
     EXISTING_LICENSE_PLATE: 'Placa já registrada.',
@@ -44,6 +47,11 @@ export const MESSAGE = {
     UPDATED_SUCCESS: 'Usuário atualizado com sucesso.',
     ALL_NOT_FOUND: 'Nenhum usuário encontrado.',
     PASSWORD_UPDATED_SUCCESS: 'Senha atualizada com sucesso.',
+    EXISTING_USER_TO_EMPLOYEE: 'Já existe um usuário registrado para o colaborador.',
+  },
+  LOGIN: {
+    FAIL: 'Usuário ou senha incorretos.',
+    SUCCESS: 'Usuário autenticado com sucesso.',
   },
   MOVEMENT: {
     REQUIRED_INFORMATIONS_TITLE: 'Informações obrigatórias!',

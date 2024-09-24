@@ -2,11 +2,12 @@
 
 import { EmployeeFormData } from '../../../../../../schemas/employeeSchema';
 import { PageComponent } from '../../../../../../components/ui/page';
-import { useToast } from '../../../../../../hooks/use-toast';
-import { IEmployeeToEdit } from '../../../types';
-import { editEmployeeAction } from '@/actions/employees/editEmployeeAction';
+import { useToast } from '../../../../../../hooks/useToast';
+import { editEmployeeAction, IEditEmployeeReturnProps } from '@/actions/employees/editEmployeeAction';
 import { EmployeeForm } from '../../../_components/employeeForm';
 import { MESSAGE } from '@/utils/message';
+import { IEmployeeToEdit } from '../../../types';
+import { formatPhoneNumber } from '@/utils/telephoneUtils';
 
 export default function EditEmployee(employee: IEmployeeToEdit) {
   const { toast } = useToast();
@@ -16,19 +17,22 @@ export default function EditEmployee(employee: IEmployeeToEdit) {
     registration: employee.registration,
     companyIds: employee.companyIds,
     internalPassword: employee.internalPassword || undefined,
-    telephone: employee.telephone || undefined,
-    cellPhone: employee.cellPhone || undefined,
+    telephone: formatPhoneNumber(employee.telephone) || undefined,
+    cellPhone: formatPhoneNumber(employee.cellPhone) || undefined,
     observation: employee.observation || undefined,
     photoURL: employee.photoURL || undefined,
   };
 
   async function onSubmit(values: EmployeeFormData) {
-    const response = await editEmployeeAction(employee.id, values);
+    const response: IEditEmployeeReturnProps = await editEmployeeAction({
+      employeeId: employee.id,
+      data: values,
+    });
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
     } else {
       toast({

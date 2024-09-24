@@ -6,11 +6,12 @@ import { CirclePlus } from 'lucide-react';
 import { PageComponent } from '../../../../components/ui/page';
 import { Button } from '../../../../components/ui/button';
 import { DataTable } from '../../../../components/ui/dataTable';
-import { useToast } from '../../../../hooks/use-toast';
+import { useToast } from '../../../../hooks/useToast';
 import { getColumns } from '../columns';
 import { MESSAGE } from '@/utils/message';
 import { GetAllVehiclesActionResult, IVehicle } from '../types';
 import { deactivateVehicleAction } from '@/actions/vehicles/desactiveVehicleAction';
+import { useAuth } from '@/hooks/usePermissions';
 
 interface VehiclesProps {
   result: GetAllVehiclesActionResult;
@@ -18,6 +19,11 @@ interface VehiclesProps {
 
 export function Vehicles({ result }: VehiclesProps) {
   const { toast } = useToast();
+  const { checkPermission } = useAuth();
+
+  const canEditAndCreate = checkPermission('vehicles', 'WRITE');
+  const canDelete = checkPermission('vehicles', 'DELETE');
+
   const [vehicles, setVehicles] = useState<IVehicle[]>(
     result.success ? (result.data as IVehicle[]) : [],
   );
@@ -54,7 +60,11 @@ export function Vehicles({ result }: VehiclesProps) {
     [toast],
   );
 
-  const columns = getColumns({ onDelete: handleDelete });
+  const columns = getColumns({
+    onDelete: handleDelete,
+    canEditAndCreate,
+    canDelete,
+  });
 
   return (
     <PageComponent.Root>
@@ -64,14 +74,16 @@ export function Vehicles({ result }: VehiclesProps) {
         </div>
       </PageComponent.Header>
       <PageComponent.Content className="flex-col">
-        <div className="flex w-full justify-end">
-          <Link href={'/vehicles/create'}>
-            <Button className="mb-2">
-              <CirclePlus className="w-4 h-4 me-2" />
-              Cadastrar veículo
-            </Button>
-          </Link>
-        </div>
+        {canEditAndCreate && (
+          <div className="flex w-full justify-end">
+            <Link href={'/vehicles/create'}>
+              <Button className="mb-2">
+                <CirclePlus className="w-4 h-4 me-2" />
+                Cadastrar veículo
+              </Button>
+            </Link>
+          </div>
+        )}
         <DataTable.Root columns={columns} data={vehicles}>
           <DataTable.Tools
             searchKey="licensePlate"

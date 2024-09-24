@@ -1,7 +1,7 @@
 'use client';
 
 import { PageComponent } from '../../../../components/ui/page';
-import { useToast } from '../../../../hooks/use-toast';
+import { useToast } from '../../../../hooks/useToast';
 import { useRef } from 'react';
 import { ShortcutFormData } from '@/schemas/shortcutSchema';
 import { ShortcutForm } from '../_components/shortcutForm';

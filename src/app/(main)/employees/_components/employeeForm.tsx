@@ -30,7 +30,7 @@ import { Textarea } from '../../../../components/ui/textarea';
 import { Checkbox } from '../../../../components/ui/checkbox';
 import Link from 'next/link';
 import { CircleArrowLeft } from 'lucide-react';
-import { useToast } from '../../../../hooks/use-toast';
+import { useToast } from '../../../../hooks/useToast';
 import FileUploadField from '../../../../components/ui/fileUploadField';
 import { uploadToS3 } from '@/utils/s3Upload';
 import {
@@ -42,9 +42,10 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { z } from 'zod';
-import { ICompanySelect } from '../../companies/types';
 import { getAllActiveCompanies } from '@/actions/companies/getAllActiveCompanies';
 import { MESSAGE } from '@/utils/message';
+import { ICompany } from '../../companies/types';
+import { getAllActiveCompaniesToSelect, IGetAllActiveCompaniesToSelectReturnProps } from '@/actions/companies/getAllActiveCompaniesToSelect';
 
 const localEmployeeFormSchema = employeeFormSchema.extend({
   photoFile: z
@@ -79,7 +80,7 @@ export const EmployeeForm = forwardRef<
   { reset: () => void },
   EmployeeFormProps
 >(({ initialData, onSubmit, submitButtonText }, ref) => {
-  const [companies, setCompanies] = useState<ICompanySelect[]>([]);
+  const [companies, setCompanies] = useState<Omit<ICompany, 'cnpj'>[]>([]);
   const [observationLength, setObservationLength] = useState(0);
   const [uploading, setUploading] = useState(false);
   const fileUploadRef = useRef<{ reset: () => void } | null>(null);
@@ -112,8 +113,8 @@ export const EmployeeForm = forwardRef<
 
   useEffect(() => {
     const fetchCompanies = async () => {
-      const result = await getAllActiveCompanies(true);
-      if (result.success) {
+      const result: IGetAllActiveCompaniesToSelectReturnProps = await getAllActiveCompaniesToSelect();
+      if (result.success && result.data) {
         setCompanies(result.data);
       } else {
         toast({

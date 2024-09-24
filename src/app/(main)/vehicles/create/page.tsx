@@ -2,9 +2,9 @@
 
 import { VehicleFormData } from '../../../../schemas/vehicleSchema';
 import { PageComponent } from '../../../../components/ui/page';
-import { useToast } from '../../../../hooks/use-toast';
+import { useToast } from '../../../../hooks/useToast';
 import { useRef } from 'react';
-import { createVehicleAction } from '@/actions/vehicles/createVehicleAction';
+import { createVehicleAction, ICreateVehicleReturnProps } from '@/actions/vehicles/createVehicleAction';
 import { VehicleForm } from '../_components/vehicleForm';
 import { MESSAGE } from '@/utils/message';
 
@@ -13,12 +13,12 @@ export default function CreateVehiclePage() {
   const formRef = useRef<{ reset: () => void } | null>(null);
 
   async function onSubmit(values: VehicleFormData) {
-    const response = await createVehicleAction(values);
+    const response: ICreateVehicleReturnProps = await createVehicleAction(values);
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
 
       if (formRef.current) {

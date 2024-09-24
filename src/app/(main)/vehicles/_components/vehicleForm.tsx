@@ -23,11 +23,10 @@ import {
   FormMessage,
   FormDescription,
 } from '../../../../components/ui/form';
-import { ScrollArea } from '../../../../components/ui/scroll-area';
 import { Input } from '../../../../components/ui/input';
 import Link from 'next/link';
 import { CheckIcon, CircleArrowLeft } from 'lucide-react';
-import { useToast } from '../../../../hooks/use-toast';
+import { useToast } from '../../../../hooks/useToast';
 import {
   Command,
   CommandEmpty,
@@ -36,8 +35,6 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { ICompanySelect } from '../../companies/types';
-import { getAllActiveCompanies } from '@/actions/companies/getAllActiveCompanies';
 import { MESSAGE } from '@/utils/message';
 import {
   Popover,
@@ -46,6 +43,11 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { CaretSortIcon } from '@radix-ui/react-icons';
+import {
+  getAllActiveCompaniesToSelect,
+  IGetAllActiveCompaniesToSelectReturnProps,
+} from '@/actions/companies/getAllActiveCompaniesToSelect';
+import { ICompany } from '../../companies/types';
 
 interface VehicleFormProps {
   initialData?: Partial<VehicleFormData>;
@@ -61,7 +63,7 @@ const VehicleFormComponent: ForwardRefRenderFunction<
   VehicleFormRef,
   VehicleFormProps
 > = ({ initialData, onSubmit, submitButtonText }, ref) => {
-  const [companies, setCompanies] = useState<ICompanySelect[]>([]);
+  const [companies, setCompanies] = useState<Omit<ICompany, 'cnpj'>[]>([]);
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
@@ -84,14 +86,15 @@ const VehicleFormComponent: ForwardRefRenderFunction<
 
   useEffect(() => {
     const fetchCompanies = async () => {
-      const result = await getAllActiveCompanies(true);
-      if (result.success) {
-        setCompanies(result.data);
+      const response: IGetAllActiveCompaniesToSelectReturnProps =
+        await getAllActiveCompaniesToSelect();
+      if (response.success && response.data) {
+        setCompanies(response.data);
       } else {
         toast({
           variant: 'destructive',
           title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
-          description: result.error,
+          description: response.error,
         });
       }
     };
@@ -100,15 +103,7 @@ const VehicleFormComponent: ForwardRefRenderFunction<
   }, [toast]);
 
   const handleSubmit = async (values: VehicleFormData) => {
-    try {
-      await onSubmit(values);
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
-        description: MESSAGE.COMMON.GENERIC_ERROR_MESSAGE,
-      });
-    }
+    await onSubmit(values);  
   };
 
   return (

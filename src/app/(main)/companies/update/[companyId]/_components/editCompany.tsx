@@ -2,7 +2,7 @@
 
 import { CompanyFormData } from '../../../../../../schemas/companySchema';
 import { PageComponent } from '../../../../../../components/ui/page';
-import { useToast } from '../../../../../../hooks/use-toast';
+import { useToast } from '../../../../../../hooks/useToast';
 import { ICompany } from '../../../types';
 import { editCompanyAction } from '../../../../../../actions/companies/editCompanyAction';
 import { CompanyForm } from '../../../_components/companyForm';
@@ -18,12 +18,15 @@ export default function EditCompany(company: ICompany) {
   };
 
   async function onSubmit(values: CompanyFormData) {
-    const response = await editCompanyAction(company.id, values);
+    const response = await editCompanyAction({
+      companyId: company.id,
+      data: values,
+    });
 
     if (response.success) {
       toast({
         variant: 'success',
-        description: response.message,
+        description: response.data,
       });
     } else {
       toast({
