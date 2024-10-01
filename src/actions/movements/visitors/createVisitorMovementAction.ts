@@ -37,6 +37,7 @@ export const createVisitorMovementAction = withPermissions(
               ? removeTelephoneMask(validatedData.telephone)
               : undefined,
             licensePlate: validatedData.licensePlate,
+            observation: validatedData.observation,
             action: validatedData.action as Action,
             companies: {
               create: validatedData.companyIds.map((companyId) => ({

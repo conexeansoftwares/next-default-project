@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { idSchema } from './idSchema';
 
 // Base schema for user details without password
 const baseUserFormSchema = z.object({
@@ -6,7 +7,7 @@ const baseUserFormSchema = z.object({
     .string()
     .email({ message: 'Email inválido' })
     .max(100, { message: 'Email não pode exceder 100 caracteres' }),
-  employeeId: z.string().cuid({ message: 'Colaborador inválido' }),
+  employeeId: idSchema,
   permissions: z.record(z.record(z.boolean())),
 });
 

@@ -11,9 +11,10 @@ import { revalidatePath } from 'next/cache';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { idSchema } from '@/schemas/idSchema';
 
 interface EditEmployeeActionParams {
-  employeeId: string;
+  employeeId: number;
   data: EmployeeFormData;
 }
 
@@ -29,6 +30,8 @@ export const editEmployeeAction = withPermissions(
   async (params: EditEmployeeActionParams): Promise<IEditEmployeeReturnProps> => {
     try {
       const { employeeId, data } = params;
+
+      const validatedId = idSchema.parse(employeeId);
       const validatedData = employeeFormSchema.parse(data);
 
       const {
@@ -44,7 +47,7 @@ export const editEmployeeAction = withPermissions(
 
       const result = await prisma.$transaction(async (tx) => {
         const existingEmployee = await tx.employee.findUnique({
-          where: { id: employeeId },
+          where: { id: validatedId },
           include: { companies: true },
         });
 

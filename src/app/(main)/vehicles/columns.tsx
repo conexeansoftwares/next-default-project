@@ -26,7 +26,7 @@ import { DataTable } from '../../../components/ui/dataTable';
 import { IVehicle } from './types';
 
 type VehicleColumnProps = {
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
   canEditAndCreate: boolean;
   canDelete: boolean;
 };

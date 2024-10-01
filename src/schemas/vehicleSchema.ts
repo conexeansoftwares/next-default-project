@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { idSchema } from './idSchema';
 
 export const vehicleFormSchema = z.object({
   licensePlate: z
@@ -9,9 +10,7 @@ export const vehicleFormSchema = z.object({
     .string()
     .min(3, { message: 'Modelo deve conter pelo menos 3 caracteres' })
     .max(100, { message: 'Modelo não pode exceder 100 caracteres' }),
-  companyId: z.string().cuid({ message: 'Empresa inválida' }),
+  companyId: idSchema,
 });
-
-export const idVehicleSchema = z.string().cuid({ message: 'ID inválido ou inexistente.' });
 
 export type VehicleFormData = z.infer<typeof vehicleFormSchema>;

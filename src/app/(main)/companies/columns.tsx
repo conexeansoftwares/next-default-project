@@ -32,7 +32,7 @@ import { ICompany } from './types';
 
 
 type CompanyColumnProps = {
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
   canEditAndCreate: boolean;
   canDelete: boolean;
 };

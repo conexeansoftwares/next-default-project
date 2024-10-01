@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { IShortcut } from '@/app/(main)/shortcuts/types';
 import { handleErrors } from '@/utils/handleErrors';
+import { idSchema } from '@/schemas/idSchema';
 
 export interface IGetShortcutByIdReturnProps {
   success: boolean,
@@ -14,12 +15,10 @@ export interface IGetShortcutByIdReturnProps {
   error?: string,
 }
 
-const getShortcutSchema = z.string().cuid();
-
 export const getShortcutByIdAction = withPermissions('shortcuts', 'READ',
-  async (shortcutId: string): Promise<IGetShortcutByIdReturnProps> => {
+  async (shortcutId: number): Promise<IGetShortcutByIdReturnProps> => {
     try {
-      const validatedId = getShortcutSchema.parse(shortcutId);
+      const validatedId = idSchema.parse(shortcutId);
 
       const result = await prisma.$transaction(async (tx) => {
         const shortcurt = await tx.shortcut.findUnique({

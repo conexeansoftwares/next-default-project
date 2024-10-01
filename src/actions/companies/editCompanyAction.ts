@@ -5,17 +5,16 @@ import { prisma } from '../../lib/prisma';
 import {
   CompanyFormData,
   companyFormSchema,
-  idCompanySchema,
 } from '../../schemas/companySchema';
 import { removeCnpjMask } from '../../utils/cnpjUtils';
 import { revalidatePath } from 'next/cache';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
-import { z } from 'zod';
+import { idSchema } from '@/schemas/idSchema';
 
 interface EditCompanyActionParams {
-  companyId: string;
+  companyId: number;
   data: CompanyFormData;
 }
 
@@ -33,7 +32,7 @@ export const editCompanyAction = withPermissions(
 
       const { companyId, data } = params;
 
-      const validatedId = idCompanySchema.parse(companyId);
+      const validatedId = idSchema.parse(companyId);
       const validatedData = companyFormSchema.parse(data);
 
       const { name, cnpj } = validatedData;

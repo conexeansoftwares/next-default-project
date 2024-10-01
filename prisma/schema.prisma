@@ -21,7 +21,7 @@ enum Permission {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            Int       @id @default(autoincrement())
   email         String    @unique @db.VarChar(150)
   password      String
   active        Boolean   @default(true)
@@ -29,15 +29,15 @@ model User {
   updatedAt     DateTime  @updatedAt
   deactivatedAt DateTime?
 
-  employeeId String   @unique
+  employeeId Int   @unique
   employee   Employee @relation(fields: [employeeId], references: [id])
 
   userPermissions UserPermission[]
 }
 
 model UserPermission {
-  id         String     @id @default(cuid())
-  userId     String
+  id         Int       @id @default(autoincrement())
+  userId     Int
   permission Permission
   module     String     @db.VarChar(50)
   user       User       @relation(fields: [userId], references: [id])
@@ -46,7 +46,7 @@ model UserPermission {
 }
 
 model Company {
-  id            String    @id @default(cuid())
+  id            Int       @id @default(autoincrement())
   name          String    @db.VarChar(150)
   cnpj          String    @unique @db.VarChar(14)
   active        Boolean   @default(true)
@@ -60,11 +60,11 @@ model Company {
 }
 
 model Vehicle {
-  id               String    @id @default(cuid())
+  id               Int       @id @default(autoincrement())
   licensePlate     String    @unique @db.VarChar(7)
-  owner            String    @db.VarChar(50)
+  owner            String?   @db.VarChar(50)
   carModel         String    @db.VarChar(50)
-  companyId        String
+  companyId        Int
   active           Boolean   @default(true)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -74,7 +74,7 @@ model Vehicle {
 }
 
 model Employee {
-  id                String    @id @default(cuid())
+  id                Int       @id @default(autoincrement())
   fullName          String    @db.VarChar(100)
   registration      String    @unique @db.VarChar(20)
   internalPassword  String?   @db.VarChar(50)
@@ -92,8 +92,8 @@ model Employee {
 }
 
 model CompanyEmployee {
-  companyId  String
-  employeeId String
+  companyId  Int
+  employeeId Int
   company    Company     @relation(fields: [companyId], references: [id])
   employee   Employee @relation(fields: [employeeId], references: [id])
 
@@ -101,29 +101,32 @@ model CompanyEmployee {
 }
 
 model VehicleMovement {
-  id        String   @id @default(cuid())
-  vehicleId String
-  action    Action
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  id          Int      @id @default(autoincrement())
+  vehicleId   Int
+  observation String?  @db.VarChar(200)
+  action      Action
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
 }
 
 model EmployeeMovement {
-  id         String      @id @default(cuid())
-  employeeId String
-  action     Action
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  employee   Employee @relation(fields: [employeeId], references: [id])
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  observation String?  @db.VarChar(200)
+  action      Action
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  employee    Employee @relation(fields: [employeeId], references: [id])
 }
 
 model VisitorMovement {
-  id           String   @id @default(cuid())
+  id           Int      @id @default(autoincrement())
   fullName     String   @db.VarChar(100)
   cpf          String?  @db.VarChar(11)
   telephone    String?  @db.VarChar(11)
   licensePlate String?  @db.VarChar(7)
+  observation  String?  @db.VarChar(200)
   action       Action
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -132,8 +135,8 @@ model VisitorMovement {
 }
 
 model VisitorMovementCompany {
-  visitorMovementId String
-  companyId         String
+  visitorMovementId Int
+  companyId         Int
   visitorMovement   VisitorMovement @relation(fields: [visitorMovementId], references: [id])
   company           Company         @relation(fields: [companyId], references: [id])
 
@@ -141,7 +144,7 @@ model VisitorMovementCompany {
 }
 
 model Shortcut {
-  id        String    @id @default(cuid())
+  id        Int       @id @default(autoincrement())
   url       String    @db.VarChar(200)
   label     String    @db.VarChar(50)
   color     String    @db.VarChar(50)

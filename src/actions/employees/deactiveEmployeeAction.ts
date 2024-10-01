@@ -2,11 +2,11 @@
 
 import { AppError } from '@/error/appError';
 import { prisma } from '../../lib/prisma';
-import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { idSchema } from '@/schemas/idSchema';
 
 export interface IDeactiveEmployeeReturnProps {
   success: boolean;
@@ -14,14 +14,12 @@ export interface IDeactiveEmployeeReturnProps {
   error?: string;
 }
 
-const deactivateEmployeeSchema = z.string().cuid();
-
 export const deactivateEmployeeAction = withPermissions(
   'employees',
   'DELETE',
-  async (employeeId: string): Promise<IDeactiveEmployeeReturnProps> => {
+  async (employeeId: number): Promise<IDeactiveEmployeeReturnProps> => {
     try {
-      const validatedId = deactivateEmployeeSchema.parse(employeeId);
+      const validatedId = idSchema.parse(employeeId);
 
       const result = await prisma.$transaction(async (tx) => {
         const employee = await tx.employee.findUnique({

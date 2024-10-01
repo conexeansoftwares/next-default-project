@@ -71,6 +71,8 @@ export const MESSAGE = {
     NOT_FOUND: 'Movimentação sem registros para o período informado.',
   },
   HISTORICAL: {
-    DATES_REQUIRED: 'Por favor, selecione as datas inial e final.',
+    DATES_REQUIRED: 'Por favor, selecione as datas inicial e final.',
+    LIMIT_INTERVAL_TITLE: 'Interválido inválido',
+    LIMIT_INTERVAL: 'O intervalo máximo permitido é de 30 dias.',
   },
 };

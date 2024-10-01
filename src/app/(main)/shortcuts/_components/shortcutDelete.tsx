@@ -30,7 +30,7 @@ export function ShortcutDelete({
   shortcutId,
   onDelete,
 }: {
-  shortcutId: string;
+  shortcutId: number;
   onDelete: () => void;
 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

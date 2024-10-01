@@ -2,7 +2,6 @@
 
 import { prisma } from '../../lib/prisma';
 import {
-  idVehicleSchema,
   VehicleFormData,
   vehicleFormSchema,
 } from '../../schemas/vehicleSchema';
@@ -11,9 +10,10 @@ import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { idSchema } from '@/schemas/idSchema';
 
 interface EditVehicleActionParams {
-  vehicleId: string;
+  vehicleId: number;
   data: VehicleFormData;
 }
 
@@ -30,7 +30,7 @@ export const editVehicleAction = withPermissions(
     try {
       const { vehicleId, data } = params;
       
-      const validatedId = idVehicleSchema.parse(vehicleId);
+      const validatedId = idSchema.parse(vehicleId);
       const validatedData = vehicleFormSchema.parse(data);
 
       const { licensePlate, carModel, owner, companyId } = validatedData;

@@ -269,7 +269,7 @@ export const EmployeeForm = forwardRef<
               control={form.control}
               name="observation"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className='col-span-full'>
                   <FormLabel>Observação</FormLabel>
                   <FormControl>
                     <Textarea

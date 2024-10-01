@@ -13,7 +13,7 @@ export type DefaultLoginActionResult =
   | { success: true; message: string }
   | { success: false; error: string };
 
-export type GetActiveUserLoginActionResult =
+export type IGetActiveUserLoginActionResult =
   | (Omit<Extract<DefaultLoginActionResult, { success: true }>, 'message'> & {
       data: IuserLoginInformations;
     })

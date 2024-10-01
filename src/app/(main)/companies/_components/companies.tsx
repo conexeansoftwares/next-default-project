@@ -9,7 +9,10 @@ import { DataTable } from '../../../../components/ui/dataTable';
 import { useToast } from '../../../../hooks/useToast';
 import { ICompany } from '../types';
 import { getColumns } from '../columns';
-import { deactivateCompanyAction, IDeactiveCompanyReturnProps } from '@/actions/companies/deactivateCompanyAction';
+import {
+  deactivateCompanyAction,
+  IDeactiveCompanyReturnProps,
+} from '@/actions/companies/deactivateCompanyAction';
 import { useAuth } from '@/hooks/usePermissions';
 import { IGetAllActiveCompaniesReturnProps } from '@/actions/companies/getAllActiveCompanies';
 import { MESSAGE } from '@/utils/message';
@@ -30,8 +33,9 @@ export function Companies({ result }: ICompaniesProps) {
   );
 
   const handleDelete = useCallback(
-    async (companyId: string) => {
-      const response: IDeactiveCompanyReturnProps = await deactivateCompanyAction(companyId);
+    async (companyId: number) => {
+      const response: IDeactiveCompanyReturnProps =
+        await deactivateCompanyAction(companyId);
 
       if (response.success) {
         toast({
@@ -46,7 +50,7 @@ export function Companies({ result }: ICompaniesProps) {
           variant: 'destructive',
           title: MESSAGE.COMMON.GENERIC_ERROR_TITLE,
           description: response.error,
-        })
+        });
       }
     },
     [toast],

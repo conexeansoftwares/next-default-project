@@ -60,6 +60,16 @@ export const getVisitorMovementByDateAction = withPermissions(
             cpf: true,
             telephone: true,
             licensePlate: true,
+            observation: true,
+            companies: {
+              select: {
+                company: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
             action: true,
             createdAt: true,
           },
@@ -78,6 +88,8 @@ export const getVisitorMovementByDateAction = withPermissions(
             cpf: movement.cpf,
             telephone: movement.telephone,
             licensePlate: movement.licensePlate,
+            observation: movement.observation,
+            companies: movement.companies,
             action: movement.action,
             date: movement.createdAt.toISOString(),
           }),

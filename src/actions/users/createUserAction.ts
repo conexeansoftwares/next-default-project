@@ -85,7 +85,7 @@ export const createUserAction = withPermissions(
                 (
                   up,
                 ): up is {
-                  userId: string;
+                  userId: number;
                   module: string;
                   permission: Permission;
                 } => up.permission !== undefined,

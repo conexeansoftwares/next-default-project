@@ -1,17 +1,17 @@
 export interface IEmployeeDataTable {
-  id: string;
+  id: number;
   fullName: string;
   registration: string;
   companies: {
     company: {
-      id: string;
+      id: number;
       name: string;
     };
   }[];
 }
 
 export interface IEmployeeToMovement {
-  id: string;
+  id: number;
   fullName: string;
   registration: string;
   observation: string | null;
@@ -19,12 +19,12 @@ export interface IEmployeeToMovement {
 }
 
 export interface IEmployeeToSelect {
-  id: string;
+  id: number;
   fullName: string;
 }
 
 export interface IEmployeeToEdit {
-  id: string;
+  id: number;
   fullName: string;
   registration: string;
   internalPassword: string | null;
@@ -32,5 +32,5 @@ export interface IEmployeeToEdit {
   cellPhone: string | null;
   observation: string | null;
   photoURL: string | null;
-  companyIds: string[];
+  companyIds: number[];
 }

@@ -8,14 +8,13 @@ import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
-
-const createEmployeeMovementSchema = z.object({
-  employeeId: z.string().cuid({ message: 'ID do colaborador inválido' }),
-  action: z.enum(['E', 'S']),
-});
+import { idSchema } from '@/schemas/idSchema';
+import { actionSchema } from '@/schemas/actionSchema';
+import { observationSchema } from '@/schemas/observationSchema';
 
 interface CreateEmployeMovementActionParams {
-  employeeId: string;
+  employeeId: number;
+  observation: string;
   action: string;
 }
 
@@ -30,16 +29,15 @@ export const createEmployeeMovementAction = withPermissions(
   'WRITE',
   async (params: CreateEmployeMovementActionParams): Promise<ICreateEmployeeMovementReturnProps> => {
     try {
-      const { employeeId, action } = params;
+      const { employeeId, observation, action } = params;
 
-      const validatedData = createEmployeeMovementSchema.parse({
-        employeeId,
-        action,
-      });
+      const validatedAction = actionSchema.parse(action);
+      const validatedObservation = observationSchema.parse(observation);
+      const validatedId = idSchema.parse(employeeId);
 
       await prisma.$transaction(async (tx) => {
         const existingEmployee = await tx.employee.findUnique({
-          where: { id: validatedData.employeeId },
+          where: { id: validatedId },
         });
 
         if (!existingEmployee) {
@@ -48,8 +46,9 @@ export const createEmployeeMovementAction = withPermissions(
 
         await tx.employeeMovement.create({
           data: {
-            employeeId: validatedData.employeeId,
-            action: validatedData.action as Action,
+            employeeId: validatedId,
+            observation: validatedObservation,
+            action: validatedAction as Action,
           },
         });
       });

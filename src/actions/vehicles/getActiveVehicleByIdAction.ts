@@ -1,13 +1,12 @@
 'use server';
 
 import { prisma } from '../../lib/prisma';
-import { z } from 'zod';
 import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
-import { IVehicle } from '@/app/(main)/movements/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
-import { idVehicleSchema } from '@/schemas/vehicleSchema';
+import { idSchema } from '@/schemas/idSchema';
+import { IVehicle } from '@/app/(main)/vehicles/types';
 
 export interface IGetActiveVehicleByIdReturnProps {
   success: boolean;
@@ -18,9 +17,9 @@ export interface IGetActiveVehicleByIdReturnProps {
 export const getActiveVehicleByIdAction = withPermissions(
   'vehicles',
   'READ',
-  async (vehicleId: string): Promise<IGetActiveVehicleByIdReturnProps> => {
+  async (vehicleId: number): Promise<IGetActiveVehicleByIdReturnProps> => {
     try {
-      const validatedId = idVehicleSchema.parse(vehicleId);
+      const validatedId = idSchema.parse(vehicleId);
 
       const result = await prisma.$transaction(async (tx) => {
         const vehicle = await tx.vehicle.findUnique({

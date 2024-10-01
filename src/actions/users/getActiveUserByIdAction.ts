@@ -7,8 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { IUserToEdit, IUserPermission } from '@/app/(main)/users/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
-
-const getUserSchema = z.string().cuid();
+import { idSchema } from '@/schemas/idSchema';
 
 const permissionMapping: Record<string, IUserPermission['permission']> = {
   READ: 'Ler',
@@ -26,9 +25,9 @@ export interface IGetActiveUserByIdReturnProps {
 export const getActiveUserByIdAction = withPermissions(
   'users',
   'READ',
-  async (userId: string): Promise<IGetActiveUserByIdReturnProps> => {
+  async (userId: number): Promise<IGetActiveUserByIdReturnProps> => {
     try {
-      const validatedId = getUserSchema.parse(userId);
+      const validatedId = idSchema.parse(userId);
 
       const result = await prisma.$transaction(async (tx) => {
         const user = await tx.user.findUnique({

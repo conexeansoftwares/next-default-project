@@ -1,4 +1,6 @@
-import * as z from 'zod';
+import { z } from 'zod';
+import { idSchema } from './idSchema';
+import { observationSchema } from './observationSchema';
 
 export const employeeFormSchema = z.object({
   fullName: z
@@ -21,15 +23,14 @@ export const employeeFormSchema = z.object({
     .string()
     .max(15, { message: 'Celular deve conter 11 caracteres' })
     .optional(),
-  observation: z
-    .string()
-    .max(200, { message: 'Observação não pode exceder 200 caracteres' })
-    .optional(),
+  observation: observationSchema,
   photoURL: z
     .string()
     .max(200, { message: 'URL da imagem não pode exceder 200 caracteres' })
     .optional(),
-  companyIds: z.array(z.string().cuid({ message: 'Empresa inválida' })).min(1, { message: 'É necessário informar pelo menos 1 empresa' }),
+  companyIds: z
+    .array(idSchema)
+    .min(1, { message: 'É necessário informar pelo menos 1 empresa' }),
 });
 
 export type EmployeeFormData = z.infer<typeof employeeFormSchema>;

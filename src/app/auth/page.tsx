@@ -14,14 +14,11 @@ import {
   FormMessage,
 } from '../../components/ui/form';
 import { LoginFormData, loginFormSchema } from '@/schemas/loginSchema';
-import { useToast } from '@/hooks/useToast';
-import { loginUserAction } from '@/actions/auth/login';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+
 
 export default function Page() {
-  const { toast } = useToast();
-  const router = useRouter();
+
   
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
@@ -32,33 +29,33 @@ export default function Page() {
   });
 
   async function onSubmit(values: LoginFormData) {
-    const response = await loginUserAction(values);
+    // const response = await loginUserAction(values);
 
-    /**
-     * Se a resposta for positiva, eu verifico as permissões do usuário.
-     * Após identificar as permissões, faço o redirecionamento para o 
-     * primeiro módulo que tiver a permissão READ ou ADMIN.
-     * 
-     * Caso não tenha nenhum módulo com permissão de administrador ou leitura,
-     * faço o redirecionamento para a rota de não autorizado.
-     */
+    // /**
+    //  * Se a resposta for positiva, eu verifico as permissões do usuário.
+    //  * Após identificar as permissões, faço o redirecionamento para o 
+    //  * primeiro módulo que tiver a permissão READ ou ADMIN.
+    //  * 
+    //  * Caso não tenha nenhum módulo com permissão de administrador ou leitura,
+    //  * faço o redirecionamento para a rota de não autorizado.
+    //  */
 
-    if (response && response.success) {
-      const permissions = response.data.permissions;
+    // if (response && response.success) {
+    //   const permissions = response.data.permissions;
       
-      const firstReadModule = permissions.find(item => item.permission === 'READ' || item.permission === 'ADMIN');
+    //   const firstReadModule = permissions.find(item => item.permission === 'READ' || item.permission === 'ADMIN');
 
-    if (firstReadModule) {
-      router.push(`/${firstReadModule.module}`);
-    } else {
-      router.push('/unauthorized');
-    }
-    } else {
-      toast({
-        variant: 'destructive',
-        description: response.error,
-      });
-    }
+    // if (firstReadModule) {
+    //   router.push(`/${firstReadModule.module}`);
+    // } else {
+    //   router.push('/unauthorized');
+    // }
+    // } else {
+    //   toast({
+    //     variant: 'destructive',
+    //     description: response.error,
+    //   });
+    // }
   }
 
   return (
@@ -120,8 +117,8 @@ export default function Page() {
                   )}
                 />
 
-                <Button type="submit" className="w-full">
-                  Fazer login
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Autenticando...' : 'Fazer login'}
                 </Button>
               </div>
             </form>

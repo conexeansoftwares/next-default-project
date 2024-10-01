@@ -7,7 +7,7 @@ import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
-import { idVehicleSchema } from '@/schemas/vehicleSchema';
+import { idSchema } from '@/schemas/idSchema';
 
 export interface IDeactiveVehicleReturnProps {
   success: boolean;
@@ -18,9 +18,9 @@ export interface IDeactiveVehicleReturnProps {
 export const deactivateVehicleAction = withPermissions(
   'vehicles',
   'DELETE',
-  async (vehicleId: string): Promise<IDeactiveVehicleReturnProps> => {
+  async (vehicleId: number): Promise<IDeactiveVehicleReturnProps> => {
     try {
-      const validatedId = idVehicleSchema.parse(vehicleId);
+      const validatedId = idSchema.parse(vehicleId);
 
       const result = await prisma.$transaction(async (tx) => {
         const vehicle = await tx.vehicle.findUnique({

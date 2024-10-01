@@ -40,7 +40,7 @@ export function Employees({ result }: EmployeesProps) {
   }, [result, toast]);
 
   const handleDelete = useCallback(
-    async (employeeId: string) => {
+    async (employeeId: number) => {
       const deleteResult: IDeactiveEmployeeReturnProps = await deactivateEmployeeAction(employeeId);
       if (deleteResult.success) {
         toast({

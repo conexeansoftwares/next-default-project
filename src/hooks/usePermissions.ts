@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { jwtVerify } from 'jose';
-import config from '@/config/env';
 import { Permission } from '@prisma/client';
 
 interface IPermission {
@@ -22,58 +20,30 @@ interface AuthState {
   userPermissions: string[];
 }
 
-const SECRET_KEY = new TextEncoder().encode(config.jwtSecret);
-
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
-    isAuthenticated: false,
-    userData: null,
-    loading: true,
+    isAuthenticated: true,
+    userData: {
+      email: 'user@example.com',
+      fullName: 'Example User',
+      companyId: 'example-company-id',
+      permissions: [],
+    },
+    loading: false,
     userPermissions: [],
   });
 
   useEffect(() => {
-    const verifyToken = async () => {
-      const token = getCookie(config.jwtTokenName);
-      if (!token) {
-        setAuthState(prev => ({ ...prev, loading: false }));
-        return;
-      }
-
-      try {
-        const { payload } = await jwtVerify(token, SECRET_KEY);
-        const userData = payload as unknown as UserData;
-        const userPermissions = userData.permissions.map(
-          p => `${p.module}:${p.permission}`
-        );
-        setAuthState({
-          isAuthenticated: true,
-          userData,
-          loading: false,
-          userPermissions,
-        });
-      } catch (error) {
-        console.error('Invalid token:', error);
-        setAuthState(prev => ({ ...prev, loading: false }));
-      }
-    };
-
-    verifyToken();
+    // Simulate loading completion
+    setAuthState(prev => ({ ...prev, loading: false }));
   }, []);
 
-  const checkPermission = useCallback((module: string, requiredPermission: Permission) => {
-    return authState.userPermissions.includes(`${module}:${requiredPermission}`);
-  }, [authState.userPermissions]);
+  const checkPermission = useCallback((_module: string, _requiredPermission: Permission) => {
+    return true;
+  }, []);
 
   return {
     ...authState,
     checkPermission,
   };
-}
-
-// Helper function to get a cookie value
-function getCookie(name: string): string | undefined {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
 }

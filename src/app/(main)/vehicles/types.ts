@@ -2,20 +2,20 @@ export interface IVehicleData {
   licensePlate: string;
   owner: string;
   carModel: string;
-  companyId: string;
+  companyId: number;
 }
 
 export interface IVehicle {
-  id: string;
+  id: number;
   licensePlate: string;
-  owner: string;
+  owner: string | null;
   carModel: string;
-  companyId: string;
+  companyId: number;
   companyName: string;
 }
 
 export interface IVehicleSelect {
-  id: string;
+  id: number;
   licensePlate: string;
   owner: string;
 }

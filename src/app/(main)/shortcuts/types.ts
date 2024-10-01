@@ -1,5 +1,5 @@
 export interface IShortcut {
-  id: string;
+  id: number;
   url: string;
   label: string;
   color: string;

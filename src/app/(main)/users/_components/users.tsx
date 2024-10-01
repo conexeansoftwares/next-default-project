@@ -40,7 +40,7 @@ export function Users({ result }: UsersProps) {
   }, [result, toast]);
 
   const handleDelete = useCallback(
-    async (userId: string) => {
+    async (userId: number) => {
       const deleteResult = await deactivateUserAction(userId);
       if (deleteResult.success) {
         toast({

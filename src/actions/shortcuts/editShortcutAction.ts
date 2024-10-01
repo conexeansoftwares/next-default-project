@@ -7,9 +7,10 @@ import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { handleErrors } from '@/utils/handleErrors';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
+import { idSchema } from '@/schemas/idSchema';
 
 interface EditShortcutActionParams {
-  shortcutId: string;
+  shortcutId: number;
   data: ShortcutFormData;
 }
 
@@ -23,13 +24,15 @@ export const editShortcutAction = withPermissions('shortcuts', 'WRITE',
   async (params: EditShortcutActionParams): Promise<IEditShortcutReturnProps> => {
     try {
       const { shortcutId, data } = params;
+
+      const validatedId = idSchema.parse(shortcutId);
       const validatedData = shortcutFormSchema.parse(data);
 
       const { url, label, color } = validatedData;
 
       const result = await prisma.$transaction(async (tx) => {
         const shortcurt = await tx.shortcut.findUnique({
-          where: { id: shortcutId },
+          where: { id: validatedId },
         });
 
         if (!shortcurt) {
@@ -37,7 +40,7 @@ export const editShortcutAction = withPermissions('shortcuts', 'WRITE',
         }
 
         await tx.shortcut.update({
-          where: { id: shortcutId },
+          where: { id: validatedId },
           data: {
             url,
             label,

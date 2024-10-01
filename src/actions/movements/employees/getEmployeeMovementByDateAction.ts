@@ -59,6 +59,7 @@ export const getEmployeeMovementsByDateAction = withPermissions(
           select: {
             action: true,
             createdAt: true,
+            observation: true,
             employee: {
               select: {
                 fullName: true,
@@ -76,9 +77,9 @@ export const getEmployeeMovementsByDateAction = withPermissions(
         }
 
         return movements.map((movement) => ({
-          name: movement.employee.fullName.split(' ')[0],
-          lastName: movement.employee.fullName.split(' ').slice(1).join(' '),
+          fullName: movement.employee.fullName,
           registration: movement.employee.registration,
+          observation: movement.observation,
           action: movement.action,
           date: movement.createdAt.toISOString(),
         }));

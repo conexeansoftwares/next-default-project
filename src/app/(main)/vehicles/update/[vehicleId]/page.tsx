@@ -1,21 +1,24 @@
-import { getActiveVehicleByIdAction } from '@/actions/vehicles/getActiveVehicleByIdAction';
+import { getActiveVehicleByIdAction, IGetActiveVehicleByIdReturnProps } from '@/actions/vehicles/getActiveVehicleByIdAction';
 import { EntityNotFound } from '../../../../../components/ui/entityNotFound';
 import EditVehicle from './_components/editVehicle';
+import { MESSAGE } from '@/utils/message';
 
 export default async function Page({
   params,
 }: {
   params: { vehicleId: string };
 }) {
-  const response = await getActiveVehicleByIdAction(params.vehicleId);
+  const vehicleId = parseInt(params.vehicleId, 10);
 
-  if (response.success) {
-    return <EditVehicle {...response.data} />;
+  const response: IGetActiveVehicleByIdReturnProps = await getActiveVehicleByIdAction(vehicleId);
+
+  if (response.success && response.data) {
+    return <EditVehicle vehicle={response.data} />;
   }
 
   return (
     <EntityNotFound 
-      title='Veículo não encontrado ou inativo.' 
+      title={response.error || MESSAGE.VEHICLE.NOT_FOUND} 
       href='/vehicles' 
     />
   );

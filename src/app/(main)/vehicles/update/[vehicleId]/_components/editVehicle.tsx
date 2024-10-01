@@ -9,7 +9,7 @@ import { MESSAGE } from '@/utils/message';
 import { IVehicle } from '../../../types';
 import { IDeactiveVehicleReturnProps } from '@/actions/vehicles/desactiveVehicleAction';
 
-export default function EditVehicle(vehicle: IVehicle) {
+export default function EditVehicle({ vehicle }: { vehicle: IVehicle }) {
   const { toast } = useToast();
 
   const initialData: Partial<VehicleFormData> = {
@@ -20,10 +20,10 @@ export default function EditVehicle(vehicle: IVehicle) {
   };
 
   async function onSubmit(values: VehicleFormData) {
-    const response: IDeactiveVehicleReturnProps = await editVehicleAction({ 
+    const response: IDeactiveVehicleReturnProps = await editVehicleAction({
       vehicleId: vehicle.id,
-      data: values
-     });
+      data: values,
+    });
 
     if (response.success) {
       toast({

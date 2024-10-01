@@ -9,12 +9,13 @@ import { DataTable } from '../../../../components/ui/dataTable';
 import { useToast } from '../../../../hooks/useToast';
 import { getColumns } from '../columns';
 import { MESSAGE } from '@/utils/message';
-import { GetAllVehiclesActionResult, IVehicle } from '../types';
+import { IVehicle } from '../types';
 import { deactivateVehicleAction } from '@/actions/vehicles/desactiveVehicleAction';
 import { useAuth } from '@/hooks/usePermissions';
+import { IGetAllActiveVehiclesReturnProps } from '@/actions/vehicles/getAllActiveVehicles';
 
 interface VehiclesProps {
-  result: GetAllVehiclesActionResult;
+  result: IGetAllActiveVehiclesReturnProps;
 }
 
 export function Vehicles({ result }: VehiclesProps) {
@@ -31,7 +32,7 @@ export function Vehicles({ result }: VehiclesProps) {
   useEffect(() => {
     if (!result.success) {
       toast({
-        variant: 'warning',
+        variant: 'destructive',
         title: MESSAGE.COMMON.GENERIC_WARNING_TITLE,
         description: result.error,
       });
@@ -39,7 +40,7 @@ export function Vehicles({ result }: VehiclesProps) {
   }, [result, toast]);
 
   const handleDelete = useCallback(
-    async (vehicleId: string) => {
+    async (vehicleId: number) => {
       const deleteResult = await deactivateVehicleAction(vehicleId);
       if (deleteResult.success) {
         toast({

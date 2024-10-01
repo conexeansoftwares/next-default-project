@@ -23,7 +23,7 @@ export function ShortcutList({ result }: ShortcutProps) {
     result.success ? (result.data as IShortcut[]) : [],
   );
 
-  const handleDelete = (deletedId: string) => {
+  const handleDelete = (deletedId: number) => {
     setShortcuts(shortcuts.filter((shortcut) => shortcut.id !== deletedId));
   };
 

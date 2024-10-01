@@ -1,6 +1,7 @@
 import { removeCpfMask } from '@/utils/cpfUtils';
 import { removeTelephoneMask } from '@/utils/telephoneUtils';
 import * as z from 'zod';
+import { idSchema } from './idSchema';
 
 function validateCPF(cpf: string): boolean {
   cpf = removeCpfMask(cpf);
@@ -59,14 +60,14 @@ export const visitorMovementFormSchema = z.object({
   telephone: z.string().refine(
     (value) => {
       if (value.trim() === '') return true;
-      
+
       const digitsOnly = removeTelephoneMask(value);
-      
+
       return digitsOnly.length === 11;
     },
     {
       message: 'O telefone deve conter 11 dígitos numéricos',
-    }
+    },
   ),
   licensePlate: z
     .string()
@@ -75,8 +76,12 @@ export const visitorMovementFormSchema = z.object({
     })
     .optional(),
   companyIds: z
-    .array(z.string().cuid({ message: 'Empresa inválida' }))
+    .array(idSchema)
     .min(1, { message: 'É necessário informar pelo menos 1 empresa' }),
+  observation: z
+    .string()
+    .max(200, { message: 'Observação não pode exceder 200 caracteres' })
+    .optional(),
   action: actionEnum,
 });
 

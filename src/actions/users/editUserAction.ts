@@ -11,6 +11,7 @@ import { MESSAGE } from '@/utils/message';
 import { Permission } from '@prisma/client';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { idSchema } from '@/schemas/idSchema';
 
 const permissionMapping: Record<string, Permission> = {
   ler: Permission.READ,
@@ -20,7 +21,7 @@ const permissionMapping: Record<string, Permission> = {
 };
 
 interface EditUserActionParams {
-  userId: string;
+  userId: number;
   data: UserFormWithoutPassword;
 }
 
@@ -37,13 +38,14 @@ export const editUserAction = withPermissions(
     try {
       const { userId, data } = params;
 
+      const validatedId = idSchema.parse(userId);
       const validatedData = userFormSchemaWithoutPassword.parse(data);
 
       const { email, employeeId, permissions } = validatedData;
 
       const result = await prisma.$transaction(async (tx) => {
         const existingUser = await tx.user.findUnique({
-          where: { id: userId },
+          where: { id: validatedId },
           include: { userPermissions: true },
         });
 
@@ -54,7 +56,7 @@ export const editUserAction = withPermissions(
         const userWithSameEmail = await tx.user.findFirst({
           where: {
             email,
-            id: { not: userId },
+            id: { not: validatedId },
           },
         });
 
@@ -63,7 +65,7 @@ export const editUserAction = withPermissions(
         }
 
         await tx.user.update({
-          where: { id: userId },
+          where: { id: validatedId },
           data: {
             email,
             employeeId,
@@ -90,7 +92,7 @@ export const editUserAction = withPermissions(
                 (
                   up,
                 ): up is {
-                  userId: string;
+                  userId: number;
                   module: string;
                   permission: Permission;
                 } => up.permission !== undefined,

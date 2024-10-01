@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { format } from 'date-fns';
+import { format, differenceInDays, addDays } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
@@ -20,14 +20,98 @@ import { MESSAGE } from '@/utils/message';
 import { useToast } from '@/hooks/useToast';
 import { IVisitorMovementSimplified } from '@/app/(main)/movements/types';
 
+const MAX_DATE_RANGE = 30; // Maximum number of days allowed between start and end date
+
 export function VisitorHistorical() {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [movements, setMovements] = useState<IVisitorMovementSimplified[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
-  const columns = getColumns();
+  const handleExpand = (rowId: string) => {
+    setExpandedRows((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
+  };
+
+  const columns = getColumns({ onExpand: handleExpand, expandedRows });
+
+  const renderExpanded = (row: IVisitorMovementSimplified) => (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2 md:hidden">
+        <h4 className="font-semibold">CPF</h4>
+        <p>{row.cpf}</p>
+      </div>
+
+      <div className="flex flex-col gap-2 md:hidden">
+        <h4 className="font-semibold">Telefone</h4>
+        <p>{row.telephone}</p>
+      </div>
+
+      <div className="flex flex-col gap-2 lg:hidden">
+        <h4 className="font-semibold">Placa</h4>
+        <p>{row.licensePlate}</p>
+      </div>
+
+      <div className="flex flex-col gap-2 lg:hidden">
+        <h4 className="font-semibold">Ação</h4>
+        <span
+          className={`px-2 py-1 rounded-lg text-xs font-semibold w-auto ${
+            row.action === 'E'
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
+          }`}
+        >
+          {row.action === 'E' ? 'Entrada' : 'Saída'}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-2 xl:hidden">
+        <h4 className="font-semibold">Data</h4>
+        <p>{row.date}</p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <h4 className="font-semibold">Observação</h4>
+        <p>{row.observation || 'Sem observação'}</p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <h4 className="font-semibold">Empresas visitadas</h4>
+        <div className="flex flex-col lg:flex-row gap-2">
+          {row.companies.map((c, index) => (
+            <div
+              key={index}
+              className="bg-primary text-white rounded-md px-2 py-1 text-xs"
+            >
+              {c.company.name}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const handleStartDateChange = (date: Date | undefined) => {
+    setStartDate(date);
+    if (date && endDate && differenceInDays(endDate, date) > MAX_DATE_RANGE) {
+      setEndDate(addDays(date, MAX_DATE_RANGE));
+    }
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    if (date && startDate) {
+      if (differenceInDays(date, startDate) > MAX_DATE_RANGE) {
+        toast({
+          variant: 'warning',
+          title: MESSAGE.HISTORICAL.LIMIT_INTERVAL_TITLE,
+          description: MESSAGE.HISTORICAL.LIMIT_INTERVAL,
+        });
+        return;
+      }
+    }
+    setEndDate(date);
+  };
 
   const handleGenerateHistorical = async () => {
     if (!startDate || !endDate) {
@@ -39,12 +123,22 @@ export function VisitorHistorical() {
       return;
     }
 
+    if (differenceInDays(endDate, startDate) > MAX_DATE_RANGE) {
+      toast({
+        variant: 'warning',
+        title: MESSAGE.HISTORICAL.LIMIT_INTERVAL_TITLE,
+        description: MESSAGE.HISTORICAL.LIMIT_INTERVAL,
+      });
+      return;
+    }
+
     setIsLoading(true);
 
-    const result: IGetVisitorMovementByDate = await getVisitorMovementByDateAction({
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-    });
+    const result: IGetVisitorMovementByDate =
+      await getVisitorMovementByDateAction({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
 
     if (result.success && result.data) {
       setMovements(result.data);
@@ -62,7 +156,7 @@ export function VisitorHistorical() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="col-span-1">
           <Popover>
             <PopoverTrigger asChild>
@@ -93,7 +187,7 @@ export function VisitorHistorical() {
               <Calendar
                 mode="single"
                 selected={startDate}
-                onSelect={setStartDate}
+                onSelect={handleStartDateChange}
                 initialFocus
                 locale={pt}
               />
@@ -131,13 +225,21 @@ export function VisitorHistorical() {
               <Calendar
                 mode="single"
                 selected={endDate}
-                onSelect={setEndDate}
+                onSelect={handleEndDateChange}
                 initialFocus
                 locale={pt}
+                disabled={(date) =>
+                  startDate
+                    ? differenceInDays(date, startDate) > MAX_DATE_RANGE
+                    : false
+                }
               />
             </PopoverContent>
           </Popover>
         </div>
+        <p className="text-sm text-muted-foreground">
+          {MESSAGE.HISTORICAL.LIMIT_INTERVAL}
+        </p>
         <Button
           className="col-span-full"
           onClick={handleGenerateHistorical}
@@ -153,7 +255,13 @@ export function VisitorHistorical() {
             searchKey="fullName"
             searchPlaceholder="Filtrar por nome..."
           />
-          <DataTable.Content columns={columns} />
+          <DataTable.Content
+            columns={columns}
+            expandable={true}
+            renderExpanded={renderExpanded}
+            expandedRows={expandedRows}
+            onExpand={handleExpand}
+          />
           <DataTable.Pagination />
         </DataTable.Root>
       )}

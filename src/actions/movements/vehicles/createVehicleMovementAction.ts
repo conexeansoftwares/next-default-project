@@ -8,14 +8,13 @@ import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
-
-const createVehicleMovementSchema = z.object({
-  vehicleId: z.string().cuid(),
-  action: z.enum(['E', 'S']),
-});
+import { idSchema } from '@/schemas/idSchema';
+import { actionSchema } from '@/schemas/actionSchema';
+import { observationSchema } from '@/schemas/observationSchema';
 
 interface CreateVehicleMovementActionParams {
-  vehicleId: string;
+  vehicleId: number;
+  observation: string;
   action: string;
 }
 
@@ -30,15 +29,15 @@ export const createVehicleMovementAction = withPermissions(
   'WRITE',
   async (params: CreateVehicleMovementActionParams): Promise<ICreateVehicleMovementReturnProps> => {
     try {
-      const { vehicleId, action } = params;
-      const validatedData = createVehicleMovementSchema.parse({
-        vehicleId,
-        action,
-      });
+      const { vehicleId, observation, action } = params;
+
+      const validatedId = idSchema.parse(vehicleId);
+      const validatedObservation = observationSchema.parse(observation); 
+      const validatedAction = actionSchema.parse(action);
 
       await prisma.$transaction(async (tx) => {
         const existingVehicle = await tx.vehicle.findUnique({
-          where: { id: validatedData.vehicleId },
+          where: { id: validatedId },
         });
 
         if (!existingVehicle) {
@@ -47,8 +46,9 @@ export const createVehicleMovementAction = withPermissions(
 
         const movement = await tx.vehicleMovement.create({
           data: {
-            vehicleId: validatedData.vehicleId,
-            action: validatedData.action as Action,
+            vehicleId: validatedId,
+            observation: validatedObservation,
+            action: validatedAction as Action,
           },
         });
 

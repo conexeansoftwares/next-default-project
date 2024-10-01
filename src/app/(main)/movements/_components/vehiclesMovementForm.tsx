@@ -3,7 +3,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/useToast';
-import { createVehicleMovementAction, ICreateVehicleMovementReturnProps } from '@/actions/movements/vehicles/createVehicleMovementAction';
+import {
+  createVehicleMovementAction,
+  ICreateVehicleMovementReturnProps,
+} from '@/actions/movements/vehicles/createVehicleMovementAction';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -12,11 +15,14 @@ import {
 } from '@/actions/vehicles/getActiveVehicleByLicensePlateAction';
 import { MESSAGE } from '@/utils/message';
 import { IVehicle } from '../../vehicles/types';
+import { Textarea } from '@/components/ui/textarea';
 
 export function VehicleMovementForm() {
   const { toast } = useToast();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [vehicle, setVehicle] = useState<IVehicle | null>(null);
+  const [observation, setObservation] = useState<string>('');
+  const [observationLength, setObservationLength] = useState(0);
   const [licensePlate, setLicensePlate] = useState('');
   const [action, setAction] = useState<'E' | 'S'>('E');
 
@@ -60,18 +66,19 @@ export function VehicleMovementForm() {
     }
 
     setRequesting(true);
-    const response: ICreateVehicleMovementReturnProps = await createVehicleMovementAction({
-      vehicleId: vehicle.id,
-      action,
-    });
+    const response: ICreateVehicleMovementReturnProps =
+      await createVehicleMovementAction({
+        vehicleId: vehicle.id,
+        observation,
+        action,
+      });
 
     if (response.success) {
       toast({
         variant: 'success',
         description: response.data,
       });
-      setVehicle(null);
-      setAction('E');
+      reset();
     } else {
       toast({
         variant: 'destructive',
@@ -83,10 +90,11 @@ export function VehicleMovementForm() {
     setRequesting(false);
   };
 
-  const cancelRequest = () => {
+  const reset = () => {
     setVehicle(null);
     setLicensePlate('');
     setAction('E');
+    setObservation('');
   };
 
   return (
@@ -152,6 +160,24 @@ export function VehicleMovementForm() {
                   {vehicle.companyName || 'N/A'}
                 </p>
               </div>
+              <div className="col-span-full">
+                <div className="bg-background rounded-lg p-2 flex-grow">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                    Observação do registro
+                  </h4>
+                  <Textarea
+                    maxLength={200}
+                    value={observation}
+                    onChange={(e) => {
+                      setObservation(e.target.value),
+                        setObservationLength(e.target.value.length);
+                    }}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {200 - observationLength} caracteres restantes
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-muted-foreground">
@@ -183,7 +209,7 @@ export function VehicleMovementForm() {
                 {requesting ? 'Registrando...' : 'Registrar movimentação'}
               </Button>
               <Button
-                onClick={cancelRequest}
+                onClick={reset}
                 variant="warning"
                 className="w-full"
               >

@@ -7,6 +7,7 @@ import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { idSchema } from '@/schemas/idSchema';
 
 export interface IDeactiveUserReturnProps {
   success: boolean;
@@ -14,14 +15,12 @@ export interface IDeactiveUserReturnProps {
   error?: string;
 }
 
-const deactivateUserSchema = z.string().cuid();
-
 export const deactivateUserAction = withPermissions(
   'users',
   'DELETE',
-  async (userId: string): Promise<IDeactiveUserReturnProps> => {
+  async (userId: number): Promise<IDeactiveUserReturnProps> => {
     try {
-      const validatedId = deactivateUserSchema.parse(userId);
+      const validatedId = idSchema.parse(userId);
 
       const result = await prisma.$transaction(async (tx) => {
         const user = await tx.user.findUnique({

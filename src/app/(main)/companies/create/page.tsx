@@ -6,12 +6,10 @@ import { useToast } from '../../../../hooks/useToast';
 import { createCompanyAction } from '../../../../actions/companies/createCompanyAction';
 import { CompanyForm } from '../_components/companyForm';
 import { useRef } from 'react';
-import { useErrorHandler } from '@/hooks/useErrorHandler'; 
 
 export default function CreateCompanyPage() {
   const { toast } = useToast();
   const formRef = useRef<{ reset: () => void } | null>(null);
-  const { handleError } = useErrorHandler();
 
   async function onSubmit(values: CompanyFormData) {
     try {
@@ -26,7 +24,7 @@ export default function CreateCompanyPage() {
         formRef.current.reset();
       }
     } catch (error) {
-      handleError(error);
+      console.log(error);
     }
   }
 

@@ -26,7 +26,7 @@ import { DataTable } from '../../../components/ui/dataTable';
 import { IUser } from './types';
 
 type userColumnProps = {
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
   canEditAndCreate: boolean;
   canDelete: boolean;
 };

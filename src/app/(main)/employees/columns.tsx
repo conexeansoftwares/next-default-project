@@ -24,7 +24,7 @@ import { DataTable } from '../../../components/ui/dataTable';
 import { IEmployeeDataTable } from './types';
 
 type EmployeeColumnProps = {
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
   canEditAndCreate: boolean;
   canDelete: boolean;
 };

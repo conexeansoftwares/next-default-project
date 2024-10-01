@@ -23,14 +23,25 @@ import { Label } from '@/components/ui/label';
 import { UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import { MESSAGE } from '@/utils/message';
-import { createEmployeeMovementAction, ICreateEmployeeMovementReturnProps } from '@/actions/movements/employees/createEmployeeMovementAction';
-import { getAllActiveEmployeesToMovementAction, IGetAllACtiveEmplyeesToMovementReturnProps } from '@/actions/employees/getAllActiveEmployeeToMovement';
+import {
+  createEmployeeMovementAction,
+  ICreateEmployeeMovementReturnProps,
+} from '@/actions/movements/employees/createEmployeeMovementAction';
+import {
+  getAllActiveEmployeesToMovementAction,
+  IGetAllACtiveEmplyeesToMovementReturnProps,
+} from '@/actions/employees/getAllActiveEmployeeToMovement';
 import { IEmployeeToMovement } from '../../employees/types';
+import { Textarea } from '@/components/ui/textarea';
 
 export function EmployeesMovementForm() {
   const { toast } = useToast();
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(
+    null,
+  );
   const [employee, setEmployee] = useState<IEmployeeToMovement | null>(null);
+  const [observation, setObservation] = useState<string>('');
+  const [observationLength, setObservationLength] = useState(0);
   const [action, setAction] = useState<'E' | 'S'>('E');
   const [requesting, setRequesting] = useState(false);
   const [open, setOpen] = useState(false);
@@ -40,7 +51,8 @@ export function EmployeesMovementForm() {
     const fetchEmployees = async () => {
       setRequesting(true);
 
-      const response: IGetAllACtiveEmplyeesToMovementReturnProps = await getAllActiveEmployeesToMovementAction();
+      const response: IGetAllACtiveEmplyeesToMovementReturnProps =
+        await getAllActiveEmployeesToMovementAction();
       if (response.success && response.data) {
         const employeeData = response.data as IEmployeeToMovement[];
         setEmployees(employeeData);
@@ -93,18 +105,20 @@ export function EmployeesMovementForm() {
     }
 
     setRequesting(true);
-    const response: ICreateEmployeeMovementReturnProps = await createEmployeeMovementAction({
-      employeeId: employee.id,
-      action,
-    });
+    const response: ICreateEmployeeMovementReturnProps =
+      await createEmployeeMovementAction({
+        employeeId: employee.id,
+        observation,
+        action,
+      });
 
     if (response.success) {
       toast({
         variant: 'success',
         description: response.data,
       });
-      setEmployee(null);
-      setAction('E');
+
+      resetForm();
     } else {
       toast({
         variant: 'destructive',
@@ -114,13 +128,12 @@ export function EmployeesMovementForm() {
     }
 
     setRequesting(false);
-
-    resetForm();
   };
 
   const resetForm = () => {
-    setSelectedEmployeeId('');
+    setSelectedEmployeeId(null);
     setEmployee(null);
+    setObservation('');
     setAction('E');
   };
 
@@ -223,29 +236,53 @@ export function EmployeesMovementForm() {
                 </div>
               </div>
               <div className="col-span-1 xl:col-span-9">
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  <div className="bg-background rounded-lg xl:col-span-2 p-2">
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">
-                      Nome
-                    </h4>
-                    <p className="text-base font-medium">{employee.fullName}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 h-full">
+                  <div className="xl:col-span-2 flex flex-col">
+                    <div className="bg-background rounded-lg p-2 flex-grow">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                        Nome
+                      </h4>
+                      <p className="text-base font-medium">
+                        {employee.fullName}
+                      </p>
+                    </div>
                   </div>
-                  <div className="bg-background rounded-lg p-3">
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">
-                      Matrícula
-                    </h4>
-                    <p className="text-base font-medium">
-                      {employee.registration}
-                    </p>
+                  <div className="flex flex-col">
+                    <div className="bg-background rounded-lg p-3 flex-grow">
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                        Matrícula
+                      </h4>
+                      <p className="text-base font-medium">
+                        {employee.registration}
+                      </p>
+                    </div>
                   </div>
-                  <div className="bg-background rounded-lg p-3 col-span-full">
+                  <div className="bg-background rounded-lg p-3 col-span-full flex flex-col flex-grow">
                     <h4 className="text-sm font-medium mb-1 text-destructive">
                       Observação
                     </h4>
-                    <p className="text-base font-medium">
+                    <p className="text-base font-medium flex-grow">
                       {employee.observation}
                     </p>
                   </div>
+                </div>
+              </div>
+              <div className="col-span-full">
+                <div className="bg-background rounded-lg p-2 flex-grow">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">
+                    Observação do registro
+                  </h4>
+                  <Textarea
+                    maxLength={200}
+                    value={observation}
+                    onChange={(e) => {
+                      setObservation(e.target.value),
+                        setObservationLength(e.target.value.length);
+                    }}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {200 - observationLength} caracteres restantes
+                  </p>
                 </div>
               </div>
             </div>

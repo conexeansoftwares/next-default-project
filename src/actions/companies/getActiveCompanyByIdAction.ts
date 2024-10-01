@@ -7,7 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { ICompany } from '@/app/(main)/companies/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
-import { idCompanySchema } from '@/schemas/companySchema';
+import { idSchema } from '@/schemas/idSchema';
 
 export interface IGetActiveCompanyByIdReturnProps {
   success: boolean;
@@ -18,9 +18,9 @@ export interface IGetActiveCompanyByIdReturnProps {
 export const getActiveCompanyByIdAction = withPermissions(
   'companies',
   'READ',
-  async (companyId: string): Promise<IGetActiveCompanyByIdReturnProps> => {
+  async (companyId: number): Promise<IGetActiveCompanyByIdReturnProps> => {
     try {
-      const validatedId = idCompanySchema.parse(companyId);
+      const validatedId = idSchema.parse(companyId);
 
       const result = await prisma.$transaction(async (tx) => {
         const company = await tx.company.findUnique({

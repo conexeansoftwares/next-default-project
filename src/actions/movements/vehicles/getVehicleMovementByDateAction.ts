@@ -58,6 +58,7 @@ export const getVehicleMovementByDateAction = withPermissions(
           select: {
             action: true,
             createdAt: true,
+            observation: true,
             vehicle: {
               select: {
                 licensePlate: true,
@@ -83,6 +84,7 @@ export const getVehicleMovementByDateAction = withPermissions(
           licensePlate: movement.vehicle.licensePlate,
           carModel: movement.vehicle.carModel,
           companyName: movement.vehicle.company.name,
+          observation: movement.observation,
           action: movement.action,
           date: movement.createdAt.toISOString(),
         }));

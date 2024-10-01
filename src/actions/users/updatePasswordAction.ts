@@ -8,9 +8,10 @@ import { hash } from 'bcryptjs';
 import { passwordSchema, type PasswordFormSchema } from '@/schemas/userSchema';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { idSchema } from '@/schemas/idSchema';
 
 interface EditPasswordActionParams {
-  userId: string;
+  userId: number;
   data: PasswordFormSchema;
 }
 
@@ -20,38 +21,43 @@ export interface IUpdateUserReturnProps {
   error?: string;
 }
 
-export const updateUserPasswordAction = withPermissions('users', 'WRITE',
+export const updateUserPasswordAction = withPermissions(
+  'users',
+  'WRITE',
   async (params: EditPasswordActionParams): Promise<IUpdateUserReturnProps> => {
     try {
       const { userId, data } = params;
-    const validatedData = passwordSchema.parse(data);
 
-    const result = await prisma.$transaction(async (tx) => {
-      const existingUser = await tx.user.findUnique({
-        where: { id: userId },
+      const validatedId = idSchema.parse(userId);
+      const validatedData = passwordSchema.parse(data);
+
+      const result = await prisma.$transaction(async (tx) => {
+        const existingUser = await tx.user.findUnique({
+          where: { id: validatedId },
+        });
+
+        if (!existingUser) {
+          throw new AppError(MESSAGE.USER.NOT_FOUND, 404);
+        }
+
+        const hashedPassword = await hash(validatedData.password, 10);
+
+        await tx.user.update({
+          where: { id: validatedId },
+          data: {
+            password: hashedPassword,
+          },
+        });
+
+        return MESSAGE.USER.PASSWORD_UPDATED_SUCCESS;
       });
 
-      if (!existingUser) {
-        throw new AppError(MESSAGE.USER.NOT_FOUND, 404);
-      }
+      revalidatePath('/users');
 
-      const hashedPassword = await hash(validatedData.password, 10);
-
-      await tx.user.update({
-        where: { id: userId },
-        data: {
-          password: hashedPassword,
-        },
-      });
-
-      return MESSAGE.USER.PASSWORD_UPDATED_SUCCESS;
-    });
-
-    revalidatePath('/users');
-
-    return { success: true, data: result };
+      return { success: true, data: result };
     } catch (error) {
       const errorResult = handleErrors(error);
       return { success: false, error: errorResult.error };
     }
-  });
+  },
+);

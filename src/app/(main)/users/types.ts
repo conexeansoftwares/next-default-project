@@ -8,20 +8,20 @@ export interface IUserPermission {
 }
 
 export interface IUser {
-  id: string;
+  id: number;
   email: string;
-  employeeId: string;
+  employeeId: number;
   userPermissions: IUserPermission[];
 }
 
 export interface IUserWithCompanies extends IUser {
-  companies: { companyId: string }[];
+  companies: { companyId: number }[];
 }
 
 export interface IUserToEdit {
-  id: string;
+  id: number;
   email: string;
-  employeeId: string;
+  employeeId: number;
   userPermissions: IUserPermission[];
-  companyIds: string[];
+  companyIds: number[];
 }

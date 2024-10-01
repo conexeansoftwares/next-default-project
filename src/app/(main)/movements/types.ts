@@ -2,33 +2,33 @@
 type Action = 'E' | 'S';
 
 interface BaseMovement {
-  id: string;
+  id: number;
   action: Action;
   createdAt: Date;
 }
 
 // Tipos para Funcionários
 export interface IEmployee {
-  id: string;
+  id: number;
   fullName: string;
   registration: string;
 }
 
 export interface IEmployeeMovement extends BaseMovement {
-  employeeId: string;
+  employeeId: number;
   employee: IEmployee;
 }
 
 export interface IEmployeeMovementSelect {
-  id: string;
-  employeeId: string;
+  id: number;
+  employeeId: number;
   action: Action;
 }
 
 export interface IEmployeeMovementDetail {
-  name: string;
-  lastName: string;
+  fullName: string;
   registration: string;
+  observation: string | null;
   action: Action;
   date: string;
 }
@@ -39,23 +39,21 @@ export interface IVisitorMovementSimplified {
   cpf: string | null;
   telephone: string | null;
   licensePlate: string | null;
+  observation: string | null;
+  companies: { company: { name: string; }; }[]
   action: Action;
   date: string;
 }
 
-export interface IVisitorMovement extends BaseMovement, Omit<IVisitorMovementSimplified, 'date'> {
-  companies: { id: string; name: string }[];
-}
-
 export interface IVisitorMovementSelect {
-  id: string;
+  id: number;
   fullName: string;
   action: Action;
 }
 
 // Tipos para Veículos
 export interface IVehicle {
-  id: string;
+  id: number;
   licensePlate: string;
   carModel: string;
   company: {
@@ -64,7 +62,7 @@ export interface IVehicle {
 }
 
 export interface IVehicleMovement extends BaseMovement {
-  vehicleId: string;
+  vehicleId: number;
   vehicle: IVehicle;
 }
 
@@ -72,6 +70,7 @@ export interface IVehicleMovementDetail {
   licensePlate: string;
   carModel: string;
   companyName: string;
+  observation: string | null;
   action: Action;
   date: string;
 }

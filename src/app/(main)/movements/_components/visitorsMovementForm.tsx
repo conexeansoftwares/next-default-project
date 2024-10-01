@@ -17,20 +17,28 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/useToast';
-import { createVisitorMovementAction, ICreateVehicleMovementReturnProps } from '@/actions/movements/visitors/createVisitorMovementAction';
+import {
+  createVisitorMovementAction,
+  ICreateVehicleMovementReturnProps,
+} from '@/actions/movements/visitors/createVisitorMovementAction';
 import {
   VisitorMovementFormData,
   visitorMovementFormSchema,
 } from '@/schemas/visitorMovementSchema';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MESSAGE } from '@/utils/message';
-import { getAllActiveCompaniesToSelect, IGetAllActiveCompaniesToSelectReturnProps } from '@/actions/companies/getAllActiveCompaniesToSelect';
+import {
+  getAllActiveCompaniesToSelect,
+  IGetAllActiveCompaniesToSelectReturnProps,
+} from '@/actions/companies/getAllActiveCompaniesToSelect';
 import { ICompany } from '../../companies/types';
+import { Textarea } from '@/components/ui/textarea';
 
 export function VisitorsMovementForm() {
   const [companies, setCompanies] = useState<Omit<ICompany, 'cnpj'>[]>([]);
   const [action, setAction] = useState<'E' | 'S'>('E');
   const [requesting, setRequesting] = useState<boolean>(false);
+  const [observationLength, setObservationLength] = useState(0);
   const [requestingCompanies, setRequestingCompanies] =
     useState<boolean>(false);
   const { toast } = useToast();
@@ -43,13 +51,15 @@ export function VisitorsMovementForm() {
       telephone: '',
       licensePlate: '',
       companyIds: [],
+      observation: '',
       action: 'E',
     },
   });
 
   const onSubmit = async (data: VisitorMovementFormData) => {
     setRequesting(true);
-    const response: ICreateVehicleMovementReturnProps = await createVisitorMovementAction(data);
+    const response: ICreateVehicleMovementReturnProps =
+      await createVisitorMovementAction(data);
 
     if (response.success) {
       toast({
@@ -165,7 +175,7 @@ export function VisitorsMovementForm() {
           <FormField
             control={form.control}
             name="companyIds"
-            render={() => (
+            render={({ field }) => (
               <FormItem className="col-span-full">
                 <div className="mb-4">
                   <FormLabel className="text-base">Empresas</FormLabel>
@@ -176,52 +186,65 @@ export function VisitorsMovementForm() {
                 <ScrollArea className="h-[220px] w-full rounded-md border p-4">
                   {requestingCompanies ? (
                     <div className="w-full grid gap-3">
-                      <Skeleton className="w-full h-[20px] rounded-full" />
-                      <Skeleton className="w-full h-[20px] rounded-full" />
-                      <Skeleton className="w-full h-[20px] rounded-full" />
-                      <Skeleton className="w-full h-[20px] rounded-full" />
-                      <Skeleton className="w-full h-[20px] rounded-full" />
-                      <Skeleton className="w-full h-[20px] rounded-full" />
+                      {[...Array(6)].map((_, index) => (
+                        <Skeleton
+                          key={index}
+                          className="w-full h-[20px] rounded-full"
+                        />
+                      ))}
                     </div>
                   ) : (
                     companies.map((company) => (
-                      <FormField
+                      <FormItem
                         key={company.id}
-                        control={form.control}
-                        name="companyIds"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={company.id}
-                              className="flex flex-row items-start space-x-3 space-y-0 mb-3"
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(company.id)}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...(field.value || []),
-                                          company.id,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== company.id,
-                                          ),
-                                        );
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="text-sm font-normal">
-                                {company.name}
-                              </FormLabel>
-                            </FormItem>
-                          );
-                        }}
-                      />
+                        className="flex flex-row items-start space-x-3 space-y-0 mb-3"
+                      >
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value?.includes(company.id)}
+                            onCheckedChange={(checked) => {
+                              const updatedIds = checked
+                                ? [...(field.value || []), company.id]
+                                : field.value?.filter(
+                                    (id) => id !== company.id,
+                                  ) || [];
+                              field.onChange(updatedIds);
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm font-normal">
+                          {company.name}
+                        </FormLabel>
+                      </FormItem>
                     ))
                   )}
                 </ScrollArea>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="observation"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>Observação</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Informe a observação"
+                    className="resize-none"
+                    maxLength={200}
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setObservationLength(e.target.value.length);
+                    }}
+                  />
+                </FormControl>
+                <FormDescription>
+                  {200 - observationLength} caracteres restantes
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
