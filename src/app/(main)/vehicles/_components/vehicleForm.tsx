@@ -73,7 +73,7 @@ const VehicleFormComponent: ForwardRefRenderFunction<
       licensePlate: '',
       carModel: '',
       owner: '',
-      companyId: '',
+      companyId: 0,
       ...initialData,
     },
   });

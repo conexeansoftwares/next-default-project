@@ -77,7 +77,7 @@ export default function UserPage() {
     resolver: zodResolver(combinedUserFormSchema),
     defaultValues: {
       email: '',
-      employeeId: '',
+      employeeId: 0,
       permissions: {},
       password: '',
       confirmPassword: '',

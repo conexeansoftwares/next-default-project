@@ -2,7 +2,6 @@
 
 import { AppError } from '@/error/appError';
 import { prisma } from '../../lib/prisma';
-import { z } from 'zod';
 import { MESSAGE } from '@/utils/message';
 import { ICompany } from '@/app/(main)/companies/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';

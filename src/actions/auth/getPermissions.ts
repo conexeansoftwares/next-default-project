@@ -13,7 +13,7 @@ export interface Permission {
 export interface GetUserPermissionsResult {
   success: boolean;
   data?: Permission[];
-  error?: any;
+  error?: unknown;
 }
 
 export async function getUserPermissionsAction(
