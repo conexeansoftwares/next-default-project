@@ -1,7 +1,6 @@
 export interface IuserLoginInformations {
   email: string;
   fullName: string;
-  token: string;
   message: string;
   permissions: {
     module: string,

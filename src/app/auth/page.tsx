@@ -15,11 +15,13 @@ import {
 } from '../../components/ui/form';
 import { LoginFormData, loginFormSchema } from '@/schemas/loginSchema';
 import Image from 'next/image';
-
+import { loginUserAction } from '@/actions/auth/login';
+import { toast } from '@/hooks/useToast';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
+  const router = useRouter();
 
-  
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -29,33 +31,34 @@ export default function Page() {
   });
 
   async function onSubmit(values: LoginFormData) {
-    // const response = await loginUserAction(values);
+    const response = await loginUserAction(values);
 
     // /**
     //  * Se a resposta for positiva, eu verifico as permissões do usuário.
-    //  * Após identificar as permissões, faço o redirecionamento para o 
+    //  * Após identificar as permissões, faço o redirecionamento para o
     //  * primeiro módulo que tiver a permissão READ ou ADMIN.
-    //  * 
+    //  *
     //  * Caso não tenha nenhum módulo com permissão de administrador ou leitura,
     //  * faço o redirecionamento para a rota de não autorizado.
     //  */
 
-    // if (response && response.success) {
-    //   const permissions = response.data.permissions;
-      
-    //   const firstReadModule = permissions.find(item => item.permission === 'READ' || item.permission === 'ADMIN');
+    if (response && response.success) {
+      const permissions = response.data.permissions;
+      const firstReadModule = permissions.find(
+        (item) => item.permission === 'READ' || item.permission === 'ADMIN',
+      );
 
-    // if (firstReadModule) {
-    //   router.push(`/${firstReadModule.module}`);
-    // } else {
-    //   router.push('/unauthorized');
-    // }
-    // } else {
-    //   toast({
-    //     variant: 'destructive',
-    //     description: response.error,
-    //   });
-    // }
+      if (firstReadModule) {
+        router.push(`/${firstReadModule.module}`);
+      } else {
+        router.push('/unauthorized');
+      }
+    } else {
+      toast({
+        variant: 'destructive',
+        description: response.error,
+      });
+    }
   }
 
   return (
@@ -117,8 +120,12 @@ export default function Page() {
                   )}
                 />
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                {/* <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Autenticando...' : 'Fazer login'}
+                </Button> */}
+
+                <Button type="submit" className="w-full">
+                  Fazer login
                 </Button>
               </div>
             </form>

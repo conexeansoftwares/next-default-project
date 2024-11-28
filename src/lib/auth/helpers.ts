@@ -8,6 +8,7 @@ type Permission = {
 
 export type UserPayload = {
   email: string;
+  id: number;
   fullName: string;
   companyId: string;
   permissions: Permission[];

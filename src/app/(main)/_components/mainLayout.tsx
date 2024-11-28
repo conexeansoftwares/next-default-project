@@ -9,6 +9,7 @@ import {
   cadastrosItems,
   portariaItems,
 } from '@/app/(main)/_components/sidebarItems';
+import { useAuth } from '@/hooks/usePermissions';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -19,28 +20,34 @@ export function MainLayout({
   children,
   pathname,
 }: MainLayoutProps) {
+  const { checkPermission } = useAuth();
+
   const isActiveRoute = (path: string, href: string) => {
     return path === href;
   };
 
-  const renderSidebarContent = (
-    title: string,
-    items: SidebarItem[],
-  ): React.ReactNode => {
+  const renderSidebarContent = (title: string, items: SidebarItem[]): React.ReactNode => {
+    const hasAnyPermission = items.some(item => checkPermission(item.permission, 'READ'));
+    if (!hasAnyPermission) {
+      return null;
+    }
     return (
       <Sidebar.Content>
         {title && <Sidebar.ContentTitle text={title} />}
         <Sidebar.Navigation>
-          {items.map((item) => (
-            <Sidebar.Item
-              key={item.href}
-              href={item.href}
-              active={isActiveRoute(pathname, item.href)}
-            >
-              {item.icon}
-              {item.label}
-            </Sidebar.Item>
-          ))}
+          {items.map(item => {
+            return (
+            checkPermission(item.permission, 'READ') && (
+              <Sidebar.Item
+                key={item.href}
+                href={item.href}
+                active={isActiveRoute(pathname, item.href)}
+              >
+                {item.icon}
+                {item.label}
+              </Sidebar.Item>
+            )
+  );})}
         </Sidebar.Navigation>
       </Sidebar.Content>
     );

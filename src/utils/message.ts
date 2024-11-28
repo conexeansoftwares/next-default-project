@@ -75,4 +75,8 @@ export const MESSAGE = {
     LIMIT_INTERVAL_TITLE: 'Interválido inválido',
     LIMIT_INTERVAL: 'O intervalo máximo permitido é de 30 dias.',
   },
+  AUTH: {
+    TOKEN_NOT_FOUND: 'Nenhum token encontrato.',
+    TOKEN_INVALID: 'Token inválido.',
+  },
 };

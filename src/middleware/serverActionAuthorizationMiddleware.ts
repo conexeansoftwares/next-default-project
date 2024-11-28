@@ -1,23 +1,24 @@
-import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { Permission } from '@prisma/client';
 
 type ServerAction<T = any> = (...args: any[]) => Promise<T>;
 
 interface UserPayload {
+  id: number;
   email: string;
   fullName: string;
   companyId: number;
   permissions: Array<{ module: string; permission: Permission }>;
-  exp: number;
-  iat: number;
-  nbf: number;
 }
 
-export function withPermissions(requiredModule: string, requiredPermission: Permission, action: ServerAction) {
+export function withPermissions(
+  requiredModule: string, 
+  requiredPermission: Permission, 
+  action: ServerAction
+) {
   return async (...args: any[]) => {
-    // const headersList = headers();
-    // const token = headersList.get('Authorization')?.split(' ')[1];
+    // // Obtém o token dos cookies do servidor
+    // const token = auth.getSessionToken();
 
     // if (!token) {
     //   throw new Error('Token não fornecido');

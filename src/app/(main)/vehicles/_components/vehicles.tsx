@@ -21,7 +21,7 @@ interface VehiclesProps {
 export function Vehicles({ result }: VehiclesProps) {
   const { toast } = useToast();
   const { checkPermission } = useAuth();
-
+  
   const canEditAndCreate = checkPermission('vehicles', 'WRITE');
   const canDelete = checkPermission('vehicles', 'DELETE');
 
