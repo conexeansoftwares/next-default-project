@@ -67,7 +67,6 @@ export async function loginUserAction(data: LoginFormData): Promise<IGetActiveUs
 
     return { success: true, data: result };
   } catch (error) {
-    console.log(error);
     const errorResult = handleErrors(error);
     return { success: false, error: errorResult.error };
   }

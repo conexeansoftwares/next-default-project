@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://dbmasteruser:correaab290499@ls-28804669717f9299d2dfbd36661c615cb8f465b8.cracgygkad7j.us-east-1.rds.amazonaws.com:5432/staging_supervisao"
 }
 
 enum Action {

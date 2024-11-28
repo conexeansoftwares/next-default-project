@@ -7,7 +7,7 @@ type ErrorResult = {
   error: string;
 };
 
-export function handleErrors(error: any): ErrorResult {
+export function handleErrors(error: unknown): ErrorResult {
   if (error instanceof z.ZodError) {
     return {
       errors: error.errors,
@@ -17,5 +17,5 @@ export function handleErrors(error: any): ErrorResult {
   if (error instanceof AppError) {
     return { error: error.message };
   }
-  return { error: error.message };
+  return { error: MESSAGE.COMMON.GENERIC_ERROR_MESSAGE };
 }
