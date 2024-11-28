@@ -21,7 +21,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["node", "bcrypt"]
+    "types": ["node", "bcrypt", "bcryptjs"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/(main)/users/update/[userId]/_components/editUser.tsx"],
   "exclude": ["node_modules"]
