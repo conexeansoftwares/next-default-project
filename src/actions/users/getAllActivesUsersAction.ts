@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { IUser } from '@/app/(main)/users/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 type UserFields = {
   id?: boolean;
@@ -38,7 +39,7 @@ export const getAllActiveUsersAction = withPermissions(
     fields: UserFields = { id: true, email: true, employeeId: true },
   ): Promise<IGetAllActiveUsersReturnProps> => {
     try {
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const users = await tx.user.findMany({
           where: { active: true },
           select: {

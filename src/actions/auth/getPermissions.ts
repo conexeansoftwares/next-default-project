@@ -41,13 +41,13 @@ export async function getUserPermissionsAction(
 
     return {
       success: true,
-      data: user.userPermissions.map((up) => ({
+      // Add type annotation for the map parameter
+      data: user.userPermissions.map((up: { module: string; permission: string }) => ({
         module: up.module,
         permission: up.permission,
       })),
     };
   } catch (error) {
-    console.log(error);
     const errorResult = handleErrors(error);
     return {
       success: false,

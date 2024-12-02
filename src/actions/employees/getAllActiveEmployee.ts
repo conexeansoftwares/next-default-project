@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { IEmployeeDataTable } from '@/app/(main)/employees/types';
+import { Prisma } from '@prisma/client';
 
 export interface IGetAllACtiveEmplyeesReturnProps {
   success: boolean;
@@ -19,7 +20,7 @@ export const getAllActiveEmployeesAction = withPermissions(
   'READ',
   async (): Promise<IGetAllACtiveEmplyeesReturnProps> => {
     try {
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const result = await tx.employee.findMany({
           select: {
             id: true,

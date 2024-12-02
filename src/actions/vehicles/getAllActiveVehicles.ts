@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { IVehicle } from '@/app/(main)/vehicles/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 export interface IGetAllActiveVehiclesReturnProps {
   success: boolean;
@@ -19,7 +20,7 @@ export const getAllActiveVehiclesAction = withPermissions(
   'READ',
   async (): Promise<IGetAllActiveVehiclesReturnProps> => {
     try {
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const vehicles = await tx.vehicle.findMany({
           select: {
             id: true,

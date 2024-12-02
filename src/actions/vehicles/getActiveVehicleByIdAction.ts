@@ -7,6 +7,7 @@ import { withPermissions } from '@/middleware/serverActionAuthorizationMiddlewar
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
 import { IVehicle } from '@/app/(main)/vehicles/types';
+import { Prisma } from '@prisma/client';
 
 export interface IGetActiveVehicleByIdReturnProps {
   success: boolean;
@@ -21,7 +22,7 @@ export const getActiveVehicleByIdAction = withPermissions(
     try {
       const validatedId = idSchema.parse(vehicleId);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const vehicle = await tx.vehicle.findUnique({
           select: {
             id: true,

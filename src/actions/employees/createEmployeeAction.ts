@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 export interface ICreateEmployeeReturnProps {
   success: boolean;
@@ -33,7 +34,7 @@ export const createEmployeeAction = withPermissions(
         companyIds,
       } = validatedData;
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const existingEmployee = await tx.employee.findUnique({
           where: { registration },
         });

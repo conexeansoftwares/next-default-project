@@ -12,6 +12,7 @@ import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 interface EditCompanyActionParams {
   companyId: number;
@@ -39,7 +40,7 @@ export const editCompanyAction = withPermissions(
 
       const cleanCnpj = removeCnpjMask(cnpj);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const existingCompany = await tx.company.findUnique({
           where: { id: validatedId },
         });

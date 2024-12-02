@@ -47,7 +47,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { IUserToEdit, IUserPermission } from '../../../types';
 import { MESSAGE } from '@/utils/message';
 import { IEmployeeToSelect } from '@/app/(main)/employees/types';
-import { getAllActiveEmployeesAction } from '@/actions/employees/getAllActiveEmployee';
 import {
   Dialog,
   DialogContent,

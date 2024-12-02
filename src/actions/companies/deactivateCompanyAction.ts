@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 export interface IDeactiveCompanyReturnProps {
   success: boolean;
@@ -21,7 +22,7 @@ export const deactivateCompanyAction = withPermissions(
     try {
       const validatedId = idSchema.parse(companyId);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const company = await tx.company.findUnique({
           where: { id: validatedId, active: true },
           include: {

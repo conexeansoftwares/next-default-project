@@ -10,6 +10,7 @@ import { revalidatePath } from 'next/cache';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 export interface ICreateVehicleReturnProps {
   success: boolean;
@@ -26,7 +27,7 @@ export const createVehicleAction = withPermissions(
 
       const { licensePlate, carModel, owner, companyId } = validatedData;
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const existingVehicle = await tx.vehicle.findUnique({
           where: { licensePlate },
         });

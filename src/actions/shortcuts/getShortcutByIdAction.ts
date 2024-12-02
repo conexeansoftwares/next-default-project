@@ -7,6 +7,7 @@ import { withPermissions } from '@/middleware/serverActionAuthorizationMiddlewar
 import { IShortcut } from '@/app/(main)/shortcuts/types';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 export interface IGetShortcutByIdReturnProps {
   success: boolean,
@@ -19,7 +20,7 @@ export const getShortcutByIdAction = withPermissions('shortcuts', 'READ',
     try {
       const validatedId = idSchema.parse(shortcutId);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const shortcurt = await tx.shortcut.findUnique({
           where: { id: validatedId },
           select: {

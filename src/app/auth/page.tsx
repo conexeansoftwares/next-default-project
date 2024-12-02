@@ -18,9 +18,11 @@ import Image from 'next/image';
 import { loginUserAction } from '@/actions/auth/login';
 import { toast } from '@/hooks/useToast';
 import { useRouter } from 'next/navigation';
+import { useLoading } from '@/context/loadingContext';
 
 export default function Page() {
   const router = useRouter();
+  const { isLoading, setIsLoading } = useLoading();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
@@ -31,6 +33,7 @@ export default function Page() {
   });
 
   async function onSubmit(values: LoginFormData) {
+    setIsLoading(true);
     const response = await loginUserAction(values);
 
     // /**
@@ -53,11 +56,14 @@ export default function Page() {
       } else {
         router.push('/unauthorized');
       }
+
+      setIsLoading(false);
     } else {
       toast({
         variant: 'destructive',
         description: response.error,
       });
+      setIsLoading(false);
     }
   }
 
@@ -65,8 +71,8 @@ export default function Page() {
     <div className="w-full lg:grid h-screen lg:grid-cols-2">
       <div className="hidden bg-muted lg:block">
         <Image
-          src="/placeholder.svg"
-          alt="Image"
+          src="/img/banners/login.png" 
+          alt="Banner principal"
           width="1920"
           height="1080"
           className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
@@ -120,12 +126,8 @@ export default function Page() {
                   )}
                 />
 
-                {/* <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Autenticando...' : 'Fazer login'}
-                </Button> */}
-
-                <Button type="submit" className="w-full">
-                  Fazer login
                 </Button>
               </div>
             </form>

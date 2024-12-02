@@ -9,6 +9,7 @@ import { passwordSchema, type PasswordFormSchema } from '@/schemas/userSchema';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 interface EditPasswordActionParams {
   userId: number;
@@ -31,7 +32,7 @@ export const updateUserPasswordAction = withPermissions(
       const validatedId = idSchema.parse(userId);
       const validatedData = passwordSchema.parse(data);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const existingUser = await tx.user.findUnique({
           where: { id: validatedId },
         });

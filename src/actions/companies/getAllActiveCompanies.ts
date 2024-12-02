@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { ICompany } from '@/app/(main)/companies/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 export interface IGetAllActiveCompaniesReturnProps {
   success: boolean;
@@ -19,7 +20,7 @@ export const getAllActiveCompanies = withPermissions(
   'READ',
   async (): Promise<IGetAllActiveCompaniesReturnProps> => {
     try {
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const companies = await tx.company.findMany({
           where: { active: true },
           select: {

@@ -7,12 +7,16 @@ import { ShortcutFormData } from '@/schemas/shortcutSchema';
 import { ShortcutForm } from '../_components/shortcutForm';
 import { createShortcutAction } from '@/actions/shortcuts/createShortcutAction';
 import { MESSAGE } from '@/utils/message';
+import { useLoading } from '@/context/loadingContext';
 
 export default function CreateShortcutPage() {
   const { toast } = useToast();
   const formRef = useRef<{ reset: () => void } | null>(null);
+  const { setIsLoading } = useLoading();
 
   async function onSubmit(values: ShortcutFormData) {
+    setIsLoading(true);
+
     const response = await createShortcutAction(values);
 
     if (response.success) {
@@ -31,6 +35,8 @@ export default function CreateShortcutPage() {
         description: response.error,
       });
     }
+
+    setIsLoading(false);
   }
 
   return (

@@ -8,6 +8,7 @@ import { MESSAGE } from '@/utils/message';
 import { IEmployeeMovementDetail } from '@/app/(main)/movements/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 const getEmployeeMovementSchema = z.object({
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
@@ -48,7 +49,7 @@ export const getEmployeeMovementsByDateAction = withPermissions(
 
       endDateTime.setHours(23, 59, 59, 999);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const movements = await tx.employeeMovement.findMany({
           where: {
             createdAt: {

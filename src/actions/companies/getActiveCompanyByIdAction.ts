@@ -7,6 +7,7 @@ import { ICompany } from '@/app/(main)/companies/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 export interface IGetActiveCompanyByIdReturnProps {
   success: boolean;
@@ -21,7 +22,7 @@ export const getActiveCompanyByIdAction = withPermissions(
     try {
       const validatedId = idSchema.parse(companyId);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const company = await tx.company.findUnique({
           select: {
             id: true,

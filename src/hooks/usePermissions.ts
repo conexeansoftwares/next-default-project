@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Permission as PrismaPermission } from '@prisma/client';
-import { getUserPermissionsAction } from '@/actions/auth/getPermissions';
 import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import config from '@/config/env';
 import { jwtVerify } from 'jose';
+import { IPermission } from '@/app/auth/types';
+import { useLoading } from '@/context/loadingContext';
 
 export interface IUserPermission {
   module: string;
@@ -15,7 +16,7 @@ const SECRET_KEY = new TextEncoder().encode(config.jwtSecret);
 
 export function useAuth() {
   const [userPermissions, setUserPermissions] = useState<IUserPermission[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { setIsLoading } = useLoading();
 
   const verifyToken = useCallback(async () => {
     setIsLoading(true);
@@ -36,20 +37,17 @@ export function useAuth() {
         return;
       }
 
-      const response = await getUserPermissionsAction(payload.id as number);
-      if (response.success) {
-        setUserPermissions(response.data || []);
-      } else {
-        setUserPermissions([]);
-        throw new AppError(MESSAGE.COMMON.GENERIC_ERROR_MESSAGE, 500);
-      }
+      const permissions = payload.permissions as IPermission[];
+
+      setUserPermissions(permissions);
+
     } catch (err) {
       setUserPermissions([]);
       throw new AppError(MESSAGE.COMMON.GENERIC_ERROR_MESSAGE, 500);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [setIsLoading]);
 
   useEffect(() => {
     verifyToken();
@@ -60,17 +58,10 @@ export function useAuth() {
       up => up.module === module && up.permission === requiredPermission
     );
   }, [userPermissions]);
-  
-  const clearPermissions = useCallback(() => {
-    setUserPermissions([]);
-  }, []);
 
   return {
     userPermissions,
     checkPermission,
-    isLoading,
-    // refreshPermissions: verifyToken,
-    clearPermissions,
   };
 }
 

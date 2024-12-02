@@ -43,7 +43,7 @@ export const editUserAction = withPermissions(
 
       const { email, employeeId, permissions } = validatedData;
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const existingUser = await tx.user.findUnique({
           where: { id: validatedId },
           include: { userPermissions: true },

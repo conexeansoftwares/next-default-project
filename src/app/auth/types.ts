@@ -1,11 +1,13 @@
+export interface IPermission {
+  module: string;
+  permission: string;
+}
+
 export interface IuserLoginInformations {
   email: string;
   fullName: string;
   message: string;
-  permissions: {
-    module: string,
-    permission: string,
-  }[]
+  permissions: IPermission[]
 }
 
 export type DefaultLoginActionResult =

@@ -7,6 +7,7 @@ import { IEmployeeToEdit } from '@/app/(main)/employees/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 export interface IGetActiveEmployeeReturnProps {
   success: boolean,
@@ -21,7 +22,7 @@ export const getActiveEmployeeByIdAction = withPermissions(
     try {
       const validatedId = idSchema.parse(employeeId);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const employee = await tx.employee.findUnique({
           where: {
             id: validatedId,

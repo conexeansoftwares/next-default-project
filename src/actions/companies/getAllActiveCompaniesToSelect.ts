@@ -6,6 +6,7 @@ import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { ICompany } from '@/app/(main)/companies/types';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 export interface IGetAllActiveCompaniesToSelectReturnProps {
   success: boolean;
@@ -16,7 +17,7 @@ export interface IGetAllActiveCompaniesToSelectReturnProps {
 export const getAllActiveCompaniesToSelect =
   async (): Promise<IGetAllActiveCompaniesToSelectReturnProps> => {
     try {
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const companies = await tx.company.findMany({
           where: { active: true },
           select: {

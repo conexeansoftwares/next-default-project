@@ -1,6 +1,5 @@
 'use server';
 
-import { Action } from '@prisma/client';
 import { prisma } from '../../../lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { AppError } from '@/error/appError';
@@ -10,6 +9,7 @@ import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
 import { actionSchema } from '@/schemas/actionSchema';
 import { observationSchema } from '@/schemas/observationSchema';
+import { Prisma } from '@prisma/client';
 
 interface CreateVehicleMovementActionParams {
   vehicleId: number;
@@ -34,7 +34,7 @@ export const createVehicleMovementAction = withPermissions(
       const validatedObservation = observationSchema.parse(observation); 
       const validatedAction = actionSchema.parse(action);
 
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const existingVehicle = await tx.vehicle.findUnique({
           where: { id: validatedId },
         });
@@ -47,7 +47,7 @@ export const createVehicleMovementAction = withPermissions(
           data: {
             vehicleId: validatedId,
             observation: validatedObservation,
-            action: validatedAction as Action,
+            action: validatedAction,
           },
         });
 

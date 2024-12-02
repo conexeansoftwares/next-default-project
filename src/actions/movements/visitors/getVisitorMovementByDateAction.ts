@@ -8,6 +8,7 @@ import { MESSAGE } from '@/utils/message';
 import { IVisitorMovementSimplified } from '@/app/(main)/movements/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 const getVisitorMovementSchema = z.object({
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
@@ -47,7 +48,7 @@ export const getVisitorMovementByDateAction = withPermissions(
 
       endDateTime.setHours(23, 59, 59, 999);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const movements = await tx.visitorMovement.findMany({
           where: {
             createdAt: {

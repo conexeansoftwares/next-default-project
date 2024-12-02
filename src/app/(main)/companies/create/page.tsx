@@ -17,7 +17,7 @@ export default function CreateCompanyPage() {
       
       toast({
         variant: 'success',
-        description: message,
+        description: message as string,
       });
 
       if (formRef.current) {

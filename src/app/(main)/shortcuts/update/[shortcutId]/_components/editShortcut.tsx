@@ -8,11 +8,15 @@ import React from 'react';
 import { ShortcutFormData } from '@/schemas/shortcutSchema';
 import { editShortcutAction } from '@/actions/shortcuts/editShortcutAction';
 import { MESSAGE } from '@/utils/message';
+import { useLoading } from '@/context/loadingContext';
 
 export default function EditShortcut(shortcut: IShortcut) {
   const { toast } = useToast();
+  const { setIsLoading } = useLoading();
 
   async function onSubmit(values: ShortcutFormData) {
+    setIsLoading(true);
+    
     const response = await editShortcutAction({
       shortcutId: shortcut.id,
       data: values,
@@ -30,6 +34,8 @@ export default function EditShortcut(shortcut: IShortcut) {
         description: response.error,
       });
     }
+
+    setIsLoading(false);
   }
 
   return (

@@ -1,16 +1,11 @@
 services:
-  db:
-    image: postgres:13
-    container_name: postgres_conexean
-    restart: always
-    environment:
-      POSTGRES_USER: conexean
-      POSTGRES_PASSWORD: conexean
-      POSTGRES_DB: mydb
+  nextjs:
+    build: 
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=develop

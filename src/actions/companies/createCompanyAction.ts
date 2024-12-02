@@ -11,6 +11,7 @@ import { revalidatePath } from 'next/cache';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 export interface ICreateCompanyReturnProps {
   success: boolean;
@@ -29,7 +30,7 @@ export const createCompanyAction = withPermissions(
 
       const cleanCnpj = removeCnpjMask(cnpj);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const existingCompany = await tx.company.findUnique({
           where: { cnpj: cleanCnpj },
         });

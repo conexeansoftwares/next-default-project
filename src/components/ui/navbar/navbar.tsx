@@ -16,14 +16,16 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sidebar } from '@/components/ui/sidebar';
-import {
-  ShieldCheck,
-  Menu,
-  CircleUser,
-} from 'lucide-react';
+import { ShieldCheck, Menu, CircleUser } from 'lucide-react';
 import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SidebarItem, shortcutsItems, cadastrosItems, portariaItems } from '@/app/(main)/_components/sidebarItems';
+import {
+  SidebarItem,
+  shortcutsItems,
+  cadastrosItems,
+  portariaItems,
+} from '@/app/(main)/_components/sidebarItems';
+import { logout } from '@/actions/auth/logout';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -33,7 +35,7 @@ export function Navbar() {
   };
 
   const renderNavItems = (items: SidebarItem[]): React.ReactNode => {
-    return items.map(item => (
+    return items.map((item) => (
       <Sidebar.Item
         key={item.href}
         href={item.href}
@@ -82,7 +84,10 @@ export function Navbar() {
           </ScrollArea>
         </SheetContent>
       </Sheet>
-      <NextLink href="/" className="flex items-center gap-2 text-lg font-semibold md:hidden">
+      <NextLink
+        href="/"
+        className="flex items-center gap-2 text-lg font-semibold md:hidden"
+      >
         <ShieldCheck className="h-6 w-6" />
         <span>Supervisão Portaria</span>
       </NextLink>
@@ -97,7 +102,13 @@ export function Navbar() {
           <DropdownMenuSeparator />
           <DropdownMenuItem>Perfil</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Sair</DropdownMenuItem>
+          <DropdownMenuItem>
+            <form action={logout}>
+              <button type="submit" className="w-full text-left">
+                Sair
+              </button>
+            </form>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

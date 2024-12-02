@@ -78,5 +78,6 @@ export const MESSAGE = {
   AUTH: {
     TOKEN_NOT_FOUND: 'Nenhum token encontrato.',
     TOKEN_INVALID: 'Token inválido.',
+    PERMISSION_DENIED: 'Permissão negada.',
   },
 };

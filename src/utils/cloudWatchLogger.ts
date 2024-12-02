@@ -53,7 +53,7 @@ export async function logToCloudWatch({
     const command = new PutLogEventsCommand(params);
     await client.send(command);
   } catch (err) {
-    console.error('Failed to send logs to CloudWatch:', err);
+    console.error('Falha ao enviar erros para o CloudWatch:', err);
   }
 }
 

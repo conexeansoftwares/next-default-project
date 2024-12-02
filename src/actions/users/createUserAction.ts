@@ -9,6 +9,7 @@ import { MESSAGE } from '@/utils/message';
 import { CombinedUserForm, combinedUserFormSchema } from '@/schemas/userSchema';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 const permissionMapping: Record<string, Permission> = {
   ler: Permission.READ,
@@ -32,7 +33,7 @@ export const createUserAction = withPermissions(
 
       const { email, password, employeeId, permissions } = validatedData;
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const existingUser = await tx.user.findUnique({
           where: { email },
         });
@@ -72,7 +73,9 @@ export const createUserAction = withPermissions(
         const userPermissions = Object.entries(permissions).flatMap(
           ([moduleId, modulePermissions]) =>
             Object.entries(modulePermissions)
-              .filter(([_, isGranted]) => isGranted)
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              .filter(([_permissionName, isGranted]) => isGranted)
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               .map(([permission, _]) => ({
                 userId: user.id,
                 module: moduleId,

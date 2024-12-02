@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { CirclePlus } from 'lucide-react';
 import { PageComponent } from '../../../../components/ui/page';
@@ -34,8 +34,7 @@ export function Companies({ result }: ICompaniesProps) {
 
   const handleDelete = useCallback(
     async (companyId: number) => {
-      const response: IDeactiveCompanyReturnProps =
-        await deactivateCompanyAction(companyId);
+      const response = await deactivateCompanyAction(companyId) as IDeactiveCompanyReturnProps;
 
       if (response.success) {
         toast({

@@ -1,7 +1,6 @@
 'use server';
 
 import { prisma } from '../../lib/prisma';
-import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
@@ -22,7 +21,7 @@ export const deactivateVehicleAction = withPermissions(
     try {
       const validatedId = idSchema.parse(vehicleId);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const vehicle = await tx.vehicle.findUnique({
           where: { id: validatedId, active: true },
         });

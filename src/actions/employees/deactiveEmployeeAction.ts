@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 export interface IDeactiveEmployeeReturnProps {
   success: boolean;
@@ -21,7 +22,7 @@ export const deactivateEmployeeAction = withPermissions(
     try {
       const validatedId = idSchema.parse(employeeId);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const employee = await tx.employee.findUnique({
           where: { id: validatedId, active: true },
           include: {

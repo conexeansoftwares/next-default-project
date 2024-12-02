@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { MESSAGE } from '@/utils/message';
 import { handleErrors } from '@/utils/handleErrors';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
+import { Prisma } from '@prisma/client';
 
 export interface ICreateShortcutReturnProps {
   success: boolean,
@@ -20,7 +21,7 @@ export const createShortcutAction = withPermissions('shortcuts', 'WRITE',
 
       const { url, label, color } = validatedData;
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         await tx.shortcut.create({
           data: {
             url,

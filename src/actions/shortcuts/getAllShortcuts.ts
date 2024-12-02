@@ -7,6 +7,7 @@ import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware'; 
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 export interface IGetAllShortcutsReturnProps {
   success: boolean;
@@ -16,7 +17,7 @@ export interface IGetAllShortcutsReturnProps {
 
 export const getAllShortcuts = withPermissions('shortcuts', 'READ', async (): Promise<IGetAllShortcutsReturnProps> => {
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const shortcuts: IShortcut[] = await tx.shortcut.findMany({
         select: {
           id: true,

@@ -1,13 +1,13 @@
 'use server';
 
 import { prisma } from '../../lib/prisma';
-import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 export interface IDeactiveUserReturnProps {
   success: boolean;
@@ -22,7 +22,7 @@ export const deactivateUserAction = withPermissions(
     try {
       const validatedId = idSchema.parse(userId);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const user = await tx.user.findUnique({
           where: { id: validatedId, active: true },
         });

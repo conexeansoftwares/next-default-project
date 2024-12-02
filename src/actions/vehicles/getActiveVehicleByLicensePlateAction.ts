@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { IVehicle } from '@/app/(main)/vehicles/types';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
+import { Prisma } from '@prisma/client';
 
 const getLicensePlateSchema = vehicleFormSchema.shape.licensePlate;
 
@@ -23,7 +24,7 @@ export const getActiveVehicleByLicensePlateAction = withPermissions(
     try {
       const validatedLicensePlate = getLicensePlateSchema.parse(licensePlate);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const vehicle = await tx.vehicle.findUnique({
           select: {
             id: true,

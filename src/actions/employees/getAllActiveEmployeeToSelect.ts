@@ -6,6 +6,7 @@ import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
 import { handleErrors } from '@/utils/handleErrors';
 import { IEmployeeToSelect } from '@/app/(main)/employees/types';
+import { Prisma } from '@prisma/client';
 
 export interface IGetAllACtiveEmplyeesToSelectReturnProps {
   success: boolean;
@@ -16,7 +17,7 @@ export interface IGetAllACtiveEmplyeesToSelectReturnProps {
 export const getAllActiveEmployeesToSelectAction =
   async (): Promise<IGetAllACtiveEmplyeesToSelectReturnProps> => {
     try {
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const result = await tx.employee.findMany({
           select: {
             id: true,

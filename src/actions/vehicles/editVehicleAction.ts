@@ -11,6 +11,7 @@ import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 interface EditVehicleActionParams {
   vehicleId: number;
@@ -35,7 +36,7 @@ export const editVehicleAction = withPermissions(
 
       const { licensePlate, carModel, owner, companyId } = validatedData;
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const existingVehicle = await tx.vehicle.findUnique({
           where: { id: validatedId },
         });

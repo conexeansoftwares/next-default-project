@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { handleErrors } from '@/utils/handleErrors';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 export interface IDeleteShortcutReturnProps {
   success: boolean,
@@ -19,7 +20,7 @@ export const deleteShortcutAction = withPermissions('shortcuts', 'DELETE',
     try {
       const validatedId = idSchema.parse(shortcutId);
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const shortcurt = await tx.shortcut.findUnique({
           where: { id: validatedId },
         });
