@@ -8,7 +8,7 @@ import { LoginFormData, loginFormSchema } from '@/schemas/loginSchema';
 import { handleErrors } from '@/utils/handleErrors';
 import { MESSAGE } from '@/utils/message';
 import bcrypt from 'bcrypt';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export interface IPayload {
   email: string;

@@ -45,7 +45,7 @@ export default function Page() {
     //  * faço o redirecionamento para a rota de não autorizado.
     //  */
 
-    if (response && response.success) {
+    if (response.success) {
       const permissions = response.data.permissions;
       const firstReadModule = permissions.find(
         (item) => item.permission === 'READ' || item.permission === 'ADMIN',

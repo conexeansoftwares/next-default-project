@@ -8,7 +8,7 @@ import {
 } from '@/schemas/userSchema';
 import { AppError } from '@/error/appError';
 import { MESSAGE } from '@/utils/message';
-import { Permission } from '@prisma/client';
+import { Permission, Prisma } from '@prisma/client';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';

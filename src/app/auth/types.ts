@@ -7,15 +7,12 @@ export interface IuserLoginInformations {
   email: string;
   fullName: string;
   message: string;
-  permissions: IPermission[]
+  permissions: IPermission[];
 }
 
-export type DefaultLoginActionResult =
-  | { success: true; message: string }
-  | { success: false; error: string };
-
-export type IGetActiveUserLoginActionResult =
-  | (Omit<Extract<DefaultLoginActionResult, { success: true }>, 'message'> & {
-      data: IuserLoginInformations;
-    })
-  | Extract<DefaultLoginActionResult, { success: false }>;
+export interface IGetActiveUserLoginActionResult {
+  success: boolean;
+  data?: IuserLoginInformations;
+  message?: string;
+  error?: string;
+}

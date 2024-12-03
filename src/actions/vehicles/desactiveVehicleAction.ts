@@ -7,6 +7,7 @@ import { MESSAGE } from '@/utils/message';
 import { withPermissions } from '@/middleware/serverActionAuthorizationMiddleware';
 import { handleErrors } from '@/utils/handleErrors';
 import { idSchema } from '@/schemas/idSchema';
+import { Prisma } from '@prisma/client';
 
 export interface IDeactiveVehicleReturnProps {
   success: boolean;
